@@ -156,6 +156,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
                       initial="hidden"
                       animate="visible"
                       exit="hidden"
+                      transition={{duration:0.2}}
                       className="absolute left-0 top-full w-48 bg-white shadow-lg rounded-md z-10 origin-top"
                     >
                       {item.dropdown.map((subItem) => (
