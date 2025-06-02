@@ -1,2 +1,73 @@
-@import "tailwindcss";
+@import "tailwindcss"; 
 
+@theme {
+  
+  --color-primary-100: #c2c8da;
+  --color-primary-200: #a3aec7;
+  --color-primary-300: #8493b5;
+  --color-primary-400: #6679a2;
+  --color-primary-500: #475e90;
+  --color-primary-600: #28437d;
+  --color-primary: #08246c; 
+  --color-primary-900: #04144b;
+  --color-primary-950: #020d31;
+
+  
+  --color-secondary-100: #e0ccd8;
+  --color-secondary-200: #d0b3c2;
+  --color-secondary-300: #c099ac;
+  --color-secondary-400: #b08097;
+  --color-secondary-500: #a06681;
+  --color-secondary: #904c8c; 
+  --color-secondary-800: #701962;
+  --color-secondary-900: #60004d;
+  --color-secondary-950: #400033;
+
+  --font-display: "FlaticonPetCare", "sans-serif";
+
+}
+
+@font-face {
+  font-family: 'FlaticonPetCare';
+  src: url('/fonts/flaticon_pet_care.woff2') format('woff2'),
+       url('/fonts/flaticon_pet_care.woff') format('woff'),
+       url('/fonts/flaticon_pet_care.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: 'FlaticonPetCare', sans-serif;
+}
+
+.footer-main-bg::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 250px; /* Adjust size as needed */
+  height: 250px; /* Adjust size as needed */
+  background-image: url('/images/house-icon.svg'); /* IMPORTANT: Replace with the actual path to your house icon SVG/PNG */
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.1; /* Very subtle */
+  pointer-events: none; /* Allows interactions with content */
+  z-index: 0; /* Ensure it's behind the footer content */
+  transform: translateX(-20px); /* Adjust position if needed */
+}
+
+/* Custom class for the newsletter card background (paw prints) */
+.newsletter-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/paw-print-pattern.png'); /* IMPORTANT: Replace with the actual path to your paw print pattern image */
+  background-repeat: repeat;
+  opacity: 0.05; /* Very subtle */
+  z-index: 0; /* Ensure it's behind the content of the card */
+  pointer-events: none;
+}
