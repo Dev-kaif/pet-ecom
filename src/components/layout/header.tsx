@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, CSSProperties, useMemo } from "react";
+import React, { useState, useEffect, useRef, CSSProperties } from "react";
 import Link from "next/link";
 import {
   AlignJustify,
@@ -9,7 +9,13 @@ import {
   Search,
   ShoppingBag,
 } from "lucide-react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  Variants,
+  useScroll,
+  useMotionValueEvent,
+} from "framer-motion";
 
 // Define framer-motion variants for the dropdown menu (unchanged)
 const dropdownVariants: Variants = {
@@ -76,77 +82,219 @@ const navItems = [
   { name: "Contact", href: "/contact" },
 ];
 
+// Helper component to render the main navigation content
+// This prevents code duplication in the two header elements
+interface MainNavContentProps {
+  openDropdown: string | null;
+  setOpenDropdown: React.Dispatch<React.SetStateAction<string | null>>;
+  isActiveLink: (path: string, subPaths?: string[]) => boolean;
+  toggleSearchPopup: () => void;
+  toggleOffCanvasInfo: () => void;
+  toggleMobileMenu: () => void;
+}
+
+const MainNavContent: React.FC<MainNavContentProps> = ({
+  openDropdown,
+  setOpenDropdown,
+  isActiveLink,
+  toggleSearchPopup,
+  toggleOffCanvasInfo,
+  toggleMobileMenu,
+}) => (
+  <div className="container mx-auto px-4 custom-container">
+    <div className="flex justify-between items-center h-20">
+      <div className="header-logo">
+        <Link href="/">
+          <img
+            src="/images/logo/logo.png"
+            alt="Petco Logo"
+            className="max-h-12"
+          />
+        </Link>
+      </div>
+      <div className="header-menu hidden lg:block">
+        <nav className="main-menu">
+          <ul className="flex space-x-8 text-lg font-medium">
+            {navItems.map((item) => (
+              <li
+                key={item.name}
+                className="relative"
+                onMouseEnter={() =>
+                  item.dropdown && setOpenDropdown(item.name)
+                }
+                onMouseLeave={() =>
+                  item.dropdown && setOpenDropdown(null)
+                }
+              >
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-1 transition-colors h-full ${
+                    isActiveLink(
+                      item.href,
+                      item.dropdown?.map((d) => d.href)
+                    )
+                      ? "text-secondary"
+                      : "text-primary-700 hover:text-secondary"
+                  }`}
+                >
+                  <div className="flex justify-center items-center gap-1">
+                    <span>{item.name}</span>
+                    {item.dropdown && (
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform duration-200
+                          ${openDropdown === item.name ? "rotate-180" : ""}`}
+                      />
+                    )}
+                  </div>
+                </Link>
+
+                <AnimatePresence>
+                  {openDropdown === item.name && item.dropdown && (
+                    <motion.ul
+                      variants={dropdownVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      className="absolute left-0 top-full w-48 bg-white shadow-lg rounded-md z-10 origin-top"
+                    >
+                      {item.dropdown.map((subItem) => (
+                        <motion.li
+                          key={subItem.name}
+                          variants={listItemVariants}
+                        >
+                          <Link href={subItem.href} passHref>
+                            <motion.div
+                              className={`block px-4 py-2 ${
+                                isActiveLink(subItem.href)
+                                  ? "text-secondary"
+                                  : "text-primary-700 hover:text-secondary"
+                              }`}
+                              whileHover={{
+                                x: 10,
+                                color: "var(--color-secondary)",
+                              }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              {subItem.name}
+                            </motion.div>
+                          </Link>
+                        </motion.li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+
+      <div className="header-action flex items-center space-x-4">
+        <ul className="flex items-center space-x-4">
+          <li className="relative">
+            <button
+              onClick={toggleSearchPopup}
+              className="text-gray-800 hover:text-primary transition-colors focus:outline-none"
+            >
+              <Search size={25} />
+            </button>
+          </li>
+          <div className="w-px h-6 bg-zinc-300"></div>
+          <li className="relative">
+            <Link
+              href="/cart"
+              className="text-gray-800 hover:text-primary transition-colors relative"
+            >
+              <ShoppingBag size={25} />
+              <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                2
+              </span>
+            </Link>
+          </li>
+        </ul>
+        <div className="ml-6 hidden lg:block">
+          <button
+            onClick={toggleOffCanvasInfo}
+            className="text-gray-800 hover:text-primary transition-colors focus:outline-none"
+          >
+            <AlignJustify size={26} />
+          </button>
+        </div>
+
+        <div className="hidden lg:block ml-4">
+          <Link
+            href="/contact"
+            className="text-white flex items-center gap-2 rounded-full px-6 py-3 shadow-md
+                       bg-secondary hover:bg-secondary-700 transition-colors"
+          >
+            <CalendarDays size={18} />
+            <span className="text-sm">Appointment</span>
+          </Link>
+        </div>
+
+        <div className="lg:hidden ml-4">
+          <button
+            onClick={toggleMobileMenu}
+            className="text-gray-800 hover:text-primary transition-colors focus:outline-none"
+          >
+            <AlignJustify size={26} />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
   const [isOffCanvasInfoOpen, setIsOffCanvasInfoOpen] = useState(false);
-  const [isScrolledPastTopBar, setIsScrolledPastTopBar] = useState(false); // Renamed for clarity
-  const [headerHeight, setHeaderHeight] = useState(0); // Height of the main header
-  const [topBarHeight, setTopBarHeight] = useState(0); // Height of the top bar
-  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null);
-  const lastScrollY = useRef(0); // To track last scroll position for direction
+  const [showFixedHeader, setShowFixedHeader] = useState(false); // Controls fixed header visibility
+  const [staticHeaderHeight, setStaticHeaderHeight] = useState(0); // Height of the initial, scrolling header
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
-  const headerRef = useRef<HTMLDivElement>(null); // Ref for the main header div
-  const topBarRef = useRef<HTMLDivElement>(null); // Ref for the top bar div
+  const initialHeaderRef = useRef<HTMLDivElement>(null); // Ref for the ENTIRE initial header (top bar + main nav)
+
+  const SHOW_THRESHOLD = 500; // Pixels to scroll down before fixed header appears
+
+  // Framer Motion's scroll hook
+  const { scrollY } = useScroll();
+
+  // Update showFixedHeader state based on scrollY
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (latest > SHOW_THRESHOLD) {
+      setShowFixedHeader(true);
+    } else {
+      setShowFixedHeader(false);
+    }
+  });
 
   useEffect(() => {
-    const measureHeights = () => {
-      if (headerRef.current) {
-        setHeaderHeight(headerRef.current.offsetHeight);
-      }
-      if (topBarRef.current) {
-        setTopBarHeight(topBarRef.current.offsetHeight);
+    const measureInitialHeaderHeight = () => {
+      // Measure the height of the entire initial header (top bar + main nav)
+      if (initialHeaderRef.current) {
+        setStaticHeaderHeight(initialHeaderRef.current.offsetHeight);
       }
     };
 
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+    // Initial measurement
+    measureInitialHeaderHeight();
+    // Re-measure on window resize
+    window.addEventListener("resize", measureInitialHeaderHeight);
 
-      // Determine scroll direction
-      if (currentScrollY > lastScrollY.current && currentScrollY > 0) { // Scrolled down
-        setScrollDirection('down');
-      } else if (currentScrollY < lastScrollY.current && currentScrollY >= 0) { // Scrolled up
-        setScrollDirection('up');
-      }
-      lastScrollY.current = currentScrollY; // Update last scroll position
+    // Initial state setup (important for page load)
+    if (window.scrollY > SHOW_THRESHOLD) {
+      setShowFixedHeader(true);
+    } else {
+      setShowFixedHeader(false);
+    }
 
-      // Determine if scrolled past top bar
-      if (currentScrollY > topBarHeight + 5) { // +5px buffer
-        setIsScrolledPastTopBar(true);
-      } else {
-        setIsScrolledPastTopBar(false);
-        setScrollDirection(null); // Reset direction when at the very top
-      }
-    };
-
-    // Initial measurement and attach listeners
-    measureHeights();
-    window.addEventListener("resize", measureHeights);
-    window.addEventListener("scroll", handleScroll);
-
-    // Cleanup listeners
     return () => {
-      window.removeEventListener("resize", measureHeights);
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", measureInitialHeaderHeight);
     };
-  }, [topBarHeight]); // Re-run if topBarHeight changes (e.g., on initial render or resize)
-
-  // Determine the 'y' position for Framer Motion animation
-  const headerTranslateY = useMemo(() => {
-    // If not scrolled past top bar, it's at its initial position (below top bar)
-    if (!isScrolledPastTopBar) {
-      return 0; // Relative to its natural position in the flow
-    }
-    // If scrolled past top bar AND scrolling down, hide it
-    if (scrollDirection === 'down') {
-      return -headerHeight - 20; // Slide fully up and a bit more
-    }
-    // If scrolled past top bar AND scrolling up, show it
-    return 0; // Show at top:0
-  }, [isScrolledPastTopBar, scrollDirection, headerHeight]);
-
+  }, [SHOW_THRESHOLD]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -184,251 +332,133 @@ const Header = () => {
     return false;
   };
 
+  // Define variants for the fixed header animation
+  const fixedHeaderVariants: Variants = {
+    hidden: { y: -staticHeaderHeight, opacity: 0 }, // Start off-screen top and invisible
+    visible: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } }, // Slide down and fade in
+    exit: { y: -staticHeaderHeight, opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }, // Slide up and fade out
+  };
+
   return (
     <header>
-      {/* Spacer div for main content to prevent jump */}
-      {/* This spacer ensures content doesn't jump up when the main header becomes fixed */}
-      {/* Its height equals the current height of the FIXED header when it's supposed to be visible */}
+      {/* This entire section is the initial, static header that scrolls naturally */}
+      {/* It will be visually hidden when the fixed header appears, but remains in DOM to hold space */}
       <div
-        style={{
-          height: isScrolledPastTopBar && scrollDirection !== 'down' ? `${headerHeight}px` : '0px',
-        }}
-        className="transition-all duration-300 ease-in-out"
-      />
-
-      {/* Header Top Area - This will scroll out of view */}
-      <div
-        ref={topBarRef}
-        className={`bg-primary py-3 text-sm hidden lg:block transition-transform duration-300 ease-in-out
-          ${isScrolledPastTopBar ? "-translate-y-full" : "translate-y-0"}`}
+        ref={initialHeaderRef} // Ref the whole initial header for height calculation
+        className={`w-full z-40 bg-white
+          ${showFixedHeader ? "invisible pointer-events-none" : ""}
+        `}
       >
-        <div className="container mx-auto px-4 custom-container">
-          <div className="flex justify-between items-center">
-            <div className="header-top-left flex items-center gap-x-6">
-              <ul className="flex items-center gap-x-4">
-                <li className="flex items-center gap-2">
-                  <MapPin size={20} className="text-white" />
-                  <span className="text-primary-300 text-base">
-                    59 Jakc Street Brooklyn, New York
-                  </span>
-                </li>
-                <div className="w-px h-6 bg-zinc-300"></div>
-                <li>
-                  <a
-                    href="mailto:info@example.com"
-                    className="text-white hover:text-primary-200 transition-colors flex items-center gap-2 text-base"
-                  >
-                    <Mail size={20} />
-                    <span className="text-primary-300">
-                      Petspostinfo@gmail.com
+        {/* Header Top Area - Part of the initial static header */}
+        <div className={`bg-primary py-3 text-sm hidden lg:block`}>
+          <div className="container mx-auto px-4 custom-container">
+            <div className="flex justify-between items-center">
+              <div className="header-top-left flex items-center gap-x-6">
+                <ul className="flex items-center gap-x-4">
+                  <li className="flex items-center gap-2">
+                    <MapPin size={20} className="text-white" />
+                    <span className="text-primary-300 text-base">
+                      59 Jakc Street Brooklyn, New York
                     </span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div className="header-top-right">
-              <div className="header-top-social">
-                <ul className="flex items-center gap-x-3">
-                  <li>
-                    <a
-                      href="#"
-                      className="text-white hover:text-primary-200 transition-colors"
-                    >
-                      <i className="fab fa-facebook-f" />
-                    </a>
                   </li>
+                  <div className="w-px h-6 bg-zinc-300"></div>
                   <li>
                     <a
-                      href="#"
-                      className="text-white hover:text-primary-200 transition-colors"
+                      href="mailto:info@example.com"
+                      className="text-white hover:text-primary-200 transition-colors flex items-center gap-2 text-base"
                     >
-                      <i className="fab fa-twitter" />
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="text-white hover:text-primary-200 transition-colors"
-                    >
-                      <i className="fab fa-pinterest-p" />
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="text-white hover:text-primary-200 transition-colors"
-                    >
-                      <i className="fab fa-linkedin-in" />
+                      <Mail size={20} />
+                      <span className="text-primary-300">
+                        Petspostinfo@gmail.com
+                      </span>
                     </a>
                   </li>
                 </ul>
               </div>
+              <div className="header-top-right">
+                <div className="header-top-social">
+                  <ul className="flex items-center gap-x-3">
+                    <li>
+                      <a
+                        href="#"
+                        className="text-white hover:text-primary-200 transition-colors"
+                      >
+                        <i className="fab fa-facebook-f" />
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        className="text-white hover:text-primary-200 transition-colors"
+                      >
+                        <i className="fab fa-twitter" />
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        className="text-white hover:text-primary-200 transition-colors"
+                      >
+                        <i className="fab fa-pinterest-p" />
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        className="text-white hover:text-primary-200 transition-colors"
+                      >
+                        <i className="fab fa-linkedin-in" />
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
+
+        {/* Main Nav Bar - Part of the initial static header */}
+        <div className="header-main w-full py-4 shadow-lg"> {/* py-4 for static */}
+          <MainNavContent
+            openDropdown={openDropdown}
+            setOpenDropdown={setOpenDropdown}
+            isActiveLink={isActiveLink}
+            toggleSearchPopup={toggleSearchPopup}
+            toggleOffCanvasInfo={toggleOffCanvasInfo}
+            toggleMobileMenu={toggleMobileMenu}
+          />
         </div>
       </div>
 
-      {/* Header Main Area - This will become sticky and animate in/out */}
-      <motion.div
-        ref={headerRef}
-        className={`header-main w-full fixed left-0 right-0 z-50 shadow-lg bg-white transition-all duration-300 ease-in-out
-          ${!isScrolledPastTopBar ? `top-[${topBarHeight}px] py-4` : "top-0 py-3"}
-          `}
-        // Framer motion properties for slide/fade in/out
-        animate={{
-          y: headerTranslateY,
-          opacity: (isScrolledPastTopBar && scrollDirection === 'down') ? 0 : 1,
-        }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-      >
-        <div className="container mx-auto px-4 custom-container">
-          <div className="flex justify-between items-center h-20">
-            <div className="header-logo">
-              <Link href="/">
-                <img
-                  src="/images/logo/logo.png"
-                  alt="Petco Logo"
-                  className="max-h-12"
-                />
-              </Link>
-            </div>
-            <div className="header-menu hidden lg:block">
-              <nav className="main-menu">
-                <ul className="flex space-x-8 text-lg font-medium">
-                  {navItems.map((item) => (
-                    <li
-                      key={item.name}
-                      className="relative"
-                      onMouseEnter={() =>
-                        item.dropdown && setOpenDropdown(item.name)
-                      }
-                      onMouseLeave={() =>
-                        item.dropdown && setOpenDropdown(null)
-                      }
-                    >
-                      <Link
-                        href={item.href}
-                        className={`flex items-center gap-1 transition-colors h-full ${
-                          isActiveLink(
-                            item.href,
-                            item.dropdown?.map((d) => d.href)
-                          )
-                            ? "text-secondary"
-                            : "text-primary-700 hover:text-secondary"
-                        }`}
-                      >
-                        <div className="flex justify-center items-center gap-1">
-                          <span>{item.name}</span>
-                          {item.dropdown && (
-                            <ChevronDown
-                              size={16}
-                              className={`transition-transform duration-200
-                                ${
-                                  openDropdown === item.name ? "rotate-180" : ""
-                                }`}
-                            />
-                          )}
-                        </div>
-                      </Link>
+      {/* Spacer div for main content to prevent jump */}
+      {/* This spacer ensures content doesn't jump when the fixed header takes over */}
+      <div
+        style={{ height: showFixedHeader ? `${staticHeaderHeight}px` : '0px' }}
+        className="transition-all duration-300 ease-in-out"
+      />
 
-                      {/* Dropdown Menu (only if dropdown exists) */}
-                      <AnimatePresence>
-                        {openDropdown === item.name && item.dropdown && (
-                          <motion.ul
-                            variants={dropdownVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="hidden"
-                            className="absolute left-0 top-full w-48 bg-white shadow-lg rounded-md z-10 origin-top"
-                          >
-                            {item.dropdown.map((subItem) => (
-                              <motion.li
-                                key={subItem.name}
-                                variants={listItemVariants}
-                              >
-                                <Link href={subItem.href} passHref>
-                                  <motion.div
-                                    className={`block px-4 py-2 ${
-                                      isActiveLink(subItem.href)
-                                        ? "text-secondary"
-                                        : "text-primary-700 hover:text-secondary"
-                                    }`}
-                                    whileHover={{
-                                      x: 10,
-                                      color: "var(--color-secondary)",
-                                    }}
-                                    transition={{ duration: 0.3 }}
-                                  >
-                                    {subItem.name}
-                                  </motion.div>
-                                </Link>
-                              </motion.li>
-                            ))}
-                          </motion.ul>
-                        )}
-                      </AnimatePresence>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </div>
-
-            <div className="header-action flex items-center space-x-4">
-              <ul className="flex items-center space-x-4">
-                <li className="relative">
-                  <button
-                    onClick={toggleSearchPopup}
-                    className="text-gray-800 hover:text-primary transition-colors focus:outline-none"
-                  >
-                    <Search size={25} />
-                  </button>
-                </li>
-                {/* Separator */}
-                <div className="w-px h-6 bg-zinc-300"></div>
-                <li className="relative">
-                  <Link
-                    href="/cart"
-                    className="text-gray-800 hover:text-primary transition-colors relative"
-                  >
-                    <ShoppingBag size={25} />
-                    <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                      2
-                    </span>
-                  </Link>
-                </li>
-              </ul>
-              <div className="ml-6 hidden lg:block">
-                <button
-                  onClick={toggleOffCanvasInfo}
-                  className="text-gray-800 hover:text-primary transition-colors focus:outline-none"
-                >
-                  <AlignJustify size={26} />
-                </button>
-              </div>
-
-              <div className="hidden lg:block ml-4">
-                <Link
-                  href="/contact"
-                  className="text-white flex items-center gap-2 rounded-full px-6 py-3 shadow-md
-                             bg-secondary hover:bg-secondary-700 transition-colors"
-                >
-                  <CalendarDays size={18} />
-                  <span className="text-sm">Appointment</span>
-                </Link>
-              </div>
-
-              <div className="lg:hidden ml-4">
-                  <button
-                    onClick={toggleMobileMenu}
-                    className="text-gray-800 hover:text-primary transition-colors focus:outline-none"
-                  >
-                    <AlignJustify size={26} />
-                  </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+      {/* Fixed Header (Animated appearance) */}
+      <AnimatePresence>
+        {showFixedHeader && (
+          <motion.div
+            key="fixed-header" // Unique key for AnimatePresence
+            className="header-main w-full fixed top-0 left-0 right-0 z-50 shadow-lg bg-white py-3" // py-3 for fixed
+            variants={fixedHeaderVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <MainNavContent
+              openDropdown={openDropdown}
+              setOpenDropdown={setOpenDropdown}
+              isActiveLink={isActiveLink}
+              toggleSearchPopup={toggleSearchPopup}
+              toggleOffCanvasInfo={toggleOffCanvasInfo}
+              toggleMobileMenu={toggleMobileMenu}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Conditional rendering for popups based on state */}
     </header>
