@@ -21,11 +21,11 @@
   --color-secondary-900: #60004d;
   --color-secondary-950: #400033;
 
-  --color-gray-200: #e5e7eb; 
-  --color-gray-300: #d1d5db; 
-  --color-gray-400: #9ca3af; 
-  --color-gray-700: #374151; 
-  --color-gray-900: #111827; 
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-700: #374151;
+  --color-gray-900: #111827;
 
   --font-display: "FlaticonPetCare", "sans-serif";
   --font-main: "Bhool-Bhaina-2", "sans-serif";
@@ -44,7 +44,7 @@
 @font-face {
   font-family: "Bhool-Bhaina-2";
   src: url("/fonts/Baloo-Bhaina-2.woff2") format("woff2");
-  font-weight:500;
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
@@ -58,7 +58,7 @@ body {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 250px; 
+  width: 250px;
   height: 250px;
   background-image: url("/images/house-icon.svg"); /* IMPORTANT: Replace with the actual path to your house icon SVG/PNG */
   background-repeat: no-repeat;
@@ -103,7 +103,7 @@ body {
 
 /* Pseudo-element for the bubble effect */
 .btn-bubble::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0; /* top-0 right-0 bottom-0 left-0 */
   border-radius: 9999px; /* rounded-full */
@@ -127,7 +127,6 @@ body {
   gap: 0.5rem; /* gap-2 */
 }
 
-
 /* Specific styles for each button variant (using Tailwind colors directly) */
 
 /* Main "Shop Now" Button */
@@ -144,7 +143,6 @@ body {
   border-color: var(--color-primary); /* Border matches hover color */
 }
 
-
 /* "Book a Vet" Button */
 .btn-bubble-secondary {
   background-color: white;
@@ -158,7 +156,6 @@ body {
   color: white; /* Text becomes white on hover */
   border-color: var(--color-primary); /* Border matches hover color */
 }
-
 
 /* "Join as a Vendor" Button */
 .btn-bubble-tertiary {
@@ -175,10 +172,24 @@ body {
   border-color: var(--color-gray-400); /* Border darkens on hover */
 }
 
+/* "Join as a Vendor" Button */
+.btn-bubble-four {
+  background-color: var(--color-secondary);
+  color: white;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow-sm */
+}
+.btn-bubble-four::before {
+  background-color: white; 
+}
+
+.btn-bubble-four:hover {
+  color: var(--color-primary); 
+}
+
 @theme inline {
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
- 
+
   @keyframes marquee {
     from {
       transform: translateX(0);
@@ -197,68 +208,93 @@ body {
   }
 }
 
-/*
-  These are the custom styles for the Team component's hover effect.
-  Add them to your global stylesheet (e.g., globals.css)
-  or a dedicated CSS module (e.g., Team.module.css) if preferred.
-*/
-
-/* Container for the image and overlay. The `relative` class is applied here in JS. */
 .team-image-wrapper {
-  position: relative; /* Essential for absolute positioning of ::before and social-list */
-  overflow: hidden;   /* Crucial to clip the expanding ::before element */
+  position: relative;
+  overflow: hidden;
 }
 
 /* The overlay pseudo-element */
 .team-image-wrapper::before {
-  content: '';
+  content: "";
   position: absolute;
-  top: 100%; /* Start just below the container (out of view) */
+  top: 100%;
   left: 50%;
-  /* Initial state: scaled down horizontally (0.5), vertically (0), and translated from bottom */
   transform: translateX(-50%) translateY(0) scale(0.5, 0);
-  transform-origin: center bottom; /* Important: Make it scale from the bottom */
-  width: 100%; /* Will expand to cover the full width */
-  height: 100%; /* Will expand to cover the full height */
-  background-color: rgba(37, 99, 235, 0.8); /* Adjust this color to your primary purple */
-  border-radius: 50%; /* Ensures the bubble remains circular */
-  opacity: 0; /* Start invisible */
-  /*
-    New transition: Adjusted cubic-bezier for a smooth, non-bouncy ease-out.
-    This one accelerates fast and then gracefully decelerates to the end.
-  */
-  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out; /* Standard 'ease-out' or similar */
-  z-index: 10; /* Ensures it's above the image but below icons */
+  transform-origin: center bottom;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.4s ease-out;
+  z-index: 10;
 }
 
-/* Hover effect for the overlay */
 .team__item:hover .team-image-wrapper::before {
-  /* Final state: move up to cover, scale to full size */
   transform: translateX(-50%) translateY(-100%) scale(1, 1);
   opacity: 1;
 }
 
-/* Social icons list */
 .team__item .social-list {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Center the list */
-  z-index: 20; /* Ensures icons are above the overlay */
+  transform: translate(-50%, -50%);
+  z-index: 20;
   opacity: 0;
-  transition: opacity 0.3s ease-in-out 0.2s; /* Delay the fade-in slightly for the animation */
+  transition: opacity 0.3s ease-in-out 0.2s;
 }
 
-/* Hover effect for social icons */
 .team__item:hover .social-list {
   opacity: 1;
 }
 
-/* Optional: Image dimming on hover */
 .team__item .team-member-image {
   transition: opacity 0.3s ease-in-out;
 }
 
 .team__item:hover .team-member-image {
-  opacity: 0.7; /* Dims the image slightly when overlay appears */
+  opacity: 0.7;
+}
+
+/* Custom CSS for the Schedule A Visit Form Section */
+
+/* This will be the main background color for the form container */
+.form-container-bg {
+  background-color: var(
+    --color-primary
+  ); /* A deep purple/blue, similar to the image */
+}
+
+
+/* Style for the input fields */
+.form-input-field {
+  background-color: var(--color-primary-500); /* Slightly darker than the container background */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle white border */
+  color: white;
+  padding: 1rem 1.25rem; /* Tailwind's px-5 py-4 */
+  border-radius: 0.5rem; /* rounded-lg */
+  font-size: 1rem; /* text-base */
+  outline: none; /* Remove default outline */
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.form-input-field::placeholder {
+  color: rgba(255, 255, 255, 0.5); /* Lighter placeholder text */
+}
+
+.form-input-field:focus {
+  border-color: #a78bfa; /* Tailwind's purple-400 or similar for focus */
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3); /* Subtle glow on focus */
+}
+
+/* Style for the select dropdown arrows (Lucide icons will replace default) */
+.form-select-icon {
+  position: absolute;
+  right: 1.25rem; /* px-5 */
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  pointer-events: none; /* Ensure clicks go through to the select */
 }
