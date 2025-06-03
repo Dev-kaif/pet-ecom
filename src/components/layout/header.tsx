@@ -4,10 +4,16 @@ import {
   AlignJustify,
   CalendarDays,
   ChevronDown,
+  Clock,
+  Facebook,
+  Instagram,
   Mail,
   MapPin,
+  MessageCircle,
   Search,
   ShoppingBag,
+  Twitter,
+  Youtube,
 } from "lucide-react";
 import {
   motion,
@@ -102,29 +108,25 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
   toggleMobileMenu,
 }) => (
   <div className="container mx-auto px-4 custom-container">
-    <div className="flex justify-between items-center h-20">
+    <div className="flex justify-between items-center h-14">
       <div className="header-logo">
         <Link href="/">
           <img
             src="/images/logo/logo.png"
             alt="Petco Logo"
-            className="max-h-12"
+            className="max-h-10"
           />
         </Link>
       </div>
       <div className="header-menu hidden lg:block">
         <nav className="main-menu">
-          <ul className="flex space-x-8 text-lg font-medium">
+          <ul className="flex space-x-8 text-lg font-bold text-primary">
             {navItems.map((item) => (
               <li
                 key={item.name}
                 className="relative"
-                onMouseEnter={() =>
-                  item.dropdown && setOpenDropdown(item.name)
-                }
-                onMouseLeave={() =>
-                  item.dropdown && setOpenDropdown(null)
-                }
+                onMouseEnter={() => item.dropdown && setOpenDropdown(item.name)}
+                onMouseLeave={() => item.dropdown && setOpenDropdown(null)}
               >
                 <Link
                   href={item.href}
@@ -156,7 +158,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
                       initial="hidden"
                       animate="visible"
                       exit="hidden"
-                      transition={{duration:0.2}}
+                      transition={{ duration: 0.2 }}
                       className="absolute left-0 top-full w-48 bg-white shadow-lg rounded-md z-10 origin-top"
                     >
                       {item.dropdown.map((subItem) => (
@@ -201,7 +203,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
               <Search size={25} />
             </button>
           </li>
-          <div className="w-px h-6 bg-zinc-300"></div>
+          <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
           <li className="relative">
             <Link
               href="/cart"
@@ -336,8 +338,16 @@ const Header = () => {
   // Define variants for the fixed header animation
   const fixedHeaderVariants: Variants = {
     hidden: { y: -staticHeaderHeight, opacity: 0 }, // Start off-screen top and invisible
-    visible: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } }, // Slide down and fade in
-    exit: { y: -staticHeaderHeight, opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }, // Slide up and fade out
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.3, ease: "easeOut" },
+    }, // Slide down and fade in
+    exit: {
+      y: -staticHeaderHeight,
+      opacity: 0,
+      transition: { duration: 0.2, ease: "easeIn" },
+    }, // Slide up and fade out
   };
 
   return (
@@ -357,34 +367,41 @@ const Header = () => {
               <div className="header-top-left flex items-center gap-x-6">
                 <ul className="flex items-center gap-x-4">
                   <li className="flex items-center gap-2">
-                    <MapPin size={20} className="text-white" />
-                    <span className="text-primary-300 text-base">
+                    <MapPin size={20} className="text-white/80" />
+                    <span className="text-primary-300 text-base mt-1">
                       59 Jakc Street Brooklyn, New York
                     </span>
                   </li>
-                  <div className="w-px h-6 bg-zinc-300"></div>
+                  <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
                   <li>
                     <a
                       href="mailto:info@example.com"
-                      className="text-white hover:text-primary-200 transition-colors flex items-center gap-2 text-base"
+                      className=" hover:text-primary-200 transition-colors flex items-center gap-2 text-base"
                     >
-                      <Mail size={20} />
-                      <span className="text-primary-300">
+                      <Mail className="text-white/80" size={20} />
+                      <span className="text-primary-300 mt-1">
                         Petspostinfo@gmail.com
                       </span>
                     </a>
                   </li>
                 </ul>
               </div>
+
               <div className="header-top-right">
-                <div className="header-top-social">
+                <div className="header-top-social flex gap-3">
+                  <div className="flex gap-2 text-white/80 items-center text-base">
+                    <Clock size={20} />
+                    <span className="text-primary-300 mt-1">Opening Hour: 09.00 am- 11.00 pm</span>
+                  </div>
+
+                  <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
                   <ul className="flex items-center gap-x-3">
                     <li>
                       <a
                         href="#"
                         className="text-white hover:text-primary-200 transition-colors"
                       >
-                        <i className="fab fa-facebook-f" />
+                        <Facebook size={18} />
                       </a>
                     </li>
                     <li>
@@ -392,7 +409,7 @@ const Header = () => {
                         href="#"
                         className="text-white hover:text-primary-200 transition-colors"
                       >
-                        <i className="fab fa-twitter" />
+                        <Twitter size={18} />
                       </a>
                     </li>
                     <li>
@@ -400,7 +417,7 @@ const Header = () => {
                         href="#"
                         className="text-white hover:text-primary-200 transition-colors"
                       >
-                        <i className="fab fa-pinterest-p" />
+                        <MessageCircle size={18} />
                       </a>
                     </li>
                     <li>
@@ -408,7 +425,15 @@ const Header = () => {
                         href="#"
                         className="text-white hover:text-primary-200 transition-colors"
                       >
-                        <i className="fab fa-linkedin-in" />
+                        <Instagram size={18} />
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        className="text-white hover:text-primary-200 transition-colors"
+                      >
+                        <Youtube size={18} />
                       </a>
                     </li>
                   </ul>
@@ -419,7 +444,9 @@ const Header = () => {
         </div>
 
         {/* Main Nav Bar - Part of the initial static header */}
-        <div className="header-main w-full py-4 shadow-lg"> {/* py-4 for static */}
+        <div className="header-main w-full py-4 shadow-lg">
+          {" "}
+          {/* py-4 for static */}
           <MainNavContent
             openDropdown={openDropdown}
             setOpenDropdown={setOpenDropdown}
@@ -434,7 +461,7 @@ const Header = () => {
       {/* Spacer div for main content to prevent jump */}
       {/* This spacer ensures content doesn't jump when the fixed header takes over */}
       <div
-        style={{ height: showFixedHeader ? `${staticHeaderHeight}px` : '0px' }}
+        style={{ height: showFixedHeader ? `${staticHeaderHeight}px` : "0px" }}
         className="transition-all duration-300 ease-in-out"
       />
 
