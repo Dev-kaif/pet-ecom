@@ -10,6 +10,7 @@ import Services from "@/components/sections/Services";
 import Team from "@/components/sections/Team";
 import Marquee from "@/components/sections/Marquee";
 import WhyUsSection from "@/components/sections/WhyUsSection";
+import StatsSection from "@/components/sections/Counter";
 
 export default function Page() {
   return (
@@ -20,6 +21,7 @@ export default function Page() {
       <Marquee />
       <Services />
       <WhyUsSection />
+      <StatsSection/>
       <Team />
       <CallToAction />
       <Blog />

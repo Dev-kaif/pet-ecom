@@ -162,13 +162,13 @@ body {
 
 /* "Join as a Vendor" Button */
 .btn-bubble-tertiary {
-  background-color: white; /* Using white as base, but could be transparent if you define border only */
+  background-color: transparent; /* Using white as base, but could be transparent if you define border only */
   color: var(--color-gray-700); /* Tailwind gray-700 */
   border: 1px solid var(--color-gray-300); /* Tailwind gray-300 */
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow-sm */
 }
 .btn-bubble-tertiary::before {
-  background-color: var(--color-gray-200); /* Tailwind gray-200 */
+  background-color: white; /* Tailwind gray-200 */
 }
 .btn-bubble-tertiary:hover {
   color: var(--color-gray-900); /* Text darkens on hover */

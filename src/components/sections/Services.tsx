@@ -36,7 +36,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
     >
       <Image
         width={1000}
-        height={1000}btn-bubble btn-bubble-secondary
+        height={1000}
         src="/images/services/services_shape01.svg" 
         alt="Decorative background shape for service card"
         className="absolute inset-0 w-full h-full object-cover z-0 text-white  "

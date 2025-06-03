@@ -1,61 +1,109 @@
-import { motion } from 'framer-motion';
-import useCountUp from '@/hooks/useCountUp'; 
+// src/components/StatItem.tsx
+import { motion } from "framer-motion"; // Import motion
+import React from "react";
+import useCounter from "@/lib/useCounter";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
-// interface CounterProps {
-//   // No specific props needed
-// }
+interface StatItemProps {
+  rawNumber: number;
+  suffix: string;
+  label: string;
+  delay?: number;
+}
 
-const Counter = () => {
-  // Data for each counter item
-  const counterItems = [
-    { icon: '/images/icon/counter_icon01.svg', end: 360, label: 'Happy Clients' }, // User will place this SVG
-    { icon: '/images/icon/counter_icon02.svg', end: 99, label: 'Positive Feedback', suffix: '%' }, // User will place this SVG
-    { icon: '/images/icon/counter_icon03.svg', end: 200, label: 'Qualified Vet' }, // User will place this SVG
-    { icon: '/images/icon/counter_icon04.svg', end: 150, label: 'Award Winner' }, // User will place this SVG
+const StatItem: React.FC<StatItemProps> = ({
+  rawNumber,
+  suffix,
+  label,
+  delay = 0,
+}) => {
+  // Call the useCounter hook here, at the top level of the functional component
+  const animatedNumber = useCounter(rawNumber, suffix, {
+    duration: 2000,
+    delay,
+  });
+
+  return (
+    <div className="flex flex-col items-start gap-3">
+      <motion.span className="text-3xl md:text-4xl lg:text-5xl font-extrabold">
+        {animatedNumber}
+      </motion.span>
+      <div className="w-64 h-px bg-primary-600 "></div>
+      <span className="text-base md:text-lg opacity-80">{label}</span>
+    </div>
+  );
+};
+
+const StatsSection = () => {
+  const stats = [
+    { rawNumber: 15, suffix: "+", label: "Years Of Experience" },
+    { rawNumber: 23, suffix: "K", label: "Our Beloved Clients" },
+    { rawNumber: 15, suffix: "K+", label: "Real Customer Reviews" },
   ];
 
   return (
-    <section
-      className="relative py-20 lg:py-24 xl:py-30 overflow-hidden bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: 'url(/images/bg/counter_bg.jpg)' }} // User will place counter_bg.jpg
-    >
-      <div className="container mx-auto px-4 custom-container">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
-          {counterItems.map((item, index) => {
-            const { count, ref } = useCountUp({ end: item.end, delay: index * 200 }); // Staggered animation delay
-            return (
-              <motion.div
-                key={index}
-                className="counter__item text-center p-8 bg-white rounded-lg shadow-md flex flex-col items-center justify-center space-y-4"
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }} // Staggered animation for the container
-              >
-                <div className="counter__icon">
-                  <img src={item.icon} alt="Counter Icon" className="w-16 h-16 object-contain" />
-                </div>
-                <div className="counter__content">
-                  <h2 className="text-5xl font-bold text-primary-600 mb-2 leading-none">
-                    <span className="odometer" ref={ref}>{count}</span>{item.suffix || '+'}
-                  </h2>
-                  <p className="text-xl text-gray-700 font-medium">{item.label}</p>
-                </div>
-              </motion.div>
-            );
-          })}
+    <section className="relative py-20 lg:py-32 bg-primary">
+      <div className="max-w-7xl mx-auto px-4 text-white relative z-10 flex flex-col lg:flex-row items-center lg:items-start gap-12">
+        <div className="lg:w-1/2 text-center lg:text-left">
+          <p className="text-sm font-semibold uppercase mb-2 opacity-70">
+            Your Trust Our Priority
+          </p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-6">
+            Professional Vest Care <br /> And Guaranteed Quality
+          </h2>
+          <p className="text-base md:text-lg mb-12 max-w-xl mx-auto lg:mx-0 opacity-80">
+            Duis aute irure dolor in reprehenderit in voluptate velit esse. We
+            understand that your furry friend treasured member of your pets are.
+          </p>
+          <button className="btn-bubble btn-bubble-tertiary !text-white hover:!text-primary">
+            <Link href="/your-read-more-page" passHref legacyBehavior>
+              <span>
+                <span>Read More</span>
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </span>
+            </Link>
+          </button>
         </div>
-        {/* Placeholder for background shape - user will place this */}
-        <motion.div
-          className="counter__shape absolute bottom-0 left-0 w-48 h-auto hidden md:block" // Adjust positioning
-          animate={{ x: [-20, 20, -20] }} // Simple horizontal float
-          transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
-        >
-          <img src="/images/bg/counter_shape.png" alt="shape" className="opacity-70" /> {/* User will place this image */}
-        </motion.div>
+
+        {/* Right Section: Image and Statistics */}
+        <div className="lg:w-1/2 flex flex-col items-center lg:items-end relative">
+          {/* Main Image */}
+          <div
+            className="relative w-full max-w-md lg:max-w-lg mb-12 lg:mb-0 rounded-full overflow-hidden"
+            style={{
+              backgroundImage: `url('/path/to/your/image.jpg')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              paddingTop: "66.66%",
+              position: "relative",
+              zIndex: 2,
+              borderRadius: "20px",
+            }}
+          >
+            <img
+              src="/path/to/your/image.jpg" // Replace with the actual path to your image
+              alt="Vets examining a dog"
+              className="absolute inset-0 w-full h-full object-cover rounded-full"
+            />
+          </div>
+
+          {/* Statistics Grid (Stacked vertically) */}
+          <div className="flex flex-col gap-8 text-center lg:text-left lg:absolute lg:top-1/2 lg:right-0 lg:-translate-y-1/2 z-10 w-full lg:w-auto">
+            {stats.map((stat, index) => (
+              <StatItem
+                key={index}
+                rawNumber={stat.rawNumber}
+                suffix={stat.suffix}
+                label={stat.label}
+                delay={index * 200}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
 };
 
-export default Counter;
+export default StatsSection;
