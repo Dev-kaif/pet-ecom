@@ -1,56 +1,51 @@
-// src/components/sections/Team.tsx
-// import React from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import Link from 'next/link';
 
-// interface TeamProps {
-//   // No specific props needed for this component currently
-// }
-
 const Team = () => {
-  // Define team members as an array for easier rendering
   const teamMembers = [
     {
-      image: '/images/team/team_img01.jpg', // User will place this image
-      name: 'Darrell Steward',
-      title: 'Founder & CEO',
+      image: '/images/doctors/daria_and_cat.jpg', // Replace with your actual image paths
+      name: 'Daria Andaloro',
+      title: 'Veterinary Technician',
       socials: {
         facebook: '#',
         twitter: '#',
-        pinterest: '#',
+        instagram: '#', // Added Instagram as it's common
         linkedin: '#',
       },
     },
     {
-      image: '/images/team/team_img02.jpg', // User will place this image
-      name: 'Leslie Alexander',
-      title: 'Trainer',
+      image: '/images/doctors/michael_and_cat.jpg', // Replace with your actual image paths
+      name: 'Michael Brian',
+      title: 'Medicine Specialist',
       socials: {
         facebook: '#',
         twitter: '#',
-        pinterest: '#',
+        instagram: '#',
         linkedin: '#',
       },
     },
     {
-      image: '/images/team/team_img03.jpg', // User will place this image
-      name: 'Kristin Watson',
-      title: 'Manager',
+      image: '/images/doctors/kenroly_and_dog.jpg', // Replace with your actual image paths
+      name: 'Kenroly Gajon',
+      title: 'Food Technician',
       socials: {
         facebook: '#',
         twitter: '#',
-        pinterest: '#',
+        instagram: '#',
         linkedin: '#',
       },
     },
     {
-      image: '/images/team/team_img04.jpg', // User will place this image
-      name: 'Jerome Bell',
-      title: 'Customer Service',
+      image: '/images/doctors/lizay_and_dog.jpg', // Replace with your actual image paths
+      name: 'Lizay Arianya',
+      title: 'Veterinary Technician',
       socials: {
         facebook: '#',
         twitter: '#',
-        pinterest: '#',
+        instagram: '#',
         linkedin: '#',
       },
     },
@@ -58,84 +53,143 @@ const Team = () => {
 
   return (
     <section className="relative py-20 lg:py-24 xl:py-30 overflow-hidden bg-white">
+      {/* Background cat paw icon */}
+      <div className="absolute top-0 right-10 z-0 opacity-20 hidden lg:block">
+        <Image
+          src="/images/paw_icon.png"
+          alt="Paw icon"
+          width={100}
+          height={100}
+          className="w-24 h-24 rotate-12"
+        />
+      </div>
+
       <div className="container mx-auto px-4 custom-container">
+        {/* Section Title */}
         <div className="flex justify-center text-center mb-16 lg:mb-20">
           <div className="w-full lg:w-8/12 xl:w-6/12">
             <div className="section__title space-y-4">
-              <span className="text-primary-600 text-lg font-semibold uppercase tracking-wider">Meet Our Team</span>
-              <h2 className="text-4xl lg:text-5xl font-bold leading-tight text-gray-900">Our Expert Team</h2>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                There are many variations of passages of lorem ipsum available
-                but the majority have suffered.
-              </p>
+              <span className="text-secondary text-lg font-bold tracking-wider flex items-center justify-center">
+                WE CHANGE YOUR LIFE & WORLD{' '}
+                <span className="ml-2 text-xl">🐾</span> {/* Paw emoji */}
+              </span>
+              <h2 className="text-4xl lg:text-5xl font-extrabold leading-tight text-gray-900 mt-2">
+                Meet Our Expertise <br /> Pet Doctors
+              </h2>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+        {/* Team Members Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 justify-items-center">
           {teamMembers.map((member, index) => (
             <motion.div
               key={index}
-              className="team__item bg-white rounded-lg shadow-md overflow-hidden group"
+              className="team__item flex flex-col items-center text-center group"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }} // Staggered animation
+              transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <div className="team__img relative overflow-hidden">
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="w-full h-72 object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-              <div className="team__content p-6 text-center space-y-2">
-                <h4 className="title text-2xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors duration-300">
-                  <Link href="#">{member.name}</Link> {/* Link to individual team member page if applicable */}
-                </h4>
-                <span className="text-primary-600 text-lg font-medium">{member.title}</span>
-                <ul className="social-list flex justify-center space-x-3 mt-4">
-                  <li>
-                    <a href={member.socials.facebook} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-primary-500 hover:text-white transition-all duration-300">
-                      <i className="fab fa-facebook-f" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href={member.socials.twitter} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-primary-500 hover:text-white transition-all duration-300">
-                      <i className="fab fa-twitter" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href={member.socials.pinterest} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-primary-500 hover:text-white transition-all duration-300">
-                      <i className="fab fa-pinterest-p" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href={member.socials.linkedin} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-primary-500 hover:text-white transition-all duration-300">
-                      <i className="fab fa-linkedin-in" />
-                    </a>
-                  </li>
+              {/* Outer container for the whole circle: background, dotted border, image, and overlay */}
+              <div className="team-image-wrapper w-[240px] h-[240px] rounded-full p-2 bg-gradient-to-br from-purple-100 via-white to-purple-100 flex items-center justify-center mb-6">
+                {/* Dotted Border - sits below the overlay */}
+                <div className="absolute inset-0 rounded-full pointer-events-none" style={{
+                    borderStyle: 'dashed',
+                    borderWidth: '2px',
+                    borderColor: 'rgb(216, 180, 252)', // A shade of purple
+                  }}>
+                </div>
+
+                {/* Inner div for the actual image. The image itself will dim on hover. */}
+                <div className="w-[220px] h-[220px] rounded-full overflow-hidden relative z-0">
+                  <Image
+                    src={member.image}
+                    alt={member.name}
+                    layout="fill"
+                    objectFit="cover"
+                    className="rounded-full team-member-image"
+                  />
+                </div>
+
+                {/* Social Icons - positioned on top of the overlay when visible */}
+                <ul className="social-list flex space-x-3 text-white">
+                  {member.socials.facebook && (
+                    <li>
+                      <Link href={member.socials.facebook} className="w-9 h-9 flex items-center justify-center rounded-full bg-white bg-opacity-20 hover:bg-white hover:bg-opacity-100 hover:text-blue-600 transition-all duration-300">
+                        <i className="fab fa-facebook-f" />
+                      </Link>
+                    </li>
+                  )}
+                  {member.socials.twitter && (
+                    <li>
+                      <Link href={member.socials.twitter} className="w-9 h-9 flex items-center justify-center rounded-full bg-white bg-opacity-20 hover:bg-white hover:bg-opacity-100 hover:text-blue-400 transition-all duration-300">
+                        <i className="fab fa-twitter" />
+                      </Link>
+                    </li>
+                  )}
+                  {member.socials.instagram && (
+                    <li>
+                      <Link href={member.socials.instagram} className="w-9 h-9 flex items-center justify-center rounded-full bg-white bg-opacity-20 hover:bg-white hover:bg-opacity-100 hover:text-pink-600 transition-all duration-300">
+                        <i className="fab fa-instagram" />
+                      </Link>
+                    </li>
+                  )}
+                  {member.socials.linkedin && (
+                    <li>
+                      <Link href={member.socials.linkedin} className="w-9 h-9 flex items-center justify-center rounded-full bg-white bg-opacity-20 hover:bg-white hover:bg-opacity-100 hover:text-blue-800 transition-all duration-300">
+                        <i className="fab fa-linkedin-in" />
+                      </Link>
+                    </li>
+                  )}
                 </ul>
               </div>
+
+              {/* Name and Title */}
+              <h4 className="title text-xl font-bold text-gray-900 mb-1">
+                {member.name}
+              </h4>
+              <span className="text-purple-600 text-base font-medium">
+                {member.title}
+              </span>
             </motion.div>
           ))}
         </div>
 
-        {/* Placeholder for background shapes - user will place these */}
-        <div className="team__shape absolute top-0 left-0 right-0 z-0 pointer-events-none">
-          <motion.img
-            src="/images/images/team_shape01.svg" // User will place this SVG
-            alt="shape"
-            className="absolute top-10 left-5 md:left-20 w-24 h-24 opacity-60"
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
+        {/* Buttons Section */}
+        <div className="flex flex-col sm:flex-row justify-center items-center mt-16 lg:mt-20 space-y-4 sm:space-y-0 sm:space-x-8">
+          <Link href="/doctors-team" className="text-gray-600 hover:text-purple-600 transition-colors duration-300 text-lg font-medium underline underline-offset-4">
+            Our Valuable Expert Doctors Team
+          </Link>
+          <Link href="/doctors" className="inline-flex items-center justify-center px-8 py-3 bg-purple-600 text-white font-semibold rounded-full hover:bg-purple-700 transition-colors duration-300 shadow-lg">
+            See All Doctors <span className="ml-2">→</span>
+          </Link>
+        </div>
+
+        {/* Placeholder for background shapes / dotted patterns */}
+        <div className="team__shape absolute -top-5 left-1/4 transform -translate-x-1/2 z-0 pointer-events-none opacity-80 hidden md:block">
+          <Image
+            src="/images/purple_dots_large.svg"
+            alt="Dotted pattern"
+            width={150}
+            height={150}
           />
-          <motion.img
-            src="/images/images/team_shape02.png" // User will place this image
-            alt="shape"
-            className="absolute bottom-10 right-5 md:right-20 w-32 h-32 opacity-60"
-            animate={{ y: [0, -20, 0] }}
-            transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
+        </div>
+        <div className="team__shape absolute top-20 right-1/4 transform translate-x-1/2 z-0 pointer-events-none opacity-80 hidden md:block">
+          <Image
+            src="/images/purple_dots_large.svg"
+            alt="Dotted pattern"
+            width={100}
+            height={100}
+            className="rotate-45"
+          />
+        </div>
+         <div className="team__shape absolute bottom-10 left-10 z-0 pointer-events-none opacity-80 hidden md:block">
+          <Image
+            src="/images/purple_dots_small.svg"
+            alt="Dotted pattern"
+            width={80}
+            height={80}
           />
         </div>
       </div>

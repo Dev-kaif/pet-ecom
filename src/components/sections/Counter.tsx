@@ -3,7 +3,8 @@ import { motion } from "framer-motion"; // Import motion
 import React from "react";
 import useCounter from "@/lib/useCounter";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { MoveRight } from "lucide-react";
+import Image from "next/image";
 
 interface StatItemProps {
   rawNumber: number;
@@ -41,6 +42,18 @@ const StatsSection = () => {
     { rawNumber: 23, suffix: "K", label: "Our Beloved Clients" },
     { rawNumber: 15, suffix: "K+", label: "Real Customer Reviews" },
   ];
+  const brandImages = [
+    "/images/counter/Brands/brand_img01.png",
+    "/images/counter/Brands/brand_img02.png",
+    "/images/counter/Brands/brand_img03.png",
+    "/images/counter/Brands/brand_img04.png",
+    "/images/counter/Brands/brand_img05.png",
+    "/images/counter/Brands/brand_img06.png",
+    "/images/counter/Brands/brand_img07.png",
+  ];
+
+  const imageWidth = 120;
+  const imageHeight = 120;
 
   return (
     <section className="relative py-20 lg:py-32 bg-primary">
@@ -56,14 +69,15 @@ const StatsSection = () => {
             Duis aute irure dolor in reprehenderit in voluptate velit esse. We
             understand that your furry friend treasured member of your pets are.
           </p>
-          <button className="btn-bubble btn-bubble-tertiary !text-white hover:!text-primary">
-            <Link href="/your-read-more-page" >
-              <span>
-                <span>Read More</span>
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </span>
-            </Link>
-          </button>
+          <Link
+            href="/read-more"
+            className="btn-bubble btn-bubble-tertiary !text-white hover:!text-primary"
+          >
+            <span>
+              <span>Read More</span>
+              <MoveRight />
+            </span>
+          </Link>
         </div>
 
         {/* Right Section: Image and Statistics */}
@@ -82,7 +96,7 @@ const StatsSection = () => {
             }}
           >
             <img
-              src="/path/to/your/image.jpg" // Replace with the actual path to your image
+              src="" // Replace with the actual path to your image
               alt="Vets examining a dog"
               className="absolute inset-0 w-full h-full object-cover rounded-full"
             />
@@ -101,8 +115,38 @@ const StatsSection = () => {
             ))}
           </div>
         </div>
+        <div>
+          <Image
+            className="absolute left-[50%] transform -translate-x-1/2 bottom-10 w-30 h-30"
+            width={100}
+            height={100}
+            alt="idk"
+            src={"/images/counter/counter_shape01.png"}
+          />
+          <Image
+            className="absolute top-18 -right-5 w-50 h-50"
+            width={100}
+            height={100}
+            alt="idk"
+            src={"/images/counter/counter_shape02.png"}
+          />
+        </div>
       </div>
-      
+      <div className="max-w-7xl mx-auto px-4 text-white relative z-10 flex flex-col items-center mt-10 gap-10">
+        <div className="w-full h-px bg-primary-600 "></div>
+        <div className="flex gap-x-16 items-center justify-center flex-wrap">
+          {brandImages.map((src, index) => (
+            <Image
+              key={index}
+              width={imageWidth}
+              height={imageHeight}
+              alt={`Brand ${index + 1}`}
+              src={src}
+              style={{ objectFit: "contain" }}
+            />
+          ))}
+        </div>
+      </div>
     </section>
   );
 };

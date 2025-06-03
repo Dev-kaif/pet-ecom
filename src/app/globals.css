@@ -196,3 +196,69 @@ body {
     }
   }
 }
+
+/*
+  These are the custom styles for the Team component's hover effect.
+  Add them to your global stylesheet (e.g., globals.css)
+  or a dedicated CSS module (e.g., Team.module.css) if preferred.
+*/
+
+/* Container for the image and overlay. The `relative` class is applied here in JS. */
+.team-image-wrapper {
+  position: relative; /* Essential for absolute positioning of ::before and social-list */
+  overflow: hidden;   /* Crucial to clip the expanding ::before element */
+}
+
+/* The overlay pseudo-element */
+.team-image-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 100%; /* Start just below the container (out of view) */
+  left: 50%;
+  /* Initial state: scaled down horizontally (0.5), vertically (0), and translated from bottom */
+  transform: translateX(-50%) translateY(0) scale(0.5, 0);
+  transform-origin: center bottom; /* Important: Make it scale from the bottom */
+  width: 100%; /* Will expand to cover the full width */
+  height: 100%; /* Will expand to cover the full height */
+  background-color: rgba(37, 99, 235, 0.8); /* Adjust this color to your primary purple */
+  border-radius: 50%; /* Ensures the bubble remains circular */
+  opacity: 0; /* Start invisible */
+  /*
+    New transition: Adjusted cubic-bezier for a smooth, non-bouncy ease-out.
+    This one accelerates fast and then gracefully decelerates to the end.
+  */
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out; /* Standard 'ease-out' or similar */
+  z-index: 10; /* Ensures it's above the image but below icons */
+}
+
+/* Hover effect for the overlay */
+.team__item:hover .team-image-wrapper::before {
+  /* Final state: move up to cover, scale to full size */
+  transform: translateX(-50%) translateY(-100%) scale(1, 1);
+  opacity: 1;
+}
+
+/* Social icons list */
+.team__item .social-list {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the list */
+  z-index: 20; /* Ensures icons are above the overlay */
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out 0.2s; /* Delay the fade-in slightly for the animation */
+}
+
+/* Hover effect for social icons */
+.team__item:hover .social-list {
+  opacity: 1;
+}
+
+/* Optional: Image dimming on hover */
+.team__item .team-member-image {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.team__item:hover .team-member-image {
+  opacity: 0.7; /* Dims the image slightly when overlay appears */
+}
