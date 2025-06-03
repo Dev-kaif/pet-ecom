@@ -1,165 +1,466 @@
-// src/components/sections/Testimonial.tsx
-import React from 'react';
-import { motion } from 'framer-motion';
-// For Swiper integration:
-// import { Swiper, SwiperSlide } from 'swiper/react';
-// import { Pagination, Autoplay } from 'swiper/modules';
-// import 'swiper/css';
-// import 'swiper/css/pagination'; // If you use pagination
+import React from "react";
+import Image from "next/image";
+import { Star } from "lucide-react";
+import { Calendar, Clock, MoveRight, ChevronDown } from "lucide-react";
 
-
-const Testimonial = () => {
-  const testimonials = [
-    {
-      image: '/images/testimonial/testimonial_img01.png', // User will place this image
-      rating: 5,
-      quote: '“There are many variations of passages of lorem ipsum available but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable.”',
-      name: 'Floyd Miles',
-      title: 'Founder',
-    },
-    {
-      image: '/images/testimonial/testimonial_img02.png', // User will place this image
-      rating: 5,
-      quote: '“There are many variations of passages of lorem ipsum available but the majority have suffered alteration in some form, by injected humour, or randomised words which dont look even slightly believable.”',
-      name: 'Ronald Richards',
-      title: 'Manager',
-    },
-    {
-      image: '/images/testimonial/testimonial_img03.png', // User will place this image
-      rating: 5,
-      quote: '“There are many variations of passages of lorem ipsum available but the majority have suffered alteration in some form, by injected humour, or randomised words which dont look even slightly believable.”',
-      name: 'Kathryn Murphy',
-      title: 'Customer',
-    },
-    // Add more testimonials if needed
-  ];
-
+const TestimonialSection = () => {
   return (
-    <section className="relative py-20 lg:py-24 xl:py-30 overflow-hidden bg-white">
-      <div className="container mx-auto px-4 custom-container">
-        <div className="flex justify-center text-center mb-16 lg:mb-20">
-          <div className="w-full lg:w-8/12 xl:w-6/12">
-            <div className="section__title space-y-4">
-              <span className="text-primary-600 text-lg font-semibold uppercase tracking-wider">Our Testimonial</span>
-              <h2 className="text-4xl lg:text-5xl font-bold leading-tight text-gray-900">What Our Client Say’s</h2>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                There are many variations of passages of lorem ipsum available
-                but the majority have suffered.
-              </p>
+    <section className="relative mb-72">
+      <div className="relative pt-20 lg:pt-24 xl:pt-30 pb-72 overflow-hidden bg-gradient-to-r from-gray-50 to-purple-50">
+        {/* Background paw print 1 (top-left) */}
+        <div className="absolute top-8 left-0 z-0 hidden md:block">
+          <Image
+            src="/images/testimonial/testimonial_shape01.png"
+            alt="Paw icon background"
+            width={120}
+            height={120}
+            className="w-50 h-50 "
+          />
+        </div>
+        <div className="absolute bottom-0 left-2 hidden md:block">
+          <Image
+            src="/images/testimonial/testimonial_shape02.png"
+            alt="Paw icon background"
+            width={120}
+            height={120}
+            className="w-26 h-26"
+          />
+        </div>
+
+        {/* Background paw print 2 (bottom-right) */}
+        <div className="absolute bottom-80 right-8 z-0 hidden md:block">
+          <Image
+            src="/images/testimonial/testimonial_shape03.png"
+            alt="Paw icon background"
+            width={100}
+            height={100}
+            className="w-24 h-24"
+          />
+        </div>
+
+        <div className="container mx-auto px-4 custom-container">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
+            <div className="w-full lg:w-6/12 flex flex-col items-center lg:items-end text-center lg:text-left">
+              <div className="w-full max-w-lg">
+                <div className="flex justify-center mb-4 relative ">
+                  <Image
+                    height={100}
+                    width={100}
+                    className="w-20 h-20"
+                    alt="qoute"
+                    src={"/images/testimonial/quote.svg"}
+                  />
+                </div>
+                <h3 className="text-3xl lg:text-4xl text-center font-extrabold text-primary mb-4">
+                  Pet Health Important
+                </h3>
+                <p className="text-lg lg:text-xl text-center font-medium text-primary italic leading-relaxed mb-8">
+                  &quot;Duis Aute Irure Dolor In Reprehenderit In Voluptate
+                  Velitesse We Understand That Your Furry Aute Irure Dolor In
+                  Reprehenderit In Voluptate Ute Irure Dolor In Reprehenderit In
+                  Voluptate Understand That You&quot;
+                </p>
+                <div className="flex items-center justify-center space-x-4">
+                  {" "}
+                  <Image
+                    src="/images/author-avatar.jpg"
+                    alt="Uraney Jacke"
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full object-cover shadow-sm"
+                  />
+                  <div className="text-left">
+                    {" "}
+                    {/* Force text left-align within this div */}
+                    <h5 className="text-xl font-semibold text-secondary">
+                      Uraney Jacke
+                    </h5>
+                    <span className="text-gray-600 text-sm">
+                      Business Study
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full lg:w-6/12 flex justify-center relative">
+              <Image
+                src="/images/testimonial/testimonial_mask_img.svg"
+                alt="Happy senior couple with their dog"
+                width={100}
+                height={100}
+                className="rounded-full z-10 w-[34vw] h-[34vw]"
+              />
+              {/* Reviews Badge */}
+              <div className="absolute top-1/4 left-0 transform translate-x-1/2 -translate-y-1/2 z-30">
+                <div className="w-32 h-32 rounded-full flex flex-col items-center justify-center text-white p-2 text-center shadow-xl bg-secondary">
+                  <span className="text-2xl font-bold">1500+</span>
+                  <div className="flex mt-1">
+                    <Star
+                      size={16}
+                      fill="yellow"
+                      stroke="yellow"
+                      className="text-yellow-400"
+                    />
+                    <Star
+                      size={16}
+                      fill="yellow"
+                      stroke="yellow"
+                      className="text-yellow-400"
+                    />
+                    <Star
+                      size={16}
+                      fill="yellow"
+                      stroke="yellow"
+                      className="text-yellow-400"
+                    />
+                    <Star
+                      size={16}
+                      fill="yellow"
+                      stroke="yellow"
+                      className="text-yellow-400"
+                    />
+                    <Star
+                      size={16}
+                      fill="yellow"
+                      stroke="yellow"
+                      className="text-yellow-400"
+                    />
+                  </div>
+                  <span className="text-xs mt-1">Reviews</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+      <div className="absolute z-30 container mx-auto px-4 custom-container flex justify-center -bottom-[25%] ">
+        <div
+          className="w-full max-w-7xl p-8 sm:p-12 md:p-16
+             bg-primary overflow-hidden shadow-2xl
+             rounded-bl-[10rem] rounded-tr-[10rem] rounded-br-[3rem] rounded-tl-[3rem]"
+        >
+          <h2 className=" z-10 text-center text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-10 sm:mb-12">
+            Schedule A Visit Today!
+          </h2>
 
-        <div className="row">
-          {/*
-            Original HTML used a Swiper container for the testimonials.
-            To fully replicate this with navigation, pagination, and responsiveness, you'd use the Swiper React component.
-            For demonstration, I'm providing a static layout that you can replace with Swiper if desired.
-            Install Swiper: npm install swiper
-            Import in this file:
-            import { Swiper, SwiperSlide } from 'swiper/react';
-            import { Pagination, Autoplay } from 'swiper/modules';
-            import 'swiper/css';
-            import 'swiper/css/pagination';
+          <form className=" z-10 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            <div>
+              <label htmlFor="name" className="sr-only">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Type Full Name"
+                className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
+              />
+            </div>
 
-            Example Swiper integration (commented out - uncomment and configure if you install Swiper):
-            <Swiper
-              modules={[Pagination, Autoplay]}
-              spaceBetween={30}
-              slidesPerView={1}
-              autoplay={{ delay: 3000, disableOnInteraction: false }}
-              pagination={{ clickable: true }}
-              loop={true}
-              breakpoints={{
-                768: {
-                  slidesPerView: 2,
-                  spaceBetween: 30,
-                },
-              }}
-              className="testimonial__active" // Apply your existing Swiper CSS classes if they customize look
-            >
-              {testimonials.map((testimonial, index) => (
-                <SwiperSlide key={index}>
-                  <motion.div
-                    className="testimonial__item bg-white p-8 rounded-lg shadow-md text-center space-y-6"
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <div className="testimonial__content space-y-4">
-                      <div className="rating flex justify-center text-yellow-400 text-lg">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <i key={i} className="fas fa-star" />
-                        ))}
-                      </div>
-                      <p className="text-gray-700 leading-relaxed italic text-lg">
-                        {testimonial.quote}
-                      </p>
-                    </div>
-                    <div className="testimonial__client flex items-center justify-center space-x-4 pt-4 border-t border-gray-200">
-                      <div className="testimonial__client-thumb w-16 h-16 rounded-full overflow-hidden">
-                        <img
-                          src={testimonial.image}
-                          alt={testimonial.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="testimonial__client-info text-left">
-                        <h4 className="name text-xl font-bold text-gray-900">{testimonial.name}</h4>
-                        <span className="text-primary-600 text-base">{testimonial.title}</span>
-                      </div>
-                    </div>
-                  </motion.div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          */}
-
-          {/* Static rendering for demonstration (replace with Swiper above) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                className="testimonial__item bg-white p-8 rounded-lg shadow-md text-center space-y-6"
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }} // Staggered animation
+            <div className="">
+              <label htmlFor="petType" className="sr-only">
+                Pet Type
+              </label>
+              <select
+                id="petType"
+                name="petType"
+                className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none appearance-none pr-10
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
               >
-                <div className="testimonial__content space-y-4">
-                  <div className="rating flex justify-center text-yellow-400 text-lg">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <i key={i} className="fas fa-star" />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 leading-relaxed italic text-lg">
-                    {testimonial.quote}
-                  </p>
-                </div>
-                <div className="testimonial__client flex items-center justify-center space-x-4 pt-4 border-t border-gray-200">
-                  <div className="testimonial__client-thumb w-16 h-16 rounded-full overflow-hidden">
-                    <img
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="testimonial__client-info text-left">
-                    <h4 className="name text-xl font-bold text-gray-900">{testimonial.name}</h4>
-                    <span className="text-primary-600 text-base">{testimonial.title}</span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                <option value="">Select Pet Type</option>
+                <option value="dog">Dog</option>
+                <option value="cat">Cat</option>
+                <option value="bird">Bird</option>
+                <option value="other">Other</option>
+              </select>
+              <ChevronDown
+                size={20}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none"
+              />
+            </div>
 
-          {/* Swiper pagination if you integrate it */}
-          {/* <div className="swiper-pagination mt-8 text-center" /> */}
+            <div className="">
+              <label htmlFor="interestIn" className="sr-only">
+                Interest In
+              </label>
+              <select
+                id="interestIn"
+                name="interestIn"
+                className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none appearance-none pr-10
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
+              >
+                <option value="">Select Service</option>
+                <option value="vaccination">Vaccination</option>
+                <option value="checkup">General Checkup</option>
+                <option value="grooming">Grooming</option>
+                <option value="emergency">Emergency</option>
+              </select>
+              <ChevronDown
+                size={20}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none"
+              />
+            </div>
+
+            <div className="">
+              <label htmlFor="date" className="sr-only">
+                Date
+              </label>
+              <input
+                type="text"
+                id="date"
+                name="date"
+                placeholder="dd/mm/yyyy"
+                className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none pr-10
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
+                onFocus={(e) => (e.target.type = "date")}
+                onBlur={(e) => (
+                  (e.target.type = "text"),
+                  e.target.value === ""
+                    ? (e.target.placeholder = "dd/mm/yyyy")
+                    : null
+                )}
+              />
+              <Calendar
+                size={20}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none"
+              />
+            </div>
+
+            {/* Input Field: Time */}
+            <div className="">
+              <label htmlFor="time" className="sr-only">
+                Time
+              </label>
+              <input
+                type="text"
+                id="time"
+                name="time"
+                placeholder="08:00 am - 10:00 am"
+                className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none pr-10
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
+                onFocus={(e) => (e.target.type = "time")}
+                onBlur={(e) => (
+                  (e.target.type = "text"),
+                  e.target.value === ""
+                    ? (e.target.placeholder = "08:00 am - 10:00 am")
+                    : null
+                )}
+              />
+              <Clock
+                size={20}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="phone" className="sr-only">
+                Phone
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                placeholder="+123 888 ..."
+                className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
+              />
+            </div>
+
+            <div className="md:col-span-3 flex justify-center mt-6 sm:mt-8">
+              <button type="submit" className="btn-bubble btn-bubble-four">
+                <span>
+                  <span>Start A Reservation</span>
+                  <MoveRight size={20} />
+                </span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </section>
   );
 };
 
-export default Testimonial;
+export default TestimonialSection;
+
+<div className=" absolute -bottom-10 container mx-auto px-4 custom-container flex justify-center">
+  <div
+    className="w-full max-w-7xl p-8 sm:p-12 md:p-16
+             bg-primary overflow-hidden shadow-2xl
+             rounded-bl-[10rem] rounded-tr-[10rem] rounded-br-[3rem] rounded-tl-[3rem]"
+  >
+    <h2 className=" z-10 text-center text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-10 sm:mb-12">
+      Schedule A Visit Today!
+    </h2>
+
+    <form className=" z-10 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+      <div>
+        <label htmlFor="name" className="sr-only">
+          Name
+        </label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          placeholder="Type Full Name"
+          className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
+        />
+      </div>
+
+      <div className="">
+        <label htmlFor="petType" className="sr-only">
+          Pet Type
+        </label>
+        <select
+          id="petType"
+          name="petType"
+          className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none appearance-none pr-10
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
+        >
+          <option value="">Select Pet Type</option>
+          <option value="dog">Dog</option>
+          <option value="cat">Cat</option>
+          <option value="bird">Bird</option>
+          <option value="other">Other</option>
+        </select>
+        <ChevronDown
+          size={20}
+          className="absolute right-5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none"
+        />
+      </div>
+
+      <div className="">
+        <label htmlFor="interestIn" className="sr-only">
+          Interest In
+        </label>
+        <select
+          id="interestIn"
+          name="interestIn"
+          className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none appearance-none pr-10
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
+        >
+          <option value="">Select Service</option>
+          <option value="vaccination">Vaccination</option>
+          <option value="checkup">General Checkup</option>
+          <option value="grooming">Grooming</option>
+          <option value="emergency">Emergency</option>
+        </select>
+        <ChevronDown
+          size={20}
+          className="absolute right-5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none"
+        />
+      </div>
+
+      <div className="">
+        <label htmlFor="date" className="sr-only">
+          Date
+        </label>
+        <input
+          type="text"
+          id="date"
+          name="date"
+          placeholder="dd/mm/yyyy"
+          className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none pr-10
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
+          onFocus={(e) => (e.target.type = "date")}
+          onBlur={(e) => (
+            (e.target.type = "text"),
+            e.target.value === "" ? (e.target.placeholder = "dd/mm/yyyy") : null
+          )}
+        />
+        <Calendar
+          size={20}
+          className="absolute right-5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none"
+        />
+      </div>
+
+      {/* Input Field: Time */}
+      <div className="">
+        <label htmlFor="time" className="sr-only">
+          Time
+        </label>
+        <input
+          type="text"
+          id="time"
+          name="time"
+          placeholder="08:00 am - 10:00 am"
+          className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none pr-10
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
+          onFocus={(e) => (e.target.type = "time")}
+          onBlur={(e) => (
+            (e.target.type = "text"),
+            e.target.value === ""
+              ? (e.target.placeholder = "08:00 am - 10:00 am")
+              : null
+          )}
+        />
+        <Clock
+          size={20}
+          className="absolute right-5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="phone" className="sr-only">
+          Phone
+        </label>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          placeholder="+123 888 ..."
+          className="w-full bg-primary-600 border border-white/10 text-white
+                   px-5 py-4 rounded-lg text-base outline-none
+                   transition-all duration-200
+                   focus:border-secondary-400 focus:ring-4 focus:ring-secondary-400/30
+                   placeholder-white/50"
+        />
+      </div>
+
+      <div className="md:col-span-3 flex justify-center mt-6 sm:mt-8">
+        <button type="submit" className="btn-bubble btn-bubble-four">
+          <span>
+            <span>Start A Reservation</span>
+            <MoveRight size={20} />
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>;
