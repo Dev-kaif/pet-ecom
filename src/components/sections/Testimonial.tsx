@@ -7,11 +7,8 @@ import { motion } from 'framer-motion';
 // import 'swiper/css';
 // import 'swiper/css/pagination'; // If you use pagination
 
-interface TestimonialProps {
-  // No specific props needed for this component currently
-}
 
-const Testimonial: React.FC<TestimonialProps> = () => {
+const Testimonial = () => {
   const testimonials = [
     {
       image: '/images/testimonial/testimonial_img01.png', // User will place this image

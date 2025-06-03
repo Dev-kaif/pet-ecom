@@ -57,7 +57,7 @@ const StatsSection = () => {
             understand that your furry friend treasured member of your pets are.
           </p>
           <button className="btn-bubble btn-bubble-tertiary !text-white hover:!text-primary">
-            <Link href="/your-read-more-page" passHref legacyBehavior>
+            <Link href="/your-read-more-page" >
               <span>
                 <span>Read More</span>
                 <ArrowRight className="ml-2 w-4 h-4" />
@@ -102,6 +102,7 @@ const StatsSection = () => {
           </div>
         </div>
       </div>
+      
     </section>
   );
 };
