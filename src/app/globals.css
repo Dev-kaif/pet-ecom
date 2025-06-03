@@ -21,6 +21,12 @@
   --color-secondary-900: #60004d;
   --color-secondary-950: #400033;
 
+  --color-gray-200: #e5e7eb; 
+  --color-gray-300: #d1d5db; 
+  --color-gray-400: #9ca3af; 
+  --color-gray-700: #374151; 
+  --color-gray-900: #111827; 
+
   --font-display: "FlaticonPetCare", "sans-serif";
   --font-main: "Bhool-Bhaina-2", "sans-serif";
 }
@@ -76,4 +82,117 @@ body {
   opacity: 0.05; /* Very subtle */
   z-index: 0; /* Ensure it's behind the content of the card */
   pointer-events: none;
+}
+
+/* src/app/globals.css (or similar) */
+
+/* Base style for all bubble buttons */
+.btn-bubble {
+  position: relative;
+  overflow: hidden;
+  font-weight: 600; /* font-semibold */
+  border-radius: 9999px; /* rounded-full */
+  padding: 0.75rem 2rem; /* px-8 py-3 */
+  display: inline-flex;
+  gap: 0.5rem; /* gap-2 */
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease-in-out; /* transition-colors duration-300 transform */
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-md for primary, shadow-sm for others */
+}
+
+/* Pseudo-element for the bubble effect */
+.btn-bubble::before {
+  content: '';
+  position: absolute;
+  inset: 0; /* top-0 right-0 bottom-0 left-0 */
+  border-radius: 9999px; /* rounded-full */
+  z-index: 0; /* Below content */
+  transform: scaleY(0); /* Start hidden at 0 height */
+  transform-origin: bottom; /* Grow from bottom */
+  transition: transform 0.5s ease-out; /* transition-all duration-500 ease-out */
+}
+
+/* On hover, the bubble grows */
+.btn-bubble:hover::before {
+  transform: scaleY(1); /* Grow to full height */
+}
+
+/* Ensure content is above the bubble */
+.btn-bubble > span {
+  position: relative;
+  z-index: 10;
+  display: flex; /* flex */
+  align-items: center; /* items-center */
+  gap: 0.5rem; /* gap-2 */
+}
+
+
+/* Specific styles for each button variant (using Tailwind colors directly) */
+
+/* Main "Shop Now" Button */
+.btn-bubble-primary {
+  background-color: var(--color-secondary); /* Tailwind secondary */
+  color: white;
+  border: 1px solid var(--color-secondary); /* To ensure consistent border */
+}
+.btn-bubble-primary::before {
+  background-color: var(--color-primary); /* Tailwind primary */
+}
+.btn-bubble-primary:hover {
+  color: white; /* Ensure text remains white */
+  border-color: var(--color-primary); /* Border matches hover color */
+}
+
+
+/* "Book a Vet" Button */
+.btn-bubble-secondary {
+  background-color: white;
+  color: var(--color-primary); /* Tailwind primary */
+  border: 1px solid var(--color-primary);
+}
+.btn-bubble-secondary::before {
+  background-color: var(--color-primary); /* Tailwind primary */
+}
+.btn-bubble-secondary:hover {
+  color: white; /* Text becomes white on hover */
+  border-color: var(--color-primary); /* Border matches hover color */
+}
+
+
+/* "Join as a Vendor" Button */
+.btn-bubble-tertiary {
+  background-color: white; /* Using white as base, but could be transparent if you define border only */
+  color: var(--color-gray-700); /* Tailwind gray-700 */
+  border: 1px solid var(--color-gray-300); /* Tailwind gray-300 */
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow-sm */
+}
+.btn-bubble-tertiary::before {
+  background-color: var(--color-gray-200); /* Tailwind gray-200 */
+}
+.btn-bubble-tertiary:hover {
+  color: var(--color-gray-900); /* Text darkens on hover */
+  border-color: var(--color-gray-400); /* Border darkens on hover */
+}
+
+@theme inline {
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+ 
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
 }

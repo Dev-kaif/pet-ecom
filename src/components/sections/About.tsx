@@ -1,15 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-
-
+import { motion } from "framer-motion";
+import { MoveRight } from "lucide-react";
+import Link from "next/link";
 
 const About = () => {
   return (
     <section className="relative py-20 lg:py-24 xl:py-30 overflow-hidden bg-white">
       <div className="container mx-auto px-4 custom-container">
         <div className="flex flex-col lg:flex-row items-center justify-center gap-12">
-          <div className="w-full lg:w-6/12 flex justify-center lg:justify-start">
+          <div className="w-full lg:w-6/12 flex justify-center">
             <motion.div
               className="about__img relative"
               initial={{ opacity: 0, x: -50 }}
@@ -17,20 +16,18 @@ const About = () => {
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.8 }}
             >
-              {/* Placeholder for about image - user will place this */}
               <img
-                src="/images/images/about_img.jpg" // User will place this image
+                src="/images/about/about_img.png"
                 alt="About Us"
-                className="max-w-full h-auto rounded-lg shadow-lg"
-                // Original AOS was data-aos="fade-right" data-aos-delay="200"
+                className="max-w-full h-auto rounded-lg "
               />
-              {/* Placeholder for shape - user will place this */}
-              <motion.div
-                className="about__img-shape absolute -bottom-10 -right-10 hidden md:block" // Adjust positioning
-                animate={{ rotate: [0, 10, 0] }} // Simple subtle animation
-                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-              >
-                <img src="/images/images/about_shape.png" alt="shape" className="w-32 h-32 object-contain" /> {/* User will place this image */}
+              <motion.div className=" absolute -bottom-15 -left-15 hidden md:block">
+                <img
+                  src="/images/images/about_shape01.png"
+                  alt="shape"
+                  className="object-contain w-32 h-40"
+                />{" "}
+                {/* User will place this image */}
               </motion.div>
             </motion.div>
           </div>
@@ -43,28 +40,44 @@ const About = () => {
               transition={{ duration: 0.8 }}
             >
               <div className="section__title space-y-4 mb-8">
-                <span className="sub-title text-primary-600 text-lg font-semibold uppercase tracking-wider">About Us</span>
-                <h2 className="title text-4xl lg:text-5xl font-bold leading-tight text-gray-900">We Care Your Pet</h2>
+                <span className="sub-title text-secondary text-lg font-semibold uppercase tracking-wider">
+                  Know More About us
+                </span>
+                <h2 className="title text-4xl lg:text-5xl font-bold leading-tight text-primary flex flex-col">
+                  <span>We’re more than just </span>
+                  <span>a pet store</span>
+                </h2>
               </div>
               <p className="text-lg text-gray-700 leading-relaxed mb-8">
-                There are many variations of passages of lorem ipsum available but
-                the majority have suffered alteration in some form, by injected
-                humour, or randomised words which don&apos;t look even slightly
-                believable. If you are going to use a passage of lorem ipsum, you
-                need to be sure there isn&apos;t anything.
+                We’re a complete pet care ecosystem. Our platform connects pet
+                owners with trusted veterinarians, reliable pet shops, and
+                professional service providers, all in one place. Whether you
+                need medicines, fun toys, grooming services, or expert advice,
+                we make it easy, safe, and convenient. Built for both pet lovers
+                and pet businesses, our mission is to simplify pet parenting and
+                support every step of your pet’s journey.
               </p>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link
-                  href="/about" // Update with actual about link
-                  className="tg-btn-1 inline-flex items-center justify-center px-8 py-3 bg-primary-600 text-white font-semibold rounded-md hover:bg-primary-700 transition-colors duration-300 transform"
-                >
-                  <span>More About Us</span>
+              <motion.div>
+                <Link href="/about" className="btn-bubble btn-bubble-primary">
+                  <span>
+                    <span>Learn More About Us</span>
+                    <MoveRight />
+                  </span>
                 </Link>
               </motion.div>
             </motion.div>
+          </div>
+          <div>
+            <img
+              src="/images/about/about_shape02.png"
+              alt="shape 2"
+              className="absolute right-80 top-10"
+            />
+            <img
+              src="/images/about/about_shape03.png"
+              alt="shape 2"
+              className="absolute right-20 bottom-20"
+            />
           </div>
         </div>
       </div>
@@ -73,3 +86,4 @@ const About = () => {
 };
 
 export default About;
+

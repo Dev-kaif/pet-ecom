@@ -5,19 +5,21 @@ import About from "@/components/sections/About";
 import Banner from "@/components/sections/Hero";
 import Blog from "@/components/sections/Blog";
 import CallToAction from "@/components/sections/CallToAction";
-import Counter from "@/components/sections/Counter";
 import Instagram from "@/components/sections/Instagram";
 import Services from "@/components/sections/Services";
 import Team from "@/components/sections/Team";
+import Marquee from "@/components/sections/Marquee";
+import WhyUsSection from "@/components/sections/WhyUsSection";
 
 export default function Page() {
   return (
     <>
       <Header />
       <Banner />
-      <Services />
       <About />
-      <Counter />
+      <Marquee />
+      <Services />
+      <WhyUsSection />
       <Team />
       <CallToAction />
       <Blog />

@@ -226,13 +226,11 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
         </div>
 
         <div className="hidden lg:block ml-4">
-          <Link
-            href="/contact"
-            className="text-white flex items-center gap-2 rounded-full px-6 py-3 shadow-md
-                       bg-secondary hover:bg-secondary-700 transition-colors"
-          >
-            <CalendarDays size={18} />
-            <span className="text-sm">Appointment</span>
+          <Link href="/contact" className="btn-bubble btn-bubble-primary">
+            <span>
+              <CalendarDays size={18} />
+              <span className="text-sm">Appointment</span>
+            </span>
           </Link>
         </div>
 
@@ -391,7 +389,9 @@ const Header = () => {
                 <div className="header-top-social flex gap-3">
                   <div className="flex gap-2 text-white/80 items-center text-base">
                     <Clock size={20} />
-                    <span className="text-primary-300 mt-1">Opening Hour: 09.00 am- 11.00 pm</span>
+                    <span className="text-primary-300 mt-1">
+                      Opening Hour: 09.00 am- 11.00 pm
+                    </span>
                   </div>
 
                   <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
