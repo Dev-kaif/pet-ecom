@@ -179,17 +179,16 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
                                 <li key={subItem.name}>
                                   <Link href={subItem.href} passHref>
                                     <motion.div
-                                      onClick={onClose}
-                                      className={`block px-8 py-2 text-sm ${
+                                      className={`block px-4 py-2 ${
                                         isActiveLink(subItem.href)
                                           ? "text-secondary"
-                                          : "text-primary-700 hover:text-secondary"
+                                          : "text-primary-700 "
                                       }`}
-                                      whileHover={{
-                                        x: 5,
+                                      whileTap={{
+                                        x: 10,
                                         color: "var(--color-secondary)",
                                       }}
-                                      transition={{ duration: 0.2 }}
+                                      transition={{ duration: 0.3 }}
                                     >
                                       {subItem.name}
                                     </motion.div>

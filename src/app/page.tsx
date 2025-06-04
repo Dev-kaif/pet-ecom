@@ -11,11 +11,12 @@ import Marquee from "@/components/sections/Marquee";
 import WhyUsSection from "@/components/sections/WhyUsSection";
 import StatsSection from "@/components/sections/Counter";
 import TestimonialSection from "@/components/sections/Testimonial";
+import ScrollToTopButton from "@/components/layout/scrollToTop";
 
 export default function Page() {
   return (
     <div className="overflow-x-hidden">
-      <Header />
+      <Header isHomePage />
       <Banner />
       <About />
       <Marquee />
@@ -27,6 +28,7 @@ export default function Page() {
       <Blog />
       <Instagram />
       <Footer />
+      <ScrollToTopButton />
     </div>
   );
 }

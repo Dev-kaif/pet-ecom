@@ -169,9 +169,6 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
                       {item.dropdown.map((subItem) => (
                         <motion.li
                           key={subItem.name}
-                          // This `whileHover` and `transition` on the `motion.div` are important
-                          // for the hover effect on dropdown items.
-                          // listItemVariants apply to the overall list item's entry/exit.
                           variants={listItemVariants}
                         >
                           <Link href={subItem.href} passHref>
@@ -179,7 +176,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
                               className={`block px-4 py-2 ${
                                 isActiveLink(subItem.href)
                                   ? "text-secondary"
-                                  : "text-primary-700 hover:text-secondary"
+                                  : "text-primary-700 "
                               }`}
                               whileHover={{
                                 x: 10,
@@ -246,7 +243,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
         {/* mobile sidebar button */}
         <div className="lg:hidden ml-4">
           <button
-            onClick={toggleMobileMenu} // This button opens the MobileSidebar
+            onClick={toggleMobileMenu} 
             className="text-gray-800 hover:text-primary transition-colors focus:outline-none"
           >
             <AlignJustify size={26} />
@@ -257,7 +254,11 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
   </div>
 );
 
-const Header = () => {
+interface HomepageProps{
+  isHomePage?:boolean;
+}
+
+const Header = ({isHomePage}:HomepageProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile sidebar
   const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
   const [isOffCanvasInfoOpen, setIsOffCanvasInfoOpen] = useState(false); // State for desktop info sidebar
@@ -364,7 +365,7 @@ const Header = () => {
         `}
       >
         {/* Header Top Area */}
-        <div className={`bg-primary py-3 text-sm hidden lg:block`}>
+        {isHomePage && <div className={`bg-primary py-3 text-sm hidden lg:block`}>
           <div className="container mx-auto px-4 custom-container">
             <div className="flex justify-between items-center">
               <div className="header-top-left flex items-center gap-x-6">
@@ -446,7 +447,7 @@ const Header = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div>}
 
         {/* Main Nav Bar */}
         <div className="header-main w-full py-4 shadow-lg">
