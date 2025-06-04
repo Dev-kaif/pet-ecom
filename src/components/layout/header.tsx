@@ -1,3 +1,4 @@
+// src/components/layout/Header.tsx
 import React, { useState, useEffect, useRef, CSSProperties } from "react";
 import Link from "next/link";
 import {
@@ -23,6 +24,8 @@ import {
   useMotionValueEvent,
 } from "framer-motion";
 import Image from "next/image";
+import OffCanvasSidebar from "./OffCanvasSidebar"; // Existing desktop sidebar
+import MobileSidebar from "./MobileSidebar";     // Import the new mobile sidebar
 
 // Define framer-motion variants for the dropdown menu (unchanged)
 const dropdownVariants: Variants = {
@@ -30,7 +33,7 @@ const dropdownVariants: Variants = {
     y: -20,
     scaleY: 0.8,
     opacity: 0,
-    pointerEvents: "none" as CSSProperties["pointerEvents"],
+    pointerEvents: "none" as CSSProperties["pointerEvents"], // Retaining for safety, though often not needed with modern FM
     transition: {
       duration: 0.2,
       ease: "easeIn",
@@ -40,7 +43,7 @@ const dropdownVariants: Variants = {
     opacity: 1,
     y: 0,
     scaleY: 1,
-    pointerEvents: "auto" as CSSProperties["pointerEvents"],
+    pointerEvents: "auto" as CSSProperties["pointerEvents"], // Retaining for safety
     transition: {
       duration: 0.3,
       ease: "easeOut",
@@ -56,7 +59,7 @@ const listItemVariants = {
   visible: { opacity: 1, x: 0 },
 };
 
-// Define your navigation items (unchanged)
+// Define your navigation items (unchanged - used by MainNavContent and MobileSidebar)
 const navItems = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
@@ -90,14 +93,13 @@ const navItems = [
 ];
 
 // Helper component to render the main navigation content
-// This prevents code duplication in the two header elements
 interface MainNavContentProps {
   openDropdown: string | null;
   setOpenDropdown: React.Dispatch<React.SetStateAction<string | null>>;
   isActiveLink: (path: string, subPaths?: string[]) => boolean;
   toggleSearchPopup: () => void;
   toggleOffCanvasInfo: () => void;
-  toggleMobileMenu: () => void;
+  toggleMobileMenu: () => void; // Passed down to the mobile button
 }
 
 const MainNavContent: React.FC<MainNavContentProps> = ({
@@ -111,7 +113,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
   <div className="container mx-auto px-4 custom-container">
     <div className="flex justify-between items-center h-14">
       <div className="header-logo">
-        <Link href="/">
+        <Link href="/" passHref>
           <Image
             height={100}
             width={100}
@@ -167,6 +169,9 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
                       {item.dropdown.map((subItem) => (
                         <motion.li
                           key={subItem.name}
+                          // This `whileHover` and `transition` on the `motion.div` are important
+                          // for the hover effect on dropdown items.
+                          // listItemVariants apply to the overall list item's entry/exit.
                           variants={listItemVariants}
                         >
                           <Link href={subItem.href} passHref>
@@ -219,6 +224,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
             </Link>
           </li>
         </ul>
+        {/* desktop sidebar button (for the off-canvas info) */}
         <div className="ml-6 hidden lg:block">
           <button
             onClick={toggleOffCanvasInfo}
@@ -237,9 +243,10 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
           </Link>
         </div>
 
+        {/* mobile sidebar button */}
         <div className="lg:hidden ml-4">
           <button
-            onClick={toggleMobileMenu}
+            onClick={toggleMobileMenu} // This button opens the MobileSidebar
             className="text-gray-800 hover:text-primary transition-colors focus:outline-none"
           >
             <AlignJustify size={26} />
@@ -251,23 +258,19 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
 );
 
 const Header = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile sidebar
   const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
-  const [isOffCanvasInfoOpen, setIsOffCanvasInfoOpen] = useState(false);
-  const [showFixedHeader, setShowFixedHeader] = useState(false); // Controls fixed header visibility
-  const [staticHeaderHeight, setStaticHeaderHeight] = useState(0); // Height of the initial, scrolling header
+  const [isOffCanvasInfoOpen, setIsOffCanvasInfoOpen] = useState(false); // State for desktop info sidebar
+  const [showFixedHeader, setShowFixedHeader] = useState(false);
+  const [staticHeaderHeight, setStaticHeaderHeight] = useState(0);
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
-  const initialHeaderRef = useRef<HTMLDivElement>(null); // Ref for the ENTIRE initial header (top bar + main nav)
-
-  const SHOW_THRESHOLD = 500; // Pixels to scroll down before fixed header appears
-
-  // Framer Motion's scroll hook
+  const initialHeaderRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
+  const SHOW_THRESHOLD = 500;
 
-  // Update showFixedHeader state based on scrollY
-  useMotionValueEvent(scrollY, "change", (latest) => {
+  useMotionValueEvent(scrollY, "change", (latest: number) => {
     if (latest > SHOW_THRESHOLD) {
       setShowFixedHeader(true);
     } else {
@@ -277,19 +280,15 @@ const Header = () => {
 
   useEffect(() => {
     const measureInitialHeaderHeight = () => {
-      // Measure the height of the entire initial header (top bar + main nav)
       if (initialHeaderRef.current) {
         setStaticHeaderHeight(initialHeaderRef.current.offsetHeight);
       }
     };
 
-    // Initial measurement
     measureInitialHeaderHeight();
-    // Re-measure on window resize
     window.addEventListener("resize", measureInitialHeaderHeight);
 
-    // Initial state setup (important for page load)
-    if (window.scrollY > SHOW_THRESHOLD) {
+    if (typeof window !== 'undefined' && window.scrollY > SHOW_THRESHOLD) {
       setShowFixedHeader(true);
     } else {
       setShowFixedHeader(false);
@@ -302,18 +301,21 @@ const Header = () => {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+    // Close other overlays when mobile menu opens/closes
     setIsSearchPopupOpen(false);
     setIsOffCanvasInfoOpen(false);
   };
 
   const toggleSearchPopup = () => {
     setIsSearchPopupOpen(!isSearchPopupOpen);
+    // Close other overlays when search popup opens/closes
     setIsMobileMenuOpen(false);
     setIsOffCanvasInfoOpen(false);
   };
 
   const toggleOffCanvasInfo = () => {
     setIsOffCanvasInfoOpen(!isOffCanvasInfoOpen);
+    // Close other overlays when desktop info sidebar opens/closes
     setIsMobileMenuOpen(false);
     setIsSearchPopupOpen(false);
   };
@@ -328,40 +330,40 @@ const Header = () => {
       return true;
     }
 
-    for (const subPath of subPaths) {
-      if (currentPath.startsWith(subPath) && subPath !== "/") {
-        return true;
+    if (Array.isArray(subPaths)) {
+      for (const subPath of subPaths) {
+        if (currentPath.startsWith(subPath) && subPath !== "/") {
+          return true;
+        }
       }
     }
     return false;
   };
 
-  // Define variants for the fixed header animation
+  // Define variants for the fixed header animation (unchanged)
   const fixedHeaderVariants: Variants = {
-    hidden: { y: -staticHeaderHeight, opacity: 0 }, // Start off-screen top and invisible
+    hidden: { y: -staticHeaderHeight, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
       transition: { duration: 0.3, ease: "easeOut" },
-    }, // Slide down and fade in
+    },
     exit: {
       y: -staticHeaderHeight,
       opacity: 0,
       transition: { duration: 0.2, ease: "easeIn" },
-    }, // Slide up and fade out
+    },
   };
 
   return (
     <header>
-      {/* This entire section is the initial, static header that scrolls naturally */}
-      {/* It will be visually hidden when the fixed header appears, but remains in DOM to hold space */}
       <div
-        ref={initialHeaderRef} // Ref the whole initial header for height calculation
+        ref={initialHeaderRef}
         className={`w-full z-40 bg-white
           ${showFixedHeader ? "invisible pointer-events-none" : ""}
         `}
       >
-        {/* Header Top Area - Part of the initial static header */}
+        {/* Header Top Area */}
         <div className={`bg-primary py-3 text-sm hidden lg:block`}>
           <div className="container mx-auto px-4 custom-container">
             <div className="flex justify-between items-center">
@@ -420,7 +422,7 @@ const Header = () => {
                         href="#"
                         className="text-white hover:text-primary-200 transition-colors"
                       >
-                        <MessageCircle size={18} />
+                        <MessageCircle size={18} /> {/* Corresponds to the 'g+' or chat icon */}
                       </a>
                     </li>
                     <li>
@@ -446,10 +448,8 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Main Nav Bar - Part of the initial static header */}
+        {/* Main Nav Bar */}
         <div className="header-main w-full py-4 shadow-lg">
-          {" "}
-          {/* py-4 for static */}
           <MainNavContent
             openDropdown={openDropdown}
             setOpenDropdown={setOpenDropdown}
@@ -461,19 +461,18 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Spacer div for main content to prevent jump */}
-      {/* This spacer ensures content doesn't jump when the fixed header takes over */}
+      {/* Spacer div */}
       <div
         style={{ height: showFixedHeader ? `${staticHeaderHeight}px` : "0px" }}
         className="transition-all duration-300 ease-in-out"
       />
 
-      {/* Fixed Header (Animated appearance) */}
+      {/* Fixed Header */}
       <AnimatePresence>
         {showFixedHeader && (
           <motion.div
-            key="fixed-header" // Unique key for AnimatePresence
-            className="header-main w-full fixed top-0 left-0 right-0 z-50 shadow-lg bg-white py-3" // py-3 for fixed
+            key="fixed-header"
+            className="header-main w-full fixed top-0 left-0 right-0 z-50 shadow-lg bg-white py-3"
             variants={fixedHeaderVariants}
             initial="hidden"
             animate="visible"
@@ -491,7 +490,18 @@ const Header = () => {
         )}
       </AnimatePresence>
 
-      {/* Conditional rendering for popups based on state */}
+      {/* Off-canvas desktop info sidebar */}
+      <OffCanvasSidebar
+        isOpen={isOffCanvasInfoOpen}
+        onClose={toggleOffCanvasInfo}
+      />
+
+      {/* Mobile sidebar */}
+      <MobileSidebar
+        isOpen={isMobileMenuOpen}
+        onClose={toggleMobileMenu}
+        isActiveLink={isActiveLink} // Pass isActiveLink for mobile navigation
+      />
     </header>
   );
 };
