@@ -76,8 +76,8 @@ const navItems = [
     name: "Pages",
     href: "#",
     dropdown: [
-      { name: "All Pets", href: "/all-pets" },
-      { name: "Pet Details", href: "/pet-details" },
+      { name: "All Pets", href: "/allPets" },
+      { name: "Pet Details", href: "/allPets/petDetails" },
       { name: "Gallery", href: "/gallery" },
       { name: "Faq Page", href: "/faq" },
       { name: "Pricing Page", href: "/pricing" },
@@ -110,7 +110,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
   toggleOffCanvasInfo,
   toggleMobileMenu,
 }) => (
-  <div className="container mx-auto px-4 custom-container">
+  <div className="container mx-auto px-4 custom-container ">
     <div className="flex justify-between items-center h-14">
       <div className="header-logo">
         <Link href="/" passHref>
