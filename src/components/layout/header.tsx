@@ -82,7 +82,7 @@ const navItems = [
       { name: "Faq Page", href: "/faq" },
       { name: "Pricing Page", href: "/pricing" },
       { name: "Reservation Page", href: "/reservation" },
-      { name: "Our Team", href: "/our-team" },
+      { name: "Our Team", href: "/team" },
       { name: "Team Details", href: "/team-details" },
       { name: "Our Blog", href: "/blog" },
       { name: "Blog Details", href: "/blog-details" },
@@ -164,7 +164,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
                       animate="visible"
                       exit="hidden"
                       transition={{ duration: 0.2 }}
-                      className="absolute left-0 top-full w-48 bg-white shadow-lg rounded-md z-10 origin-top"
+                      className="absolute left-0 top-full w-48 bg-white shadow-lg rounded-md z-20 origin-top"
                     >
                       {item.dropdown.map((subItem) => (
                         <motion.li
