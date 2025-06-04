@@ -22,6 +22,7 @@ import {
   useScroll,
   useMotionValueEvent,
 } from "framer-motion";
+import Image from "next/image";
 
 // Define framer-motion variants for the dropdown menu (unchanged)
 const dropdownVariants: Variants = {
@@ -111,7 +112,9 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
     <div className="flex justify-between items-center h-14">
       <div className="header-logo">
         <Link href="/">
-          <img
+          <Image
+            height={100}
+            width={100}
             src="/images/logo/logo.png"
             alt="Petco Logo"
             className="max-h-10"
