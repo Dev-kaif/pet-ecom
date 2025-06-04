@@ -97,7 +97,7 @@ const Team = () => {
         </div>
 
         {/* Team Members Grid */}
-        <div className="flex justify-center items-center gap-20 justify-items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 justify-items-center px-32">
           {teamMembers.map((member, index) => (
             <motion.div
               key={index}

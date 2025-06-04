@@ -14,19 +14,19 @@ import TestimonialSection from "@/components/sections/Testimonial";
 
 export default function Page() {
   return (
-    <>
+    <div className="overflow-x-hidden">
       <Header />
       <Banner />
       <About />
       <Marquee />
       <Services />
       <WhyUsSection />
-      <StatsSection/>
+      <StatsSection />
       <Team />
-      <TestimonialSection/>
+      <TestimonialSection />
       <Blog />
       <Instagram />
       <Footer />
-    </>
+    </div>
   );
 }

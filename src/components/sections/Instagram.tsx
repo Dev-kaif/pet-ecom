@@ -69,16 +69,6 @@ const Instagram = () => {
           ))}
         </motion.div>
 
-        {/* Placeholder for background shape - user will place this */}
-        <div className="instagram__shape absolute bottom-0 right-0 w-40 h-auto hidden md:block z-0 pointer-events-none">
-          <motion.img
-            src="/images/instagram/instagram_shape.png"
-            alt="shape"
-            className="opacity-70"
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
-          />
-        </div>
       </div>
     </section>
   );

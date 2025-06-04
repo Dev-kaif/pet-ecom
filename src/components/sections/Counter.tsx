@@ -96,7 +96,7 @@ const StatsSection = () => {
             }}
           >
             <img
-              src="" // Replace with the actual path to your image
+              src="/public/images/about/#"
               alt="Vets examining a dog"
               className="absolute inset-0 w-full h-full object-cover rounded-full"
             />
