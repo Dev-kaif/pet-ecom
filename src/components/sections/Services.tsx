@@ -219,7 +219,7 @@ const ServicesSection: React.FC = () => {
   ];
 
   return (
-    <section className="relative py-20 lg:py-32 bg-gray-50 overflow-hidden">
+    <section className="relative py-20 lg:py-32 bg-secondary-50 overflow-hidden">
       {/* Removed the single background image from here */}
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">

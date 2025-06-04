@@ -61,15 +61,6 @@ const Team = () => {
 
   return (
     <section className="relative py-20 lg:py-24 xl:py-30 overflow-hidden bg-white">
-      <div className="absolute top-0 right-10 z-0 opacity-20 hidden lg:block">
-        <Image
-          src="/images/paw_icon.png"
-          alt="Paw icon"
-          width={100}
-          height={100}
-          className="w-24 h-24 rotate-12"
-        />
-      </div>
 
       <div className="container mx-auto px-4 custom-container">
         {/* Section Title */}

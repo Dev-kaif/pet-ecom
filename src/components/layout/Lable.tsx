@@ -7,7 +7,7 @@ interface LableProps{
 
 export default function Lable({lableName}:LableProps) {
   return (
-    <section className="h-52 w-full bg-zinc-50 px-32 py-16 relative -z-1">
+    <section className="h-52 w-full bg-secondary-50 px-32 py-16 relative -z-1">
       <div className="relative flex flex-col gap-4 z-10">
         <h2 className="text-primary text-5xl font-bold capitalize">{lableName}</h2>
         <h6 className="flex gap-2 items-center font-light text-base">
