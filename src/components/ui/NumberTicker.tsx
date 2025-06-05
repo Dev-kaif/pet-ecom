@@ -4,7 +4,7 @@
 import { useInView, useMotionValue, useSpring } from "framer-motion"; // Changed from "motion/react"
 import { ComponentPropsWithoutRef, useEffect, useRef } from "react";
 
-import { cn } from "@/lib/utils"; // Assuming this utility is available
+import { cn } from "@/components/lib/utils"; // Assuming this utility is available
 
 interface NumberTickerProps extends ComponentPropsWithoutRef<"span"> {
   value: number;

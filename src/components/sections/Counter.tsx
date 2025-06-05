@@ -1,7 +1,7 @@
 // src/components/StatItem.tsx
 import { motion } from "framer-motion"; // Import motion
 import React from "react";
-import useCounter from "@/lib/useCounter";
+import useCounter from "@/components/lib/useCounter";
 import Link from "next/link";
 import { MoveRight } from "lucide-react";
 import Image from "next/image";
