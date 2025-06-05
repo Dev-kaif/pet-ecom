@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Clock,
   Facebook,
+  Heart,
   Instagram,
   Mail,
   MapPin,
@@ -25,7 +26,7 @@ import {
 } from "framer-motion";
 import Image from "next/image";
 import OffCanvasSidebar from "./OffCanvasSidebar"; // Existing desktop sidebar
-import MobileSidebar from "./MobileSidebar";     // Import the new mobile sidebar
+import MobileSidebar from "./MobileSidebar"; // Import the new mobile sidebar
 
 // Define framer-motion variants for the dropdown menu (unchanged)
 const dropdownVariants: Variants = {
@@ -68,8 +69,7 @@ const navItems = [
     href: "/shop",
     dropdown: [
       { name: "All Products", href: "/shop" },
-      { name: "Pet Food", href: "/shop/food" },
-      { name: "Pet Toys", href: "/shop/toys" },
+      { name: "Product Details", href: "/shop/details" },
     ],
   },
   {
@@ -209,17 +209,27 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
             </button>
           </li>
           <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
-          <li className="relative">
-            <Link
-              href="/cart"
-              className="text-gray-800 hover:text-primary transition-colors relative"
-            >
-              <ShoppingBag size={25} />
-              <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                2
-              </span>
-            </Link>
-          </li>
+          <div className="flex gap-10">
+            <li className="relative">
+              <Link
+                href="/cart"
+                className="text-gray-800 hover:text-primary transition-colors relative"
+              >
+                <ShoppingBag size={25} />
+                <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  2
+                </span>
+              </Link>
+            </li>
+            <li className="relative">
+              <Link
+                href="/wishlist"
+                className="text-gray-800 hover:text-primary transition-colors relative"
+              >
+                <Heart size={25} />
+              </Link>
+            </li>
+          </div>
         </ul>
         {/* desktop sidebar button (for the off-canvas info) */}
         <div className="ml-6 hidden lg:block">
@@ -243,7 +253,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
         {/* mobile sidebar button */}
         <div className="lg:hidden ml-4">
           <button
-            onClick={toggleMobileMenu} 
+            onClick={toggleMobileMenu}
             className="text-gray-800 hover:text-primary transition-colors focus:outline-none"
           >
             <AlignJustify size={26} />
@@ -254,11 +264,11 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
   </div>
 );
 
-interface HomepageProps{
-  isHomePage?:boolean;
+interface HomepageProps {
+  isHomePage?: boolean;
 }
 
-const Header = ({isHomePage}:HomepageProps) => {
+const Header = ({ isHomePage }: HomepageProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile sidebar
   const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
   const [isOffCanvasInfoOpen, setIsOffCanvasInfoOpen] = useState(false); // State for desktop info sidebar
@@ -289,7 +299,7 @@ const Header = ({isHomePage}:HomepageProps) => {
     measureInitialHeaderHeight();
     window.addEventListener("resize", measureInitialHeaderHeight);
 
-    if (typeof window !== 'undefined' && window.scrollY > SHOW_THRESHOLD) {
+    if (typeof window !== "undefined" && window.scrollY > SHOW_THRESHOLD) {
       setShowFixedHeader(true);
     } else {
       setShowFixedHeader(false);
@@ -365,89 +375,92 @@ const Header = ({isHomePage}:HomepageProps) => {
         `}
       >
         {/* Header Top Area */}
-        {isHomePage && <div className={`bg-primary py-3 text-sm hidden lg:block`}>
-          <div className="container mx-auto px-4 custom-container">
-            <div className="flex justify-between items-center">
-              <div className="header-top-left flex items-center gap-x-6">
-                <ul className="flex items-center gap-x-4">
-                  <li className="flex items-center gap-2">
-                    <MapPin size={20} className="text-white/80" />
-                    <span className="text-primary-300 text-base mt-1">
-                      59 Jakc Street Brooklyn, New York
-                    </span>
-                  </li>
-                  <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
-                  <li>
-                    <a
-                      href="mailto:info@example.com"
-                      className=" hover:text-primary-200 transition-colors flex items-center gap-2 text-base"
-                    >
-                      <Mail className="text-white/80" size={20} />
-                      <span className="text-primary-300 mt-1">
-                        Petspostinfo@gmail.com
+        {isHomePage && (
+          <div className={`bg-primary py-3 text-sm hidden lg:block`}>
+            <div className="container mx-auto px-4 custom-container">
+              <div className="flex justify-between items-center">
+                <div className="header-top-left flex items-center gap-x-6">
+                  <ul className="flex items-center gap-x-4">
+                    <li className="flex items-center gap-2">
+                      <MapPin size={20} className="text-white/80" />
+                      <span className="text-primary-300 text-base mt-1">
+                        59 Jakc Street Brooklyn, New York
                       </span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="header-top-right">
-                <div className="header-top-social flex gap-3">
-                  <div className="flex gap-2 text-white/80 items-center text-base">
-                    <Clock size={20} />
-                    <span className="text-primary-300 mt-1">
-                      Opening Hour: 09.00 am- 11.00 pm
-                    </span>
-                  </div>
-
-                  <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
-                  <ul className="flex items-center gap-x-3">
-                    <li>
-                      <a
-                        href="#"
-                        className="text-white hover:text-primary-200 transition-colors"
-                      >
-                        <Facebook size={18} />
-                      </a>
                     </li>
+                    <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
                     <li>
                       <a
-                        href="#"
-                        className="text-white hover:text-primary-200 transition-colors"
+                        href="mailto:info@example.com"
+                        className=" hover:text-primary-200 transition-colors flex items-center gap-2 text-base"
                       >
-                        <Twitter size={18} />
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        className="text-white hover:text-primary-200 transition-colors"
-                      >
-                        <MessageCircle size={18} /> {/* Corresponds to the 'g+' or chat icon */}
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        className="text-white hover:text-primary-200 transition-colors"
-                      >
-                        <Instagram size={18} />
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        className="text-white hover:text-primary-200 transition-colors"
-                      >
-                        <Youtube size={18} />
+                        <Mail className="text-white/80" size={20} />
+                        <span className="text-primary-300 mt-1">
+                          Petspostinfo@gmail.com
+                        </span>
                       </a>
                     </li>
                   </ul>
                 </div>
+
+                <div className="header-top-right">
+                  <div className="header-top-social flex gap-3">
+                    <div className="flex gap-2 text-white/80 items-center text-base">
+                      <Clock size={20} />
+                      <span className="text-primary-300 mt-1">
+                        Opening Hour: 09.00 am- 11.00 pm
+                      </span>
+                    </div>
+
+                    <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
+                    <ul className="flex items-center gap-x-3">
+                      <li>
+                        <a
+                          href="#"
+                          className="text-white hover:text-primary-200 transition-colors"
+                        >
+                          <Facebook size={18} />
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          href="#"
+                          className="text-white hover:text-primary-200 transition-colors"
+                        >
+                          <Twitter size={18} />
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          href="#"
+                          className="text-white hover:text-primary-200 transition-colors"
+                        >
+                          <MessageCircle size={18} />{" "}
+                          {/* Corresponds to the 'g+' or chat icon */}
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          href="#"
+                          className="text-white hover:text-primary-200 transition-colors"
+                        >
+                          <Instagram size={18} />
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          href="#"
+                          className="text-white hover:text-primary-200 transition-colors"
+                        >
+                          <Youtube size={18} />
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>}
+        )}
 
         {/* Main Nav Bar */}
         <div className="header-main w-full py-4 shadow-lg">

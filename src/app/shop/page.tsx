@@ -3,14 +3,14 @@ import Footer from "@/components/layout/footer";
 import Header from "@/components/layout/header";
 import Lable from "@/components/layout/Lable";
 import Suscribe from "@/components/layout/Suscribe";
-import ReservationPage from "@/components/pages/Reservation";
+import Shop from "@/components/pages/Shop";
 
 export default function Page() {
   return (
     <div>
       <Header />
-      <Lable lableName="Reservation"/>
-      <ReservationPage/>
+      <Lable lableName="All Products"/>
+      <Shop/>
       <Suscribe/>
       <Footer />
     </div>
