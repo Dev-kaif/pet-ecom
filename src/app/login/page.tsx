@@ -16,7 +16,9 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [message, setMessage] = useState<string | null>(null);
-  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(
+    null
+  );
 
   const router = useRouter(); // Initialize router
 
@@ -53,7 +55,7 @@ const LoginPage: React.FC = () => {
     }
 
     try {
-      const res = await signIn('credentials', {
+      const res = await signIn("credentials", {
         email,
         password,
         redirect: false, // Prevent NextAuth.js from redirecting automatically
@@ -61,7 +63,7 @@ const LoginPage: React.FC = () => {
 
       if (res?.ok) {
         // Login successful, redirect to home page
-        router.push('/admin');
+        router.push("/admin");
       } else {
         // Login failed, display error message
         setMessage("Login failed. Please check your credentials.");
@@ -83,13 +85,15 @@ const LoginPage: React.FC = () => {
 
   return (
     <motion.div
-      className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen-minus-nav"
+      className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen-minus-nav my-32"
       initial="initial"
       animate="animate"
       variants={pageVariants}
     >
       <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Login</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+          Login
+        </h1>
 
         {message && (
           <motion.div
@@ -107,9 +111,14 @@ const LoginPage: React.FC = () => {
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label htmlFor="email" className="sr-only">Email Address</label>
+            <label htmlFor="email" className="sr-only">
+              Email Address
+            </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Mail
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="email"
                 id="email"
@@ -127,9 +136,14 @@ const LoginPage: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="sr-only">Password</label>
+            <label htmlFor="password" className="sr-only">
+              Password
+            </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Lock
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="password"
                 id="password"
@@ -147,8 +161,13 @@ const LoginPage: React.FC = () => {
           </div>
 
           <p className="text-right text-sm">
-            <a href="#" className="text-primary hover:underline font-medium"
-               onClick={() => alert("Navigate to Forgot Password page")}> {/* Replace with actual navigation */}
+            <a
+              href="#"
+              className="text-primary hover:underline font-medium"
+              onClick={() => alert("Navigate to Forgot Password page")}
+            >
+              {" "}
+              {/* Replace with actual navigation */}
               Forgot Password?
             </a>
           </p>
@@ -159,14 +178,19 @@ const LoginPage: React.FC = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            Login
+            <span>Login</span>
           </motion.button>
         </form>
 
         <p className="text-center text-gray-600 text-sm mt-6">
           Don&apos;t have an account?{" "}
-          <a href="#" className="text-primary hover:underline font-medium"
-             onClick={() => alert("Navigate to Sign Up Page")}> {/* Replace with actual navigation */}
+          <a
+            href="#"
+            className="text-primary hover:underline font-medium"
+            onClick={() => router.push("/signup")}
+          >
+            {" "}
+            {/* Replace with actual navigation */}
             Sign Up
           </a>
         </p>

@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Variants for page fade-in
 const pageVariants = {
@@ -17,8 +18,12 @@ const SignUpPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [message, setMessage] = useState<string | null>(null);
-  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false); // New state for loading indicator
+
+  const router = useRouter();
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -89,7 +94,9 @@ const SignUpPage: React.FC = () => {
         setErrors({});
       } else {
         // Handle API errors (e.g., user already exists, invalid data from backend)
-        setMessage(data.error || "An unexpected error occurred during sign up.");
+        setMessage(
+          data.error || "An unexpected error occurred during sign up."
+        );
         setMessageType("error");
       }
     } catch (error) {
@@ -103,13 +110,15 @@ const SignUpPage: React.FC = () => {
 
   return (
     <motion.div
-      className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen-minus-nav"
+      className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen-minus-nav min-h-screen"
       initial="initial"
       animate="animate"
       variants={pageVariants}
     >
       <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Sign Up</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+          Sign Up
+        </h1>
 
         {message && (
           <motion.div
@@ -127,9 +136,14 @@ const SignUpPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="name" className="sr-only">Name</label>
+            <label htmlFor="name" className="sr-only">
+              Name
+            </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <User
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="text"
                 id="name"
@@ -148,9 +162,14 @@ const SignUpPage: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="email" className="sr-only">Email Address</label>
+            <label htmlFor="email" className="sr-only">
+              Email Address
+            </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Mail
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="email"
                 id="email"
@@ -169,9 +188,14 @@ const SignUpPage: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="sr-only">Password</label>
+            <label htmlFor="password" className="sr-only">
+              Password
+            </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Lock
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="password"
                 id="password"
@@ -190,9 +214,14 @@ const SignUpPage: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
+            <label htmlFor="confirmPassword" className="sr-only">
+              Confirm Password
+            </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Lock
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="password"
                 id="confirmPassword"
@@ -206,7 +235,9 @@ const SignUpPage: React.FC = () => {
               />
             </div>
             {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.confirmPassword}
+              </p>
             )}
           </div>
 
@@ -217,21 +248,42 @@ const SignUpPage: React.FC = () => {
             whileTap={{ scale: 0.98 }}
             disabled={isLoading} // Disable button while loading
           >
-            {isLoading ? (
-              <svg className="animate-spin h-5 w-5 text-white mr-3" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : (
-              "Sign Up"
-            )}
+            <span>
+              {isLoading ? (
+                <svg
+                  className="animate-spin h-5 w-5 text-white mr-3"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              ) : (
+                "Sign Up"
+              )}
+            </span>
           </motion.button>
         </form>
 
         <p className="text-center text-gray-600 text-sm mt-6">
           Already have an account?{" "}
-          <a href="#" className="text-primary hover:underline font-medium"
-             onClick={() => alert("Navigate to Login Page")}> {/* Replace with actual navigation */}
+          <a
+            href="#"
+            className="text-primary hover:underline font-medium"
+            onClick={() => router.push("/login")}
+          >
+            {" "}
+            {/* Replace with actual navigation */}
             Login
           </a>
         </p>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/layout/MobileSidebar.tsx
 import React, { useState } from "react";
 import Link from "next/link";
@@ -11,39 +12,42 @@ import {
   Instagram,
   Youtube,
   MessageCircle,
+  LogIn, // Import Login icon
+  LogOut, // Import Logout icon
+  UserPlus, // Import UserPlus icon for Sign Up
+  LayoutDashboard, // Import LayoutDashboard icon for Admin Dashboard
+  ShoppingBag, // Import ShoppingBag icon
+  Heart, // Import Heart icon
 } from "lucide-react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
+import { signIn, signOut } from "next-auth/react"; // Import signIn and signOut
 
 interface MobileSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   isActiveLink: (path: string, subPaths?: string[]) => boolean;
+  session: any; // Add session prop
+  status: "loading" | "authenticated" | "unauthenticated"; // Add status prop
+  cartItemCount: number; // NEW: Add cartItemCount prop
 }
 
 const navItems = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
-  {
-    name: "Shop",
-    href: "/shop",
-    dropdown: [
-      { name: "All Products", href: "/shop" },
-      { name: "Pet Food", href: "/shop/food" },
-      { name: "Pet Toys", href: "/shop/toys" },
-    ],
-  },
+  // Shop link changed: removed dropdown, now directly links to /shop
+  { name: "Shop", href: "/shop" },
   {
     name: "Pages",
     href: "#",
     dropdown: [
-      { name: "All Pets", href: "/all-pets" },
-      { name: "Pet Details", href: "/pet-details" },
+      { name: "All Pets", href: "/allPets" }, // Corrected path to match Header.tsx
+      { name: "Pet Details", href: "/allPets/petDetails" }, // Corrected path to match Header.tsx
       { name: "Gallery", href: "/gallery" },
       { name: "Faq Page", href: "/faq" },
       { name: "Pricing Page", href: "/pricing" },
       { name: "Reservation Page", href: "/reservation" },
-      { name: "Our Team", href: "/our-team" },
+      { name: "Our Team", href: "/team" }, // Corrected path to match Header.tsx
       { name: "Team Details", href: "/team-details" },
       { name: "Our Blog", href: "/blog" },
       { name: "Blog Details", href: "/blog-details" },
@@ -76,6 +80,9 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
   isOpen,
   onClose,
   isActiveLink,
+  session, // Destructure session
+  status, // Destructure status
+  cartItemCount, // Destructure cartItemCount
 }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
@@ -98,7 +105,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
 
           {/* Mobile Sidebar */}
           <motion.div
-            className="fixed top-0 right-0 h-full w-[280px] bg-white text-primary shadow-xl z-[100] flex flex-col overflow-y-auto" // Changed 'left-0' to 'right-0'
+            className="fixed top-0 right-0 h-full w-[280px] bg-white text-primary shadow-xl z-[100] flex flex-col overflow-y-auto"
             variants={sidebarVariants}
             initial="hidden"
             animate="visible"
@@ -179,6 +186,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
                                 <li key={subItem.name}>
                                   <Link href={subItem.href} passHref>
                                     <motion.div
+                                      onClick={onClose} // Close sidebar on sub-item click
                                       className={`block px-4 py-2 ${
                                         isActiveLink(subItem.href)
                                           ? "text-secondary"
@@ -202,7 +210,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
                     ) : (
                       <Link href={item.href} passHref>
                         <motion.div
-                          onClick={onClose}
+                          onClick={onClose} // Close sidebar on main item click
                           className={`block px-4 py-3 hover:bg-gray-50 transition-colors ${
                             isActiveLink(item.href)
                               ? "text-secondary"
@@ -220,8 +228,94 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
               </ul>
             </nav>
 
+            {/* Cart & Wishlist Icons for Mobile (NEW: Conditionally rendered) */}
+            {status === 'authenticated' && (
+              <div className="p-4 border-t border-gray-200">
+                <h5 className="font-bold text-lg mb-4 text-primary-700">Your Items</h5>
+                <div className="flex space-x-6 justify-center">
+                  <Link href="/cart" passHref>
+                    <motion.div
+                      onClick={onClose}
+                      className="relative flex flex-col items-center text-gray-700 hover:text-secondary transition-colors"
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <ShoppingBag size={28} />
+                      {cartItemCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                          {cartItemCount}
+                        </span>
+                      )}
+                      <span className="text-sm mt-1">Cart</span>
+                    </motion.div>
+                  </Link>
+                  <Link href="/wishlist" passHref>
+                    <motion.div
+                      onClick={onClose}
+                      className="relative flex flex-col items-center text-gray-700 hover:text-secondary transition-colors"
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Heart size={28} />
+                      <span className="text-sm mt-1">Wishlist</span>
+                    </motion.div>
+                  </Link>
+                </div>
+              </div>
+            )}
+
+
+            {/* Auth/Admin Buttons for Mobile */}
+            <div className="p-4 border-t border-gray-200">
+              {status === "loading" ? (
+                <div className="text-gray-600 text-center">Loading user...</div>
+              ) : session ? (
+                <div className="flex flex-col gap-3">
+                  {/* Admin Dashboard button */}
+                  {session.user && (session.user as any).role === 'admin' && (
+                    <Link href="/admin" passHref>
+                      <button
+                        onClick={onClose} // Close sidebar on click
+                        className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md bg-blue-600 text-white font-bold hover:bg-blue-700 transition duration-300"
+                      >
+                        <LayoutDashboard size={18} />
+                        Admin Dashboard
+                      </button>
+                    </Link>
+                  )}
+                  {/* Logout button */}
+                  <button
+                    onClick={() => { signOut(); onClose(); }} // Close sidebar on logout
+                    className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md bg-red-500 text-white font-bold hover:bg-red-600 transition duration-300"
+                  >
+                    <LogOut size={18} />
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {/* Login button */}
+                  <button
+                    onClick={() => { signIn(); onClose(); }} // Close sidebar on login click
+                    className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md bg-primary text-white font-bold hover:bg-primary-dark transition duration-300"
+                  >
+                    <LogIn size={18} />
+                    Login
+                  </button>
+                  {/* Signup button */}
+                  <Link href="/auth/signup" passHref> {/* Assuming a signup page at /auth/signup */}
+                    <button
+                      onClick={onClose} // Close sidebar on signup click
+                      className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md border border-primary text-primary font-bold hover:bg-primary hover:text-white transition duration-300"
+                    >
+                      <UserPlus size={18} />
+                      Sign Up
+                    </button>
+                  </Link>
+                </div>
+              )}
+            </div>
+
             {/* Social Icons */}
-            <div className="p-4 border-t border-gray-200 mt-auto">
+            <div className="p-4 border-t border-gray-200 mt-4"> {/* Increased mt-4 for better spacing */}
               <h5 className="font-bold text-lg mb-4 text-primary-700">
                 Follow Us
               </h5>

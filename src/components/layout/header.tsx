@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/layout/Header.tsx
-import React, { useState, useEffect, useRef, CSSProperties } from "react";
+import React, { useState, useEffect, useRef, CSSProperties, useCallback } from "react";
 import Link from "next/link";
 import {
   AlignJustify,
-  CalendarDays,
   ChevronDown,
   Clock,
   Facebook,
@@ -16,6 +16,10 @@ import {
   ShoppingBag,
   Twitter,
   Youtube,
+  LogIn, // Icon for Login
+  LogOut, // Icon for Logout
+  UserPlus, // Icon for Sign Up
+  LayoutDashboard, // Icon for Admin Dashboard
 } from "lucide-react";
 import {
   motion,
@@ -27,6 +31,9 @@ import {
 import Image from "next/image";
 import OffCanvasSidebar from "./OffCanvasSidebar"; // Existing desktop sidebar
 import MobileSidebar from "./MobileSidebar"; // Import the new mobile sidebar
+import { useSession, signIn, signOut } from "next-auth/react"; // Import useSession for authentication
+import axios from "axios"; // Import axios for API calls
+import { ICart } from "@/types"; // Import ICartFrontend type
 
 // Define framer-motion variants for the dropdown menu (unchanged)
 const dropdownVariants: Variants = {
@@ -34,7 +41,7 @@ const dropdownVariants: Variants = {
     y: -20,
     scaleY: 0.8,
     opacity: 0,
-    pointerEvents: "none" as CSSProperties["pointerEvents"], // Retaining for safety, though often not needed with modern FM
+    pointerEvents: "none" as CSSProperties["pointerEvents"],
     transition: {
       duration: 0.2,
       ease: "easeIn",
@@ -44,7 +51,7 @@ const dropdownVariants: Variants = {
     opacity: 1,
     y: 0,
     scaleY: 1,
-    pointerEvents: "auto" as CSSProperties["pointerEvents"], // Retaining for safety
+    pointerEvents: "auto" as CSSProperties["pointerEvents"],
     transition: {
       duration: 0.3,
       ease: "easeOut",
@@ -60,18 +67,11 @@ const listItemVariants = {
   visible: { opacity: 1, x: 0 },
 };
 
-// Define your navigation items (unchanged - used by MainNavContent and MobileSidebar)
+// Define your navigation items - Shop dropdown removed
 const navItems = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
-  {
-    name: "Shop",
-    href: "/shop",
-    dropdown: [
-      { name: "All Products", href: "/shop" },
-      { name: "Product Details", href: "/shop/details" },
-    ],
-  },
+  { name: "Shop", href: "/shop" }, // Shop now directly links to /shop
   {
     name: "Pages",
     href: "#",
@@ -99,7 +99,10 @@ interface MainNavContentProps {
   isActiveLink: (path: string, subPaths?: string[]) => boolean;
   toggleSearchPopup: () => void;
   toggleOffCanvasInfo: () => void;
-  toggleMobileMenu: () => void; // Passed down to the mobile button
+  toggleMobileMenu: () => void;
+  session: any; // Added session prop
+  status: 'loading' | 'authenticated' | 'unauthenticated'; // Added status prop
+  cartItemCount: number; // NEW: Add cartItemCount prop
 }
 
 const MainNavContent: React.FC<MainNavContentProps> = ({
@@ -109,6 +112,9 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
   toggleSearchPopup,
   toggleOffCanvasInfo,
   toggleMobileMenu,
+  session,
+  status,
+  cartItemCount, // NEW: Destructure cartItemCount
 }) => (
   <div className="container mx-auto px-4 custom-container ">
     <div className="flex justify-between items-center h-14">
@@ -208,28 +214,35 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
               <Search size={25} />
             </button>
           </li>
-          <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
-          <div className="flex gap-10">
-            <li className="relative">
-              <Link
-                href="/cart"
-                className="text-gray-800 hover:text-primary transition-colors relative"
-              >
-                <ShoppingBag size={25} />
-                <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  2
-                </span>
-              </Link>
-            </li>
-            <li className="relative">
-              <Link
-                href="/wishlist"
-                className="text-gray-800 hover:text-primary transition-colors relative"
-              >
-                <Heart size={25} />
-              </Link>
-            </li>
-          </div>
+          {/* NEW: Conditionally render Cart and Wishlist if authenticated */}
+          {status === 'authenticated' && (
+            <>
+              <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
+              <div className="flex gap-10">
+                <li className="relative">
+                  <Link
+                    href="/cart"
+                    className="text-gray-800 hover:text-primary transition-colors relative"
+                  >
+                    <ShoppingBag size={25} />
+                    {cartItemCount > 0 && ( // Only show number if count > 0
+                      <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                        {cartItemCount}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+                <li className="relative">
+                  <Link
+                    href="/wishlist"
+                    className="text-gray-800 hover:text-primary transition-colors relative"
+                  >
+                    <Heart size={25} />
+                  </Link>
+                </li>
+              </div>
+            </>
+          )}
         </ul>
         {/* desktop sidebar button (for the off-canvas info) */}
         <div className="ml-6 hidden lg:block">
@@ -241,13 +254,54 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
           </button>
         </div>
 
+        {/* Auth/Admin Buttons (replacing Appointment button) */}
         <div className="hidden lg:block ml-4">
-          <Link href="/contact" className="btn-bubble btn-bubble-primary">
-            <span>
-              <CalendarDays size={18} />
-              <span className="text-sm">Appointment</span>
-            </span>
-          </Link>
+          {status === 'loading' ? (
+            <div className="text-gray-600">Loading...</div>
+          ) : session ? (
+            <div className="flex gap-2">
+              {/* Only show Admin Dashboard button if user is admin */}
+              {session.user && (session.user as any).role === 'admin' && (
+                <Link href="/admin" passHref>
+                  <button className="btn-bubble btn-bubble-primary">
+                    <span>
+                      <LayoutDashboard size={18} /> {/* Admin Dashboard Icon */}
+                      <span className="text-sm">Admin Dashboard</span>
+                    </span>
+                  </button>
+                </Link>
+              )}
+              <button
+                onClick={() => signOut()}
+                className="btn-bubble btn-bubble-secondary" // Changed to secondary for distinction
+              >
+                <span>
+                  <LogOut size={18} /> {/* Logout Icon */}
+                  <span className="text-sm">Logout</span>
+                </span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={() => signIn()}
+                className="btn-bubble btn-bubble-primary"
+              >
+                <span>
+                  <LogIn size={18} /> {/* Login Icon */}
+                  <span className="text-sm">Login</span>
+                </span>
+              </button>
+              <Link href="/auth/signup" passHref> {/* Assuming a signup page at /auth/signup */}
+                <button className="btn-bubble btn-bubble-outline-primary">
+                  <span>
+                    <UserPlus size={18} /> {/* Sign Up Icon */}
+                    <span className="text-sm">Sign Up</span>
+                  </span>
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* mobile sidebar button */}
@@ -274,12 +328,43 @@ const Header = ({ isHomePage }: HomepageProps) => {
   const [isOffCanvasInfoOpen, setIsOffCanvasInfoOpen] = useState(false); // State for desktop info sidebar
   const [showFixedHeader, setShowFixedHeader] = useState(false);
   const [staticHeaderHeight, setStaticHeaderHeight] = useState(0);
+  const [cartItemCount, setCartItemCount] = useState<number>(0); // NEW: State for cart item count
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const initialHeaderRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   const SHOW_THRESHOLD = 500;
+
+  // Added useSession to the Header component
+  const { data: session, status } = useSession();
+
+  // NEW: Function to fetch cart item count
+  const fetchCartItemCount = useCallback(async () => {
+    if (status !== 'authenticated') {
+      setCartItemCount(0);
+      return;
+    }
+    try {
+      const response = await axios.get<ICart>("/api/cart");
+      if (response.data && response.data.items) {
+        // Calculate total quantity of items in cart
+        const totalCount = response.data.items.reduce((sum:any, item:any) => sum + item.quantity, 0);
+        setCartItemCount(totalCount);
+      } else {
+        setCartItemCount(0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch cart items:", error);
+      setCartItemCount(0);
+    }
+  }, [status]); // Dependency on status to refetch when authentication changes
+
+  useEffect(() => {
+    // Fetch cart item count when component mounts or session status changes
+    fetchCartItemCount();
+  }, [fetchCartItemCount]);
+
 
   useMotionValueEvent(scrollY, "change", (latest: number) => {
     if (latest > SHOW_THRESHOLD) {
@@ -471,6 +556,9 @@ const Header = ({ isHomePage }: HomepageProps) => {
             toggleSearchPopup={toggleSearchPopup}
             toggleOffCanvasInfo={toggleOffCanvasInfo}
             toggleMobileMenu={toggleMobileMenu}
+            session={session} // Pass session
+            status={status}   // Pass status
+            cartItemCount={cartItemCount} // NEW: Pass cartItemCount
           />
         </div>
       </div>
@@ -499,6 +587,9 @@ const Header = ({ isHomePage }: HomepageProps) => {
               toggleSearchPopup={toggleSearchPopup}
               toggleOffCanvasInfo={toggleOffCanvasInfo}
               toggleMobileMenu={toggleMobileMenu}
+              session={session} // Pass session
+              status={status}   // Pass status
+              cartItemCount={cartItemCount} // NEW: Pass cartItemCount
             />
           </motion.div>
         )}
@@ -514,7 +605,10 @@ const Header = ({ isHomePage }: HomepageProps) => {
       <MobileSidebar
         isOpen={isMobileMenuOpen}
         onClose={toggleMobileMenu}
-        isActiveLink={isActiveLink} // Pass isActiveLink for mobile navigation
+        isActiveLink={isActiveLink}
+        session={session} // Pass session to MobileSidebar
+        status={status}   // Pass status to MobileSidebar
+        cartItemCount={cartItemCount} // NEW: Pass cartItemCount
       />
     </header>
   );
