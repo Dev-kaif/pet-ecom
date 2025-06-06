@@ -3,7 +3,7 @@ import mongoose, { Schema, Model, Document, Types } from 'mongoose';
 import { IReview } from '@/types';
 
 // Define the Mongoose Document type for Review
-interface ReviewDocument extends IReview, Document {
+interface ReviewDocument extends Omit<IReview, "_id">, Document {
   productId: Types.ObjectId;
   userId: Types.ObjectId;
 }

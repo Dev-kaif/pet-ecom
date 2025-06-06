@@ -6,16 +6,9 @@ import dbConnect from "@/backend/lib/mongodb";
 import Product from "@/backend/models/Product";
 import { authenticateAndAuthorize } from "@/backend/lib/auth";
 
-// Define the shape of the params object for dynamic routes
-interface ProductRouteParams {
-  params: { id: string };
-}
-
-export async function GET(
-  request: NextRequest,
-  { params }: ProductRouteParams
-) {
+export async function GET(request: NextRequest, context: any) {
   await dbConnect();
+  const { params } = context;
   const { id } = params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -47,14 +40,12 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: ProductRouteParams
-) {
+export async function PUT(request: NextRequest, context: any) {
   const authResult = await authenticateAndAuthorize(request, "admin");
   if (authResult.response) {
     return authResult.response;
   }
+  const { params } = context;
 
   await dbConnect();
   const { id } = params;
@@ -68,7 +59,7 @@ export async function PUT(
 
   try {
     const body: IProduct = await request.json();
-    const { name, description, price, category, imageUrl, stock } = body;
+    const { name, description, price, category, images, stock } = body;
 
     if (price !== undefined && (typeof price !== "number" || price < 0)) {
       return NextResponse.json(
@@ -83,6 +74,17 @@ export async function PUT(
       );
     }
 
+    if (
+      images !== undefined &&
+      (!Array.isArray(images) ||
+        !images.every((img) => typeof img === "string"))
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Images must be an array of strings." },
+        { status: 400 }
+      );
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       {
@@ -90,7 +92,7 @@ export async function PUT(
         description,
         price,
         category,
-        imageUrl,
+        images,
         stock,
         updatedAt: new Date(),
       },
@@ -126,16 +128,14 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: ProductRouteParams
-) {
+export async function DELETE(request: NextRequest, context: any) {
   const authResult = await authenticateAndAuthorize(request, "admin");
   if (authResult.response) {
     return authResult.response;
   }
 
   await dbConnect();
+  const { params } = context;
   const { id } = params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {

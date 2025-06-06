@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const price_max = searchParams.get("price_max");
     const name_search = searchParams.get("name_search");
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
+    const limit = parseInt(searchParams.get("limit") || "15");
 
     const query: any = {};
 
@@ -32,17 +32,39 @@ export async function GET(request: NextRequest) {
     }
 
     const skip = (page - 1) * limit;
-    const products = await Product.find(query)
+    const productsFromDb = await Product.find(query)
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
 
     const totalProducts = await Product.countDocuments(query);
 
+    // Dynamically add isNewlyReleased and isOnSale flags
+    const productsWithFlags: IProduct[] = productsFromDb.map((product) => {
+      const productObject = product.toObject() as IProduct; // Convert Mongoose document to plain object
+
+      // Calculate isNewlyReleased: created within the last 7 days (1 week)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      productObject.isNewlyReleased = productObject.createdAt
+        ? productObject.createdAt >= sevenDaysAgo
+        : false; // Renamed here
+
+      // Calculate isOnSale: oldPrice exists and is greater than current price
+      productObject.isOnSale =
+        productObject.oldPrice !== undefined &&
+        productObject.oldPrice > productObject.price;
+
+      // Ensure images array is present, even if empty
+      productObject.images = productObject.images || [];
+
+      return productObject;
+    });
+
     return NextResponse.json(
       {
         success: true,
-        data: products,
+        data: productsWithFlags,
         pagination: {
           currentPage: page,
           totalPages: Math.ceil(totalProducts / limit),
@@ -74,8 +96,9 @@ export async function POST(request: NextRequest) {
   await dbConnect();
 
   try {
+    // Include 'images' in destructuring
     const body: IProduct = await request.json();
-    const { name, description, price, category, imageUrl, stock } = body;
+    const { name, description, price, oldPrice, category, images, stock } = body; 
 
     if (!name || !price || !category) {
       return NextResponse.json(
@@ -89,9 +112,30 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    if (
+      oldPrice !== undefined &&
+      (typeof oldPrice !== "number" || oldPrice < 0)
+    ) {
+      // Validate oldPrice
+      return NextResponse.json(
+        { success: false, message: "Old price must be a non-negative number." },
+        { status: 400 }
+      );
+    }
     if (stock !== undefined && (typeof stock !== "number" || stock < 0)) {
       return NextResponse.json(
         { success: false, message: "Stock must be a positive number." },
+        { status: 400 }
+      );
+    }
+    if (
+      images !== undefined &&
+      (!Array.isArray(images) ||
+        !images.every((img) => typeof img === "string"))
+    ) {
+      // Validate images
+      return NextResponse.json(
+        { success: false, message: "Images must be an array of strings." },
         { status: 400 }
       );
     }
@@ -100,8 +144,9 @@ export async function POST(request: NextRequest) {
       name,
       description,
       price,
+      oldPrice,
       category,
-      imageUrl,
+      images,
       stock,
     });
     return NextResponse.json({ success: true, data: product }, { status: 201 });

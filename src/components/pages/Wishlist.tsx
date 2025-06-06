@@ -1,27 +1,15 @@
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/app/wishlist/page.tsx
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ShoppingCart, Trash2 } from "lucide-react";
-
-const dummyWishlistItems = [
-  {
-    id: 101,
-    name: "Luxury Pet Bed - Orthopedic",
-    imageUrl: "https://placehold.co/96x96/e0e0e0/555555?text=Wish+Item+1", // Placeholder image
-    price: 89.99,
-  },
-  {
-    id: 102,
-    name: "Interactive Laser Pointer Toy",
-    imageUrl: "https://placehold.co/96x96/e0e0e0/555555?text=Wish+Item+2", // Placeholder image
-    price: 19.99,
-  },
-  {
-    id: 103,
-    name: "Premium Salmon Oil Supplement",
-    imageUrl: "https://placehold.co/96x96/e0e0e0/555555?text=Wish+Item+3", // Placeholder image
-    price: 34.5,
-  },
-];
+import { useSession } from "next-auth/react";
+import axios from "axios";
+import { IWishlistItemFrontend } from "@/types"; // Import from your common types file
 
 // Variants for page fade-in
 const pageVariants = {
@@ -38,20 +26,179 @@ const itemVariants = {
 };
 
 const WishlistPage: React.FC = () => {
-  const [wishlistItems, setWishlistItems] = useState(dummyWishlistItems);
+  const { status } = useSession();
+  const [wishlistItems, setWishlistItems] = useState<IWishlistItemFrontend[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [removingItemId, setRemovingItemId] = useState<string | null>(null);
+  const [movingToCartItemId, setMovingToCartItemId] = useState<string | null>(
+    null
+  );
+
+  // General message utility (can be enhanced with a toast library)
+  const showMessage = (type: "success" | "error", text: string) => {
+    // For simplicity, using alert. Replace with a proper toast/modal.
+    alert(`${type.toUpperCase()}: ${text}`);
+  };
+
+  // Function to fetch wishlist data
+  const fetchWishlistData = useCallback(async () => {
+    if (status !== "authenticated") {
+      setLoading(false);
+      setWishlistItems([]);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get("/api/wishlist");
+      if (response.data.success) {
+        setWishlistItems(response.data.data.items);
+      } else {
+        setError(response.data.message || "Failed to fetch wishlist.");
+        showMessage(
+          "error",
+          response.data.message || "Failed to fetch wishlist."
+        );
+      }
+    } catch (err: any) {
+      console.error("Error fetching wishlist:", err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Network error fetching wishlist."
+      );
+      showMessage(
+        "error",
+        err.response?.data?.message ||
+          err.message ||
+          "Network error fetching wishlist."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [status]);
+
+  useEffect(() => {
+    fetchWishlistData();
+  }, [fetchWishlistData]);
 
   // Handle removing an item from the wishlist
-  const handleRemoveItem = (itemId: number) => {
-    setWishlistItems((prevItems) =>
-      prevItems.filter((item) => item.id !== itemId)
-    );
+  const handleRemoveItem = async (productIdToRemove: string) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to remove this item from your wishlist?"
+      )
+    ) {
+      return;
+    }
+
+    if (status !== "authenticated") {
+      showMessage("error", "Please log in to manage your wishlist.");
+      return;
+    }
+
+    setRemovingItemId(productIdToRemove);
+    try {
+      const response = await axios.delete(`/api/wishlist/${productIdToRemove}`);
+      if (response.data.success) {
+        showMessage(
+          "success",
+          response.data.message || "Item removed from wishlist."
+        );
+        setWishlistItems((prevItems) =>
+          prevItems.filter((item) => item.productId !== productIdToRemove)
+        );
+      } else {
+        showMessage(
+          "error",
+          response.data.message || "Failed to remove item from wishlist."
+        );
+      }
+    } catch (err: any) {
+      console.error("Error removing item from wishlist:", err);
+      showMessage(
+        "error",
+        err.response?.data?.message ||
+          err.message ||
+          "Network error removing item."
+      );
+    } finally {
+      setRemovingItemId(null);
+    }
   };
 
-  // Simulate moving an item to the cart (in a real app, this would update global cart state)
-  const handleMoveToCart = (item: (typeof dummyWishlistItems)[0]) => {
-    alert(`"${item.name}" moved to cart! (Simulation)`);
-    handleRemoveItem(item.id); // Remove from wishlist after "moving" to cart
+  // Handle moving an item to the cart
+  const handleMoveToCart = async (item: IWishlistItemFrontend) => {
+    if (status !== "authenticated") {
+      showMessage("error", "Please log in to add items to your cart.");
+      return;
+    }
+
+    if (item.stock !== undefined && item.stock <= 0) {
+      showMessage("error", "This product is out of stock.");
+      return;
+    }
+
+    setMovingToCartItemId(item.productId);
+    try {
+      const response = await axios.post("/api/cart", {
+        productId: item.productId,
+        quantity: 1, 
+      });
+
+      if (response.data.success) {
+        showMessage("success", `"${item.name}" added to cart!`);
+        handleRemoveItem(item.productId); 
+      } else {
+        showMessage(
+          "error",
+          response.data.message || `Failed to add "${item.name}" to cart.`
+        );
+      }
+    } catch (err: any) {
+      console.error("Error moving to cart:", err);
+      showMessage(
+        "error",
+        err.response?.data?.message ||
+          err.message ||
+          `Network error adding "${item.name}" to cart.`
+      );
+    } finally {
+      setMovingToCartItemId(null);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center text-lg text-gray-700">
+        Loading wishlist...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center text-lg text-red-600">
+        Error: {error}
+        {status === "unauthenticated" && (
+          <p className="mt-4">
+            Please{" "}
+            <Link
+              href="/api/auth/signin"
+              className="text-primary hover:underline"
+            >
+              log in
+            </Link>{" "}
+            to view your wishlist.
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -78,14 +225,15 @@ const WishlistPage: React.FC = () => {
             Start adding products you love to your wishlist to keep track of
             them.
           </p>
-          <motion.button
-            className="btn-bubble btn-bubble-primary inline-flex items-center gap-2"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => alert("Navigate to shop page")} // Replace with actual navigation
-          >
-            Explore Products
-          </motion.button>
+          <Link href="/shop" passHref>
+            <motion.button
+              className="btn-bubble btn-bubble-primary inline-flex items-center gap-2"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span>Explore Products</span>
+            </motion.button>
+          </Link>
         </motion.div>
       ) : (
         <div className="bg-white p-6 rounded-lg shadow-md">
@@ -95,7 +243,7 @@ const WishlistPage: React.FC = () => {
           <AnimatePresence>
             {wishlistItems.map((item) => (
               <motion.div
-                key={item.id}
+                key={item.productId}
                 className="flex flex-col sm:flex-row items-center justify-between border-b border-gray-200 py-4 last:border-b-0"
                 variants={itemVariants}
                 initial="initial"
@@ -104,13 +252,16 @@ const WishlistPage: React.FC = () => {
               >
                 <div className="flex items-center w-full sm:w-auto mb-4 sm:mb-0">
                   <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-                    {/* Replaced Next.js Image with standard <img> tag */}
-                    <img
+                    <Image
+                    unoptimized
+
                       src={item.imageUrl}
                       alt={item.name}
-                      className="w-full h-full object-contain rounded-lg"
+                      width={96}
+                      height={96}
+                      objectFit="contain"
+                      className="rounded-lg"
                       onError={(e) => {
-                        // Fallback to a placeholder image if the original fails
                         (e.target as HTMLImageElement).src =
                           "https://placehold.co/96x96/e0e0e0/555555?text=No+Image";
                       }}
@@ -120,33 +271,108 @@ const WishlistPage: React.FC = () => {
                     <h3 className="text-lg font-medium text-secondary line-clamp-2">
                       {item.name}
                     </h3>
-                    <p className="text-gray-600 text-sm">
-                      Price: ${item.price.toFixed(2)}
-                    </p>
+                    <div className="flex items-baseline space-x-2 text-xl font-bold">
+                      <span className="text-secondary">
+                        ${item.price.toFixed(2)}
+                      </span>
+                      {item.oldPrice !== undefined &&
+                        item.oldPrice > item.price && (
+                          <span className="text-gray-400 line-through text-base">
+                            ${item.oldPrice.toFixed(2)}
+                          </span>
+                        )}
+                    </div>
+                    {/* Display New/Sale badges */}
+                    <div className="flex gap-2 mt-1">
+                      {item.isOnSale && (
+                        <span className="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                          Sale!
+                        </span>
+                      )}
+                      {item.isNewlyReleased && (
+                        <span className="bg-primary text-white text-xs font-semibold px-2 py-1 rounded-full">
+                          New
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4 mt-4 sm:mt-0">
                   {/* Move to Cart Button */}
                   <motion.button
-                    className="btn-bubble btn-bubble-primary"
+                    className="btn-bubble btn-bubble-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => handleMoveToCart(item)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    disabled={
+                      movingToCartItemId === item.productId ||
+                      (item.stock !== undefined && item.stock <= 0)
+                    }
                   >
                     <span>
-                      <ShoppingCart size={18} /> Move to Cart
+                      {movingToCartItemId === item.productId ? (
+                        <svg
+                          className="animate-spin h-5 w-5 text-white inline-block mr-2"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                      ) : (
+                        <ShoppingCart size={18} />
+                      )}
+                      {item.stock !== undefined && item.stock <= 0
+                        ? "Out of Stock"
+                        : "Move to Cart"}
                     </span>
                   </motion.button>
 
                   {/* Remove Button */}
                   <motion.button
-                    className="text-gray-400 hover:text-red-500 transition-colors p-2"
-                    onClick={() => handleRemoveItem(item.id)}
+                    className="text-gray-400 hover:text-red-500 transition-colors p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => handleRemoveItem(item.productId)}
                     whileTap={{ scale: 0.9 }}
                     aria-label="Remove item from wishlist"
+                    disabled={removingItemId === item.productId}
                   >
-                    <Trash2 size={20} />
+                    {removingItemId === item.productId ? (
+                      <svg
+                        className="animate-spin h-5 w-5 text-gray-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                    ) : (
+                      <Trash2 size={20} />
+                    )}
                   </motion.button>
                 </div>
               </motion.div>
