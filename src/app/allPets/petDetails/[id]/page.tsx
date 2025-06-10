@@ -9,7 +9,7 @@ export default function Page() {
   return (
     <div>
       <Header />
-      <Lable lableName="All pets"/>
+      <Lable lableName="Pet Details"/>
       <PetDetailPage/>
       <Suscribe/>
       <Footer />

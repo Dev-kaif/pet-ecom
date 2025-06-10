@@ -153,3 +153,33 @@ export interface IWishlistItemFrontend {
   addedAt: string; 
   stock?: number; 
 }
+
+
+// src/types/index.ts (Example - adjust to your actual API response)
+export interface IPet {
+  _id: string; // This is the ID from MongoDB
+  name: string;
+  category: string;
+  type: string;
+  age: string;
+  color: string;
+  gender: "Male" | "Female" | "N/A";
+  size: "Tiny" | "Small" | "Medium" | "Large";
+  weight: number;
+  price: number; // Stored as a number
+  location: string; // This will map to your frontend's `location`
+  images: string[]; // Array of image URLs
+  description?: string;
+  isNewlyAdded?: boolean;
+  availableDate?: string; // Add if your backend schema includes this
+  breed?: string; // Add if your backend schema includes this
+  dateOfBirth?: string; // Add if your backend schema includes this
+  additionalInfo?: string[]; // Add if your backend schema includes this
+  mapLocation?: { // Add if your backend schema includes this
+    address: string;
+    coords: { lat: number; lng: number };
+    link: string; // The embed link for the map
+  };
+  createdAt?: string;
+  updatedAt?: string;
+}

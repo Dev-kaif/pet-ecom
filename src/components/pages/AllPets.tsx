@@ -1,281 +1,77 @@
-// src/pages/pets.tsx
-"use client"; // This is crucial for using client-side hooks like useState, useEffect, useMemo
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/pages/pets.tsx (or src/app/pets/page.tsx for App Router)
+"use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react"; // Import useRef
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion"; // Or "motion/react" if you prefer
 import { Search, ChevronDown, ChevronUp, MapPin, Heart } from "lucide-react";
+import { IPet } from "@/types"; // Import your IPet interface
+import { useRouter } from "next/navigation"; // For App Router, use "next/navigation"
+import Loader from "../ui/Loader"; // Import your Loader component
 
-// --- Define types for better type checking ---
-interface Pet {
-  id: string;
-  name: string;
-  category: string;
-  type: string;
-  age: string;
-  color: string;
-  gender: string;
-  size: string;
-  weight: string;
-  price: number;
-  location: string;
-  imageUrl: string;
-  description: string;
-}
-
-// --- Dummy Data (Using the defined Pet interface) ---
-const allPetsData: Pet[] = [
-  {
-    id: "p1",
-    name: "Buddy",
-    category: "Dog",
-    type: "Golden Retriever",
-    age: "1-2 Years",
-    color: "Golden",
-    gender: "Male",
-    size: "Medium",
-    weight: "25kg",
-    price: 500,
-    location: "New York",
-    imageUrl: "/images/pets/golden-retriever.jpg",
-    description: "Friendly and playful, loves walks.",
-  },
-  {
-    id: "p2",
-    name: "Whiskers",
-    category: "Cat",
-    type: "Persian",
-    age: "0-1 Year",
-    color: "White",
-    gender: "Female",
-    size: "Small",
-    weight: "5kg",
-    price: 300,
-    location: "Los Angeles",
-    imageUrl: "/images/pets/persian-cat.jpg",
-    description: "Calm and affectionate, enjoys naps.",
-  },
-  {
-    id: "p3",
-    name: "Rocky",
-    category: "Dog",
-    type: "German Shepherd",
-    age: "2-3 Years",
-    color: "Black & Tan",
-    gender: "Male",
-    size: "Large",
-    weight: "40kg",
-    price: 700,
-    location: "Chicago",
-    imageUrl: "/images/pets/german-shepherd.jpg",
-    description: "Loyal and protective, great family dog.",
-  },
-  {
-    id: "p4",
-    name: "Mittens",
-    category: "Cat",
-    type: "Siamese",
-    age: "1-2 Years",
-    color: "Cream",
-    gender: "Female",
-    size: "Small",
-    weight: "4kg",
-    price: 250,
-    location: "Houston",
-    imageUrl: "/images/pets/siamese-cat.jpg",
-    description: "Vocal and curious, loves to explore.",
-  },
-  {
-    id: "p5",
-    name: "Captain",
-    category: "Bird",
-    type: "Parrot",
-    age: "3-4 Years",
-    color: "Green",
-    gender: "Male",
-    size: "Small",
-    weight: "0.5kg",
-    price: 150,
-    location: "Phoenix",
-    imageUrl: "/images/pets/parrot.jpg",
-    description: "Talkative and intelligent, needs stimulation.",
-  },
-  {
-    id: "p6",
-    name: "Bubbles",
-    category: "Fish",
-    type: "Goldfish",
-    age: "0-1 Year",
-    color: "Orange",
-    gender: "N/A",
-    size: "Tiny",
-    weight: "0.1kg",
-    price: 20,
-    location: "Philadelphia",
-    imageUrl: "/images/pets/goldfish.jpg",
-    description: "Low maintenance, adds color to any tank.",
-  },
-  {
-    id: "p7",
-    name: "Shadow",
-    category: "Dog",
-    type: "Labrador Retriever",
-    age: "1-2 Years",
-    color: "Black",
-    gender: "Male",
-    size: "Medium",
-    weight: "30kg",
-    price: 600,
-    location: "San Antonio",
-    imageUrl: "/images/pets/labrador.jpg",
-    description: "Energetic and friendly, loves to retrieve.",
-  },
-  {
-    id: "p8",
-    name: "Luna",
-    category: "Cat",
-    type: "Maine Coon",
-    age: "2-3 Years",
-    color: "Grey Tabby",
-    gender: "Female",
-    size: "Medium",
-    weight: "7kg",
-    price: 400,
-    location: "Dallas",
-    imageUrl: "/images/pets/maine-coon.jpg",
-    description: "Gentle giant, loves to cuddle.",
-  },
-  {
-    id: "p9",
-    name: "Patches",
-    category: "Dog",
-    type: "Beagle",
-    age: "0-1 Year",
-    color: "Tri-color",
-    gender: "Female",
-    size: "Small",
-    weight: "10kg",
-    price: 450,
-    location: "San Jose",
-    imageUrl: "/images/pets/beagle.jpg",
-    description: "Curious and playful, loves to sniff around.",
-  },
-  {
-    id: "p10",
-    name: "Spike",
-    category: "Reptile",
-    type: "Bearded Dragon",
-    age: "1-2 Years",
-    color: "Tan",
-    gender: "Male",
-    size: "Small",
-    weight: "0.3kg",
-    price: 100,
-    location: "Austin",
-    imageUrl: "/images/pets/bearded-dragon.jpg",
-    description: "Calm and easy to handle, needs proper care.",
-  },
-  {
-    id: "p11",
-    name: "Daisy",
-    category: "Dog",
-    type: "Poodle",
-    age: "3-4 Years",
-    color: "White",
-    gender: "Female",
-    size: "Small",
-    weight: "7kg",
-    price: 550,
-    location: "Jacksonville",
-    imageUrl: "/images/pets/poodle.jpg",
-    description: "Intelligent and elegant, enjoys grooming.",
-  },
-  {
-    id: "p12",
-    name: "Oreo",
-    category: "Cat",
-    type: "Domestic Shorthair",
-    age: "0-1 Year",
-    color: "Black & White",
-    gender: "Male",
-    size: "Small",
-    weight: "4kg",
-    price: 200,
-    location: "Indianapolis",
-    imageUrl: "/images/pets/domestic-shorthair.jpg",
-    description: "Lively and affectionate, loves to play.",
-  },
-];
-
-// Helper to extract unique filter options
-const getUniqueOptions = (data: Pet[], key: keyof Pet) => {
-  const options = new Set<string>();
-  data.forEach((item) => {
-    const value = item[key];
-    if (typeof value === "string" && value) {
-      options.add(value);
-    }
-  });
-  return Array.from(options).sort();
-};
 
 interface PetCardProps {
-  pet: Pet;
+  pet: IPet; // Use IPet type
 }
 
-const PetCard: React.FC<PetCardProps> = ({ pet }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    layout
-    className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col h-full"
-  >
-    <div className="relative h-48 w-full">
-      <Image
-        src={pet.imageUrl || "/images/pets/placeholder.jpg"}
-        alt={pet.name}
-        fill
-        style={{ objectFit: "cover" }}
-        className="transition-transform duration-300 hover:scale-105"
-      />
-      <div className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-sm text-red-500 cursor-pointer">
-        <Heart size={20} fill="currentColor" />
+const PetCard: React.FC<PetCardProps> = ({ pet }) => {
+  const router = useRouter();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      layout
+      className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col h-full cursor-pointer"
+      onClick={() => router.push(`/petdetails/${pet._id}`)} // Route to pet details
+    >
+      <div className="relative h-48 w-full">
+        <Image
+        unoptimized
+          src={pet.images?.[0] || "/images/pets/placeholder.jpg"}
+          alt={pet.name}
+          fill
+          style={{ objectFit: "cover" }}
+          className="transition-transform duration-300 hover:scale-105"
+        />
+        <div className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-sm text-red-500 cursor-pointer">
+          <Heart size={20} fill="currentColor" />
+        </div>
       </div>
-    </div>
-    <div className="p-4 flex flex-col flex-grow">
-      <h3 className="text-xl font-bold text-primary mb-2">{pet.name}</h3>
-      <p className="text-gray-600 text-sm mb-3 flex items-center">
-        <MapPin size={16} className="mr-1 text-secondary" /> {pet.location}
-      </p>
-      <div className="flex justify-between items-center text-gray-700 text-sm mb-3">
-        <span>Type: {pet.type}</span>
-        <span>Age: {pet.age}</span>
+      <div className="p-4 flex flex-col flex-grow">
+        <h3 className="text-xl font-bold text-primary mb-2">{pet.name}</h3>
+        <p className="text-gray-600 text-sm mb-3 flex items-center">
+          <MapPin size={16} className="mr-1 text-secondary" /> {pet.location}
+        </p>
+        <div className="flex justify-between items-center text-gray-700 text-sm mb-3">
+          <span>Type: {pet.type}</span>
+          <span>Age: {pet.age}</span>
+        </div>
+        <div className="flex justify-between items-center text-gray-700 text-sm mb-4">
+          <span>Gender: {pet.gender}</span>
+          <span>Size: {pet.size}</span>
+        </div>
+        <p className="text-gray-500 text-sm mb-4 line-clamp-2 flex-grow">
+          {pet.description}
+        </p>
+        <div className="mt-auto flex justify-between items-center pt-3 border-t border-gray-100">
+          <span className="text-2xl font-bold text-secondary">${pet.price}</span>
+          <button className="btn-bubble btn-bubble-primary" onClick={(e) => { e.stopPropagation(); router.push(`/allPets/petDetails/${pet._id}`); }}>
+            <span>View Details</span>
+          </button>
+        </div>
       </div>
-      <div className="flex justify-between items-center text-gray-700 text-sm mb-4">
-        <span>Gender: {pet.gender}</span>
-        <span>Size: {pet.size}</span>
-      </div>
-      <p className="text-gray-500 text-sm mb-4 line-clamp-2 flex-grow">
-        {pet.description}
-      </p>
-      <div className="mt-auto flex justify-between items-center pt-3 border-t border-gray-100">
-        <span className="text-2xl font-bold text-secondary">${pet.price}</span>
-        <button className="btn-bubble btn-bubble-primary">
-          <span>View Details</span>
-        </button>
-      </div>
-    </div>
-  </motion.div>
-);
+    </motion.div>
+  );
+};
 
 interface FilterSectionProps {
   title: string;
   options: string[];
   selected: string[];
   onChange: (value: string, checked: boolean) => void;
-  isExpanded: boolean; // New prop to control expansion
-  // showCount?: number; // Removed as showCount will now be managed by the parent PetsPage
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({
@@ -290,30 +86,25 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     <div className="mb-6 pb-4 border-b border-gray-200 last:border-b-0">
       <h4 className="font-semibold text-lg text-primary mb-3">{title}</h4>
       <div className="space-y-2">
-        {options.map(
-          (
-            option // Always map all options, visibility controlled by parent container
-          ) => (
-            <label
-              key={option}
-              className="flex items-center text-gray-700 text-sm cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                className="form-checkbox h-4 w-4 text-secondary rounded focus:ring-secondary mr-2"
-                checked={selected.includes(option)}
-                onChange={(e) => onChange(option, e.target.checked)}
-              />
-              {option}
-            </label>
-          )
-        )}
+        {options.map((option) => (
+          <label
+            key={option}
+            className="flex items-center text-gray-700 text-sm cursor-pointer"
+          >
+            <input
+              type="checkbox"
+              className="form-checkbox h-4 w-4 text-secondary rounded focus:ring-secondary mr-2"
+              checked={selected.includes(option)}
+              onChange={(e) => onChange(option, e.target.checked)}
+            />
+            {option}
+          </label>
+        ))}
       </div>
     </div>
   );
 };
 
-// Define the shape of the filters state for type safety
 interface PetFilters {
   category: string[];
   type: string[];
@@ -326,6 +117,12 @@ interface PetFilters {
 }
 
 const PetsPage: React.FC = () => {
+  const [pets, setPets] = useState<IPet[]>([]); // State to store fetched pets
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState<string | null>(null); // Error state
+  const [, setTotalItems] = useState(0); // Total items from API
+  const [totalPages, setTotalPages] = useState(1); // Total pages from API
+
   const [filters, setFilters] = useState<PetFilters>({
     category: [],
     type: [],
@@ -337,41 +134,108 @@ const PetsPage: React.FC = () => {
     priceRange: [],
   });
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("default");
+  const [sortBy, setSortBy] = useState("createdAt_desc"); // Default sort to newest
   const [currentPage, setCurrentPage] = useState(1);
-  const [showAllFilters, setShowAllFilters] = useState(false); // New state for filter expansion
+  const [showAllFilters, setShowAllFilters] = useState(false);
 
-  const petGridRef = useRef<HTMLDivElement>(null); // Ref for the pet grid
-  const filterSidebarRef = useRef<HTMLElement>(null); // Ref for the filter sidebar
+  // Memoize filter options (these would ideally be fetched from API or be static and complete)
+  const uniqueCategories = useMemo(() => ["Dog", "Cat", "Bird", "Fish", "Reptile"], []);
+  const uniqueTypes = useMemo(() => ["Golden Retriever", "Persian", "German Shepherd", "Siamese", "Parrot", "Goldfish", "Labrador Retriever", "Maine Coon", "Beagle", "Bearded Dragon", "Poodle", "Domestic Shorthair"], []);
+  const uniqueAges = useMemo(() => ["0-1 Year", "1-2 Years", "2-3 Years", "3-4 Years"], []);
+  const uniqueColors = useMemo(() => ["Golden", "White", "Black & Tan", "Cream", "Green", "Orange", "Black", "Grey Tabby", "Tri-color", "Tan", "Black & White"], []);
+  const uniqueGenders = useMemo(() => ["Male", "Female", "N/A"], []);
+  const uniqueSizes = useMemo(() => ["Tiny", "Small", "Medium", "Large"], []);
+  const uniqueWeights = useMemo(() => ["0.1kg", "0.3kg", "0.5kg", "4kg", "5kg", "7kg", "10kg", "25kg", "30kg", "40kg"], []);
+  const uniquePriceRanges = useMemo(() => ["0-100", "101-300", "301-500", "501-1000", "1000+"], []);
 
-  const [gridHeight, setGridHeight] = useState<number | "auto">("auto"); // State to store grid height
+  const petGridRef = useRef<HTMLDivElement>(null);
+  const filterSidebarRef = useRef<HTMLElement>(null);
+  const [gridHeight, setGridHeight] = useState<number | "auto">("auto");
 
-  const ITEMS_PER_PAGE = 9;
+  // Function to fetch pets from the backend API
+  const fetchPets = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    let queryString = `page=${currentPage}&limit=9`; // Hardcode limit to 9 for now
 
-  // Generate unique filter options dynamically
-  const uniqueCategories = useMemo(
-    () => getUniqueOptions(allPetsData, "category"),
-    []
-  );
-  const uniqueTypes = useMemo(() => getUniqueOptions(allPetsData, "type"), []);
-  const uniqueAges = useMemo(() => getUniqueOptions(allPetsData, "age"), []);
-  const uniqueColors = useMemo(
-    () => getUniqueOptions(allPetsData, "color"),
-    []
-  );
-  const uniqueGenders = useMemo(
-    () => getUniqueOptions(allPetsData, "gender"),
-    []
-  );
-  const uniqueSizes = useMemo(() => getUniqueOptions(allPetsData, "size"), []);
-  const uniqueWeights = useMemo(
-    () => getUniqueOptions(allPetsData, "weight"),
-    []
-  );
-  const uniquePriceRanges = useMemo(
-    () => ["0-100", "101-300", "301-500", "501-1000", "1000+"],
-    []
-  );
+    // Add search queries
+    if (searchQuery) {
+      queryString += `&name_search=${encodeURIComponent(searchQuery)}`;
+    }
+
+    // Add filter queries
+    if (filters.category.length > 0) {
+      queryString += `&category=${filters.category.map(c => c.toLowerCase()).join(',')}`;
+    }
+    if (filters.type.length > 0) {
+      queryString += `&type_search=${filters.type.join(',')}`;
+    }
+    if (filters.gender.length > 0) {
+        queryString += `&gender=${filters.gender.join(',')}`;
+    }
+    if (filters.size.length > 0) {
+        queryString += `&size=${filters.size.join(',')}`;
+    }
+    // Price range handling - needs careful backend mapping
+    if (filters.priceRange.length > 0) {
+        let minPrice = Infinity;
+        let maxPrice = 0;
+        filters.priceRange.forEach(range => {
+            const parts = range.split("-");
+            const min = parseInt(parts[0]);
+            const max = parts[1] === undefined || parts[1] === "" ? Infinity : parseInt(parts[1]);
+            minPrice = Math.min(minPrice, min);
+            maxPrice = Math.max(maxPrice, max);
+        });
+        if (minPrice !== Infinity) queryString += `&price_min=${minPrice}`;
+        if (maxPrice !== 0) queryString += `&price_max=${maxPrice === Infinity ? '' : maxPrice}`; // Backend expects no value for max if infinity
+    }
+    // Add other filters as needed
+
+    // Add sort parameter (backend needs to handle `sortField` and `sortOrder` query params)
+    let sortField = 'createdAt';
+    let sortOrder = 'desc';
+
+    switch (sortBy) {
+        case 'newest': sortField = 'createdAt'; sortOrder = 'desc'; break;
+        case 'oldest': sortField = 'createdAt'; sortOrder = 'asc'; break;
+        case 'priceAsc': sortField = 'price'; sortOrder = 'asc'; break;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        case 'priceDesc': sortField = 'price'; sortOrder = 'desc'; break;
+        default: break; // default sorting is already handled by backend
+    }
+    // IMPORTANT: Your backend GET handler needs to process these sortField and sortOrder params
+    // Example: queryString += `&sortField=${sortField}&sortOrder=${sortOrder}`;
+    // If your backend only sorts by createdAt: -1 (newest) by default, then `sortBy` selection
+    // will not affect the order unless you implement sorting logic on the backend.
+
+    try {
+      const response = await fetch(`/api/pets?${queryString}`); // Make sure this matches your API endpoint
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.success) {
+        setPets(data.data);
+        setTotalItems(data.pagination.totalItems);
+        setTotalPages(data.pagination.totalPages);
+      } else {
+        setError(data.message || "Failed to fetch pets.");
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch pets:", err);
+      setError(err.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, searchQuery, filters, sortBy]); // Dependencies for useCallback
+
+  // Trigger fetchPets whenever relevant state changes
+  useEffect(() => {
+    fetchPets();
+    // Smooth scroll to top when filters/pagination/search changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [fetchPets]);
 
   const handleFilterChange = (
     filterType: keyof PetFilters,
@@ -385,126 +249,41 @@ const PetsPage: React.FC = () => {
         : currentFilterValues.filter((item) => item !== value);
       return { ...prev, [filterType]: newValues };
     });
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page on filter change
   };
 
-  const filteredAndSortedPets = useMemo(() => {
-    const filtered = allPetsData.filter((pet) => {
-      if (searchQuery) {
-        const lowerCaseSearch = searchQuery.toLowerCase();
-        if (
-          !pet.name.toLowerCase().includes(lowerCaseSearch) &&
-          !pet.type.toLowerCase().includes(lowerCaseSearch) &&
-          !pet.description.toLowerCase().includes(lowerCaseSearch)
-        ) {
-          return false;
-        }
-      }
-
-      if (
-        filters.category.length > 0 &&
-        !filters.category.includes(pet.category)
-      )
-        return false;
-      if (filters.type.length > 0 && !filters.type.includes(pet.type))
-        return false;
-      if (filters.age.length > 0 && !filters.age.includes(pet.age))
-        return false;
-      if (filters.color.length > 0 && !filters.color.includes(pet.color))
-        return false;
-      if (filters.gender.length > 0 && !filters.gender.includes(pet.gender))
-        return false;
-      if (filters.size.length > 0 && !filters.size.includes(pet.size))
-        return false;
-      if (filters.weight.length > 0 && !filters.weight.includes(pet.weight))
-        return false;
-      if (filters.priceRange.length > 0) {
-        const matchesPriceRange = filters.priceRange.some((range) => {
-          const parts = range.split("-");
-          const min = parseInt(parts[0]);
-          const max =
-            parts[1] === undefined || parts[1] === ""
-              ? Infinity
-              : parseInt(parts[1]);
-          return pet.price >= min && pet.price <= max;
-        });
-        if (!matchesPriceRange) return false;
-      }
-      return true;
-    });
-
-    switch (sortBy) {
-      case "newest":
-        filtered.sort((a, b) => b.id.localeCompare(a.id));
-        break;
-      case "oldest":
-        filtered.sort((a, b) => a.id.localeCompare(b.id));
-        break;
-      case "priceAsc":
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case "priceDesc":
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case "popular":
-        break;
-      default:
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-    }
-    return filtered;
-  }, [filters, searchQuery, sortBy]);
-
-  const totalPages = Math.ceil(filteredAndSortedPets.length / ITEMS_PER_PAGE);
-  const currentPets = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    return filteredAndSortedPets.slice(startIndex, endIndex);
-  }, [filteredAndSortedPets, currentPage]);
 
   useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(totalPages);
-    } else if (totalPages === 0 && currentPage !== 1) {
-      setCurrentPage(1);
-    }
-  }, [currentPage, totalPages, filteredAndSortedPets]);
-
-  // Effect to measure the height of the pet grid
-  useEffect(() => {
+    // This effect is for dynamically adjusting sidebar height to match grid height
     const updateGridHeight = () => {
       if (petGridRef.current) {
-        // Adjust for potential padding/margin on the grid container or items
-        // We want the height of the main content area that holds the cards.
-        // It's generally better to get the scrollHeight of the actual grid if it's scrollable,
-        // or the clientHeight of its container.
         const height = petGridRef.current.offsetHeight;
         setGridHeight(height);
       }
     };
 
-    // Initial measurement
-    updateGridHeight();
+    updateGridHeight(); // Call initially
 
-    // Re-measure on window resize and when currentPets (which affects grid height) changes
+    // Set up observers for changes
     window.addEventListener("resize", updateGridHeight);
-    // Use a MutationObserver to detect changes in the DOM, like new cards being loaded
     const observer = new MutationObserver(updateGridHeight);
     if (petGridRef.current) {
       observer.observe(petGridRef.current, {
-        childList: true,
-        subtree: true,
-        attributes: true,
+        childList: true, // Observe direct children
+        subtree: true,   // Observe all descendants
+        attributes: true, // Observe attribute changes (e.g., class changes from motion.div)
+        characterData: true // Observe changes to text content
       });
     }
 
+    // Cleanup
     return () => {
       window.removeEventListener("resize", updateGridHeight);
       observer.disconnect();
     };
-  }, [currentPets]); // Re-run when currentPets changes (and thus grid content changes)
+  }, [pets, loading]); // Depend on 'pets' and 'loading' state to re-evaluate height
 
-  // Determine which filter sections to display based on showAllFilters
+
   const initialFilterSections = [
     {
       title: "Categories",
@@ -555,7 +334,7 @@ const PetsPage: React.FC = () => {
   ];
 
   return (
-    <div className="bg-gray-50 py-16 lg:py-24">
+    <div className="bg-gray-50 py-16 lg:py-24 min-h-screen">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters */}
@@ -563,16 +342,12 @@ const PetsPage: React.FC = () => {
             ref={filterSidebarRef}
             className={`w-full lg:w-1/4 bg-white p-6 rounded-xl shadow-md lg:sticky lg:top-8 lg:self-start transition-all duration-500 ease-in-out ${
               showAllFilters ? "lg:max-h-full" : `lg:max-h-[${gridHeight}px]`
-            } lg:overflow-hidden`} // Apply dynamic height and overflow-hidden
-            style={
-              showAllFilters
-                ? {}
-                : { maxHeight: gridHeight !== "auto" ? gridHeight : "auto" }
-            } // Apply style directly for precise control
+            } lg:overflow-hidden`}
+            // Fallback for initial render if gridHeight is 'auto'
+            style={typeof gridHeight === 'number' ? { maxHeight: gridHeight + 'px' } : {}}
           >
             <h3 className="text-xl font-bold text-primary mb-6">Filter By</h3>
 
-            {/* Always visible filter sections */}
             {initialFilterSections.map((section) => (
               <FilterSection
                 key={section.type}
@@ -586,11 +361,9 @@ const PetsPage: React.FC = () => {
                     checked
                   )
                 }
-                isExpanded={true} // These are always visible initially
               />
             ))}
 
-            {/* Conditionally visible filter sections */}
             <AnimatePresence>
               {showAllFilters && (
                 <motion.div
@@ -613,17 +386,15 @@ const PetsPage: React.FC = () => {
                           checked
                         )
                       }
-                      isExpanded={true}
                     />
                   ))}
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Show More/Less Button */}
             {hiddenFilterSections.some(
               (section) => section.options.length > 0
-            ) && ( // Only show button if there are hidden filters with options
+            ) && (
               <div className="pt-4 mt-2">
                 <button
                   onClick={() => setShowAllFilters(!showAllFilters)}
@@ -674,13 +445,12 @@ const PetsPage: React.FC = () => {
                     setCurrentPage(1);
                   }}
                 >
-                  <option value="default">Sort by: Default</option>
-                  <option value="newest">Sort by: Newest</option>
+                  <option value="createdAt_desc">Sort by: Newest</option>
+                  <option value="createdAt_asc">Sort by: Oldest</option>
                   <option value="priceAsc">Sort by: Price (Low to High)</option>
                   <option value="priceDesc">
                     Sort by: Price (High to Low)
                   </option>
-                  <option value="oldest">Sort by: Oldest</option>
                 </select>
                 <ChevronDown
                   size={18}
@@ -689,16 +459,24 @@ const PetsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Pet Cards Grid */}
-            {currentPets.length > 0 ? (
+            {/* Loading, Error, or Pet Cards Grid */}
+            {loading ? (
+              <div className="text-center text-gray-600 text-xl py-10 bg-white rounded-xl shadow-md">
+                <Loader /> {/* Display the Loader component */}
+              </div>
+            ) : error ? (
+              <div className="text-center text-red-600 text-xl py-10 bg-white rounded-xl shadow-md">
+                Error: {error}
+              </div>
+            ) : pets.length > 0 ? (
               <motion.div
                 ref={petGridRef}
                 layout
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
                 <AnimatePresence mode="popLayout">
-                  {currentPets.map((pet) => (
-                    <PetCard key={pet.id} pet={pet} />
+                  {pets.map((pet) => (
+                    <PetCard key={pet._id} pet={pet} /> 
                   ))}
                 </AnimatePresence>
               </motion.div>
