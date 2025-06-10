@@ -1,7 +1,7 @@
 // src/components/ui/NumberTicker.tsx
 "use client"; // Important for client-side components in Next.js 13+
 
-import { useInView, useMotionValue, useSpring } from "framer-motion"; // Changed from "motion/react"
+import { useInView, useMotionValue, useSpring } from "motion/react"; // Changed from "motion/react"
 import { ComponentPropsWithoutRef, useEffect, useRef } from "react";
 
 import { cn } from "@/components/lib/utils"; // Assuming this utility is available

@@ -5,7 +5,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion"; // Import AnimatePresence
+import { motion, AnimatePresence } from "motion/react"; // Import AnimatePresence
 import { IProduct, ICart, IWishlistItemFrontend } from "@/types"; // Import necessary types
 import { Heart, ShoppingCart, Star, RotateCw } from "lucide-react"; // Import RotateCw for spinner
 import { useSession } from "next-auth/react";

@@ -1,5 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface LableProps{
     lableName:string;
@@ -7,11 +8,13 @@ interface LableProps{
 
 export default function Lable({lableName}:LableProps) {
   return (
-    <section className="h-52 w-full bg-secondary-50 px-32 py-16 relative -z-1">
+    <section className="h-52 w-full bg-secondary-50 px-32 py-16 relative">
       <div className="relative flex flex-col gap-4 z-10">
         <h2 className="text-primary text-5xl font-bold capitalize">{lableName}</h2>
         <h6 className="flex gap-2 items-center font-light text-base">
-          <span>Home</span>
+          <Link href={'/'}>
+            <span className="cursor-pointer hover:text-secondary">Home</span>
+          </Link>
           <span>
             <ChevronRight size={20} />
           </span>

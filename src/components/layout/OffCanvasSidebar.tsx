@@ -1,6 +1,6 @@
 // src/components/layout/OffCanvasSidebar.tsx
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import Image from "next/image";
 import { X, MapPin, PhoneCall, Mail, Facebook, Twitter, Instagram, Globe } from "lucide-react"; // Changed Google to Globe for better Lucide compatibility if 'g+' isn't strict

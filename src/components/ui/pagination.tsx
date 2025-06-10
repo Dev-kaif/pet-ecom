@@ -1,6 +1,6 @@
 // src/components/Pagination.tsx
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from 'lucide-react'; // Import Lucid Icons
 
 interface PaginationProps {

@@ -1,10 +1,11 @@
 // src/components/StatItem.tsx
-import { motion } from "framer-motion"; // Import motion
+"use client";
 import React from "react";
-import useCounter from "@/components/lib/useCounter";
 import Link from "next/link";
 import { MoveRight } from "lucide-react";
 import Image from "next/image";
+import { NumberTicker } from "@/components/ui/NumberTicker";
+import { motion } from "motion/react";
 
 interface StatItemProps {
   rawNumber: number;
@@ -17,18 +18,12 @@ const StatItem: React.FC<StatItemProps> = ({
   rawNumber,
   suffix,
   label,
-  delay = 0,
 }) => {
-  // Call the useCounter hook here, at the top level of the functional component
-  const animatedNumber = useCounter(rawNumber, suffix, {
-    duration: 2000,
-    delay,
-  });
-
   return (
     <div className="flex flex-col items-start gap-3">
       <motion.span className="text-3xl md:text-4xl lg:text-5xl font-extrabold">
-        {animatedNumber}
+        <NumberTicker value={rawNumber} />
+        {suffix}
       </motion.span>
       <div className="w-64 h-px bg-primary-600 "></div>
       <span className="text-base md:text-lg opacity-80">{label}</span>
@@ -95,7 +90,9 @@ const StatsSection = () => {
               borderRadius: "20px",
             }}
           >
-            <img
+            <Image
+              width={100}
+              height={100}
               src="/public/images/about/#"
               alt="Vets examining a dog"
               className="absolute inset-0 w-full h-full object-cover rounded-full"

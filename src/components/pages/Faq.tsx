@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { Plus, Minus } from "lucide-react"; // For the icons
-import { motion, AnimatePresence } from "framer-motion"; // For animations
+import { motion, AnimatePresence } from "motion/react"; // For animations
 
 const FAQPage: React.FC = () => {
   // State to manage which accordion item is currently open.

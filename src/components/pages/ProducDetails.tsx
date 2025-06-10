@@ -5,12 +5,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link"; // Import Link for navigation
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Star, Heart, ShoppingCart, Minus, Plus, X } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import axios from "axios"; // Import Axios
 import { IProduct, IReview, ICart, IWishlistItemFrontend } from "@/types"; // Import IProduct and ICart types
+import Loader from "../ui/Loader";
 
 // ... (Variants for animations - keep them as is)
 const pageVariants = {
@@ -521,7 +522,7 @@ const ProductDetailsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 text-center text-lg text-gray-700">
-        Loading product details...
+        <Loader/>
       </div>
     );
   }

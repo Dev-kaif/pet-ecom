@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/app/shop/page.tsx
-"use client"; // This directive is essential for client-side functionality
+"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Head from "next/head";
 import ProductCard from "@/components/ui/ProductCard"; // Adjust path if needed
 import Pagination from "@/components/ui/pagination"; // Adjust path if needed
-import { motion } from "framer-motion";
-import { IProduct } from '@/types'; // Import the IProduct interface from your types file
+import { motion } from "motion/react";
+import { IProduct } from "@/types";
+import Loader from "../ui/Loader";
 
 // Define products per page for the frontend display and API request limit
 const PRODUCTS_PER_PAGE = 15;
@@ -26,7 +25,9 @@ const Shop: React.FC = () => {
     setError(null); // Clear previous errors
 
     try {
-      const response = await fetch(`/api/products?page=${currentPage}&limit=${PRODUCTS_PER_PAGE}`);
+      const response = await fetch(
+        `/api/products?page=${currentPage}&limit=${PRODUCTS_PER_PAGE}`
+      );
       const data = await response.json();
 
       if (data.success) {
@@ -34,13 +35,13 @@ const Shop: React.FC = () => {
         setTotalPages(data.pagination.totalPages);
         setTotalItems(data.pagination.totalItems);
       } else {
-        setError(data.message || 'Failed to fetch products.');
+        setError(data.message || "Failed to fetch products.");
         setProducts([]); // Clear products on error
       }
     } catch (err: any) {
       console.error("Error fetching products:", err);
-      setError('Network error: Could not connect to the server.');
-      setProducts([]); 
+      setError("Network error: Could not connect to the server.");
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -59,6 +60,10 @@ const Shop: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <motion.div
       className="min-h-screen bg-white py-10 font-sans"
@@ -67,23 +72,8 @@ const Shop: React.FC = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Head>
-        <title>E-commerce Product Grid</title>
-        <meta
-          name="description"
-          content="E-commerce product grid with pagination, hover effects, and animations."
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
 
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-10">Our Products</h1>
-
-        {loading && (
-          <div className="flex items-center justify-center h-64">
-            <p className="text-gray-600 text-lg">Loading products...</p>
-          </div>
-        )}
 
         {error && (
           <div className="flex items-center justify-center h-64">
@@ -93,7 +83,9 @@ const Shop: React.FC = () => {
 
         {!loading && !error && products.length === 0 && (
           <div className="flex items-center justify-center h-64">
-            <p className="text-gray-600 text-lg">No products found. Please check back later!</p>
+            <p className="text-primary text-lg">
+              No products found. Please check back later!
+            </p>
           </div>
         )}
 
@@ -106,7 +98,10 @@ const Shop: React.FC = () => {
             transition={{ duration: 0.5 }}
           >
             {products.map((product) => (
-              <ProductCard key={product._id?.toString() || product.name} product={product} />
+              <ProductCard
+                key={product._id?.toString() || product.name}
+                product={product}
+              />
             ))}
           </motion.div>
         )}

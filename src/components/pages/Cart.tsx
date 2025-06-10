@@ -4,11 +4,12 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import Image from "next/image"; // Re-import Next.js Image component if you are using Next.js framework
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 import { useSession } from "next-auth/react";
 import axios from "axios"; // Import Axios
 import { ICartItemFrontend } from "@/types";
+import Loader from "../ui/Loader";
 
 // Variants for page fade-in
 const pageVariants = {
@@ -178,11 +179,7 @@ const CartPage: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-center text-lg text-gray-700">
-        Loading cart...
-      </div>
-    );
+    return <Loader />;
   }
 
   if (error) {
@@ -230,7 +227,7 @@ const CartPage: React.FC = () => {
             Looks like you haven&apos;t added anything to your cart yet. Go
             ahead and explore our products.
           </p>
-          <Link href="/products" passHref>
+          <Link href="/shop" passHref>
             {" "}
             {/* Link to your products page */}
             <motion.button
@@ -238,7 +235,7 @@ const CartPage: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Start Shopping
+              <span>Start Shopping</span>
             </motion.button>
           </Link>
         </motion.div>

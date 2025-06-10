@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import { motion } from "framer-motion";
 import { MoveRight } from "lucide-react";
 import Link from "next/link";
+import * as motion from "motion/react-client";
 
 const About = () => {
   return (

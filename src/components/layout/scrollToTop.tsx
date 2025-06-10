@@ -1,4 +1,6 @@
 // src/components/common/ScrollToTopButton.tsx
+"use client"
+
 import React, { useState, useEffect } from 'react';
 import { ArrowUp } from 'lucide-react'; // Import Lucide's ArrowUp icon
 

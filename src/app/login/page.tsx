@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Mail, Lock } from "lucide-react"; // Icons for input fields
 import { signIn } from "next-auth/react"; // Import signIn function from next-auth
 import { useRouter } from "next/navigation"; // Import useRouter for client-side navigation
@@ -58,28 +58,23 @@ const LoginPage: React.FC = () => {
       const res = await signIn("credentials", {
         email,
         password,
-        redirect: false, // Prevent NextAuth.js from redirecting automatically
+        redirect: false,
       });
 
       if (res?.ok) {
-        // Login successful, redirect to home page
-        router.push("/admin");
+        router.push("/");
       } else {
-        // Login failed, display error message
         setMessage("Login failed. Please check your credentials.");
         setMessageType("error");
-        // As per the prompt, using alert for failed login
-        // IMPORTANT: In a production app, custom modal UI is preferred over alert()
         alert("Login failed");
       }
     } catch (error) {
       console.error("An error occurred during login:", error);
       setMessage("An unexpected error occurred. Please try again later.");
       setMessageType("error");
-      // As per the prompt, using alert for general error
       alert("An unexpected error occurred.");
     } finally {
-      setPassword(""); // Always clear password field for security
+      setPassword("");
     }
   };
 

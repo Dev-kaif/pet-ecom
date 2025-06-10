@@ -1,9 +1,11 @@
-import React from "react";
+"use client"
+import React, { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MoveRight } from "lucide-react";
+import { motion, useInView, Variants } from "motion/react"; // Import motion, useInView, Variants
 
-import { cn } from "@/components/lib/utils";
+import { cn } from "@/components/lib/utils"; // Assuming this utility is available
 
 interface ServiceCardProps {
   icon: React.ReactNode;
@@ -14,6 +16,20 @@ interface ServiceCardProps {
   className?: string;
 }
 
+// Define variants for individual service cards
+// These will be controlled by the parent's `staggerChildren`
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6, // Each card animates over 0.6 seconds
+      ease: "easeOut",
+    },
+  },
+};
+
 const ServiceCard: React.FC<ServiceCardProps> = ({
   icon,
   title,
@@ -22,14 +38,14 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   className,
 }) => {
   return (
-    // The main container. It will define the overall size and shape
-    // Its actual background will be the SVG.
-    // We add flex-col, items-center, justify-between for content alignment
-    // We explicitly set a min-height to ensure the card has enough space for content
-    <div
+    // Use motion.div for animation. 'variants' prop makes it a child
+    // that responds to parent's stagger. 'initial' and 'animate'
+    // will be implicitly managed by the parent's `containerVariants`.
+    <motion.div
+      variants={cardVariants} // Apply cardVariants here
       className={cn(
         "relative flex flex-col items-center justify-between p-6 md:p-8 rounded-[3rem]",
-        "overflow-hidden", 
+        "overflow-hidden",
         "min-h-[400px] sm:min-h-[450px]",
         className
       )}
@@ -37,9 +53,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       <Image
         width={1000}
         height={1000}
-        src="/images/services/services_shape01.svg" 
+        src="/images/services/services_shape01.svg"
         alt="Decorative background shape for service card"
-        className="absolute inset-0 w-full h-full object-cover z-0 text-white  "
+        className="absolute inset-0 w-full h-full object-cover z-0 text-white"
+        // No motion on this Image itself as it's a fixed background to the card.
+        // It uses Next.js Image component for optimization.
       />
 
       <div className="relative z-10 mb-4 bg-secondary-100 rounded-full p-4 flex items-center justify-center">
@@ -48,7 +66,6 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       <h3 className="relative z-10 text-xl md:text-2xl font-bold text-secondary mb-2">
         {title}
       </h3>
-      {/* Assuming description text color remains primary (dark blue) */}
       <p className="relative z-10 text-primary text-sm md:text-base mb-6 leading-relaxed whitespace-pre-line">
         {description}
       </p>
@@ -57,14 +74,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         className="btn-bubble btn-bubble-secondary !text-secondary hover:!text-white"
       >
         <span>
-        <span>See Details</span>
-        <MoveRight className="w-5 h-5" />
+          <span>See Details</span>
+          <MoveRight className="w-5 h-5" />
         </span>
       </Link>
-    </div>
+    </motion.div>
   );
 };
-
 
 
 const ServicesSection: React.FC = () => {
@@ -218,12 +234,48 @@ const ServicesSection: React.FC = () => {
     },
   ];
 
+  const ref = useRef(null);
+  // useInView with once: true ensures animation only plays once when entering the viewport.
+  // amount: 0.2 means the animation triggers when 20% of the element is visible.
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
+
+  // Variants for the container that holds the cards to enable staggered animation
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1, // Each child animates with a 0.1s delay after the previous
+        delayChildren: 0.2, // Delay before the first child starts animating (after parent appears)
+      },
+    },
+  };
+
+  // Variants for the top content (heading, button)
+  const topContentVariants: Variants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
+  };
+
+  // Variants for background shapes - simple fade-in and slight scale up
+  const shapeVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 1.2, ease: "easeOut" } },
+  };
+
+
   return (
     <section className="relative py-20 lg:py-32 bg-secondary-50 overflow-hidden">
-      {/* Removed the single background image from here */}
-
-      <div className="max-w-7xl mx-auto px-4 relative z-10">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-12 text-center md:text-left">
+      {/* Attach ref to the main content container to detect when it's in view */}
+      <div className="max-w-7xl mx-auto px-4 relative z-10" ref={ref}>
+        {/* Animate the top content (heading and button) */}
+        <motion.div
+          className="flex flex-col md:flex-row items-center justify-between mb-12 text-center md:text-left"
+          initial="hidden"
+          // 'animate' prop uses the isInView boolean to trigger the animation
+          animate={isInView ? "visible" : "hidden"}
+          variants={topContentVariants}
+        >
           <div className="mb-8 md:mb-0">
             <p className="text-secondary font-semibold text-base mb-2 flex items-center justify-center md:justify-start">
               DELIVERING WORLD CLASS HOME CARE <span className="ml-2 text-xl">🐾</span>
@@ -242,44 +294,69 @@ const ServicesSection: React.FC = () => {
               <MoveRight className="w-5 h-5" />
             </span>
           </Link>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+        {/* Animate the grid container for staggered child animations */}
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8"
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          variants={containerVariants} // Apply container variants for stagger
+        >
           {services.map((service, index) => (
             <ServiceCard
-              key={index}
+              key={index} // Ensure key is present and stable for React list rendering
               icon={service.icon}
               iconAlt={service.iconAlt}
               title={service.title}
               description={service.description}
               linkHref={service.linkHref}
+              // ServiceCard automatically inherits animation control from parent's variants
             />
           ))}
-        </div>
+        </motion.div>
       </div>
 
-      {/* Other Background Shapes (these are meant for the overall section background) */}
-      <Image
-        src="/images/services/services_shape02.png"
-        alt="Cat shape"
-        width={100}
-        height={100}
+      {/* Other Background Shapes - Animate these as well using motion.div wrappers */}
+      <motion.div
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={shapeVariants}
         className="absolute top-30 right-[40%] hidden lg:block opacity-70"
-      />
-      <Image
-        src="/images/services/services_shape03.png"
-        alt="Paw shape"
-        width={150}
-        height={200}
+      >
+        <Image
+          src="/images/services/services_shape02.png"
+          alt="Cat shape"
+          width={100}
+          height={100}
+        />
+      </motion.div>
+      <motion.div
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={shapeVariants}
         className="absolute top-40 right-0 hidden md:block opacity-60"
-      />
-      <Image
-        src="/images/services/services_shape01.png"
-        alt="Bone shape"
-        width={70}
-        height={70}
+      >
+        <Image
+          src="/images/services/services_shape03.png"
+          alt="Paw shape"
+          width={150}
+          height={200}
+        />
+      </motion.div>
+      <motion.div
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={shapeVariants}
         className="absolute bottom-10 left-10 hidden lg:block opacity-60"
-      />
+      >
+        <Image
+          src="/images/services/services_shape01.png"
+          alt="Bone shape"
+          width={70}
+          height={70}
+        />
+      </motion.div>
     </section>
   );
 };

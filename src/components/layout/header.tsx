@@ -1,7 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/layout/Header.tsx
-import React, { useState, useEffect, useRef, CSSProperties, useCallback } from "react";
+"use client";
+
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  CSSProperties,
+  useCallback,
+} from "react";
+
 import Link from "next/link";
+
 import {
   AlignJustify,
   ChevronDown,
@@ -16,26 +25,38 @@ import {
   ShoppingBag,
   Twitter,
   Youtube,
-  LogIn, // Icon for Login
-  LogOut, // Icon for Logout
-  UserPlus, // Icon for Sign Up
-  LayoutDashboard, // Icon for Admin Dashboard
+  LogIn,
+  LogOut,
+  UserPlus,
+  LayoutDashboard,
 } from "lucide-react";
+
 import {
   motion,
   AnimatePresence,
   Variants,
   useScroll,
   useMotionValueEvent,
-} from "framer-motion";
-import Image from "next/image";
-import OffCanvasSidebar from "./OffCanvasSidebar"; // Existing desktop sidebar
-import MobileSidebar from "./MobileSidebar"; // Import the new mobile sidebar
-import { useSession, signIn, signOut } from "next-auth/react"; // Import useSession for authentication
-import axios from "axios"; // Import axios for API calls
-import { ICart } from "@/types"; // Import ICartFrontend type
+} from "motion/react";
 
-// Define framer-motion variants for the dropdown menu (unchanged)
+import Image from "next/image";
+import dynamic from "next/dynamic";
+import { useSession, signIn, signOut } from "next-auth/react";
+import axios from "axios";
+import { ICart } from "@/types";
+
+// Dynamically import sidebars for performance
+const DynamicOffCanvasSidebar = dynamic(() => import("./OffCanvasSidebar"), {
+  ssr: false, // Prevents server-side rendering, loads only on the client
+  loading: () => null, // No visual placeholder needed while loading
+});
+
+const DynamicMobileSidebar = dynamic(() => import("./MobileSidebar"), {
+  ssr: false, // Prevents server-side rendering, loads only on the client
+  loading: () => null, // No visual placeholder needed while loading
+});
+
+// Variants for dropdown animations
 const dropdownVariants: Variants = {
   hidden: {
     y: -20,
@@ -61,17 +82,17 @@ const dropdownVariants: Variants = {
   },
 };
 
-// Define variants for individual list items in the dropdown (unchanged)
+// Variants for individual list items in the dropdown
 const listItemVariants = {
   hidden: { opacity: 0, x: -10 },
   visible: { opacity: 1, x: 0 },
 };
 
-// Define your navigation items - Shop dropdown removed
+// Define your navigation items
 const navItems = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
-  { name: "Shop", href: "/shop" }, // Shop now directly links to /shop
+  { name: "Shop", href: "/shop" },
   {
     name: "Pages",
     href: "#",
@@ -92,7 +113,7 @@ const navItems = [
   { name: "Contact", href: "/contact" },
 ];
 
-// Helper component to render the main navigation content
+// Helper component to render the main navigation content (factored out for reusability)
 interface MainNavContentProps {
   openDropdown: string | null;
   setOpenDropdown: React.Dispatch<React.SetStateAction<string | null>>;
@@ -100,9 +121,9 @@ interface MainNavContentProps {
   toggleSearchPopup: () => void;
   toggleOffCanvasInfo: () => void;
   toggleMobileMenu: () => void;
-  session: any; // Added session prop
-  status: 'loading' | 'authenticated' | 'unauthenticated'; // Added status prop
-  cartItemCount: number; // NEW: Add cartItemCount prop
+  session: any;
+  status: "loading" | "authenticated" | "unauthenticated";
+  cartItemCount: number;
 }
 
 const MainNavContent: React.FC<MainNavContentProps> = ({
@@ -114,7 +135,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
   toggleMobileMenu,
   session,
   status,
-  cartItemCount, // NEW: Destructure cartItemCount
+  cartItemCount,
 }) => (
   <div className="container mx-auto px-4 custom-container ">
     <div className="flex justify-between items-center h-14">
@@ -214,8 +235,8 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
               <Search size={25} />
             </button>
           </li>
-          {/* NEW: Conditionally render Cart and Wishlist if authenticated */}
-          {status === 'authenticated' && (
+          {/* Conditionally render Cart and Wishlist if authenticated */}
+          {status === "authenticated" && (
             <>
               <div className="w-px h-6 bg-zinc-300 rotate-20"></div>
               <div className="flex gap-10">
@@ -244,7 +265,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
             </>
           )}
         </ul>
-        {/* desktop sidebar button (for the off-canvas info) */}
+        {/* Desktop sidebar button (for the off-canvas info) */}
         <div className="ml-6 hidden lg:block">
           <button
             onClick={toggleOffCanvasInfo}
@@ -254,18 +275,16 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
           </button>
         </div>
 
-        {/* Auth/Admin Buttons (replacing Appointment button) */}
-        <div className="hidden lg:block ml-4">
-          {status === 'loading' ? (
-            <div className="text-gray-600">Loading...</div>
-          ) : session ? (
+        {/* Auth/Admin Buttons - Now completely hidden during loading */}
+        <div className="hidden lg:flex ml-4 w-72 lg:justify-center ">
+          {status === "loading" ? null : session ? ( // Render nothing while loading. The buttons will just appear when ready.
             <div className="flex gap-2">
               {/* Only show Admin Dashboard button if user is admin */}
-              {session.user && (session.user as any).role === 'admin' && (
+              {session.user && (session.user as any).role === "admin" && (
                 <Link href="/admin" passHref>
                   <button className="btn-bubble btn-bubble-primary">
                     <span>
-                      <LayoutDashboard size={18} /> {/* Admin Dashboard Icon */}
+                      <LayoutDashboard size={18} />
                       <span className="text-sm">Admin Dashboard</span>
                     </span>
                   </button>
@@ -273,10 +292,10 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
               )}
               <button
                 onClick={() => signOut()}
-                className="btn-bubble btn-bubble-secondary" // Changed to secondary for distinction
+                className="btn-bubble btn-bubble-secondary"
               >
                 <span>
-                  <LogOut size={18} /> {/* Logout Icon */}
+                  <LogOut size={18} />
                   <span className="text-sm">Logout</span>
                 </span>
               </button>
@@ -288,14 +307,14 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
                 className="btn-bubble btn-bubble-primary"
               >
                 <span>
-                  <LogIn size={18} /> {/* Login Icon */}
+                  <LogIn size={18} />
                   <span className="text-sm">Login</span>
                 </span>
               </button>
-              <Link href="/auth/signup" passHref> {/* Assuming a signup page at /auth/signup */}
+              <Link href="/auth/signup" passHref>
                 <button className="btn-bubble btn-bubble-outline-primary">
                   <span>
-                    <UserPlus size={18} /> {/* Sign Up Icon */}
+                    <UserPlus size={18} />
                     <span className="text-sm">Sign Up</span>
                   </span>
                 </button>
@@ -304,7 +323,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
           )}
         </div>
 
-        {/* mobile sidebar button */}
+        {/* Mobile sidebar button */}
         <div className="lg:hidden ml-4">
           <button
             onClick={toggleMobileMenu}
@@ -318,38 +337,39 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
   </div>
 );
 
-interface HomepageProps {
+interface HeaderProps {
   isHomePage?: boolean;
 }
 
-const Header = ({ isHomePage }: HomepageProps) => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile sidebar
+const Header = ({ isHomePage }: HeaderProps) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
-  const [isOffCanvasInfoOpen, setIsOffCanvasInfoOpen] = useState(false); // State for desktop info sidebar
+  const [isOffCanvasInfoOpen, setIsOffCanvasInfoOpen] = useState(false);
   const [showFixedHeader, setShowFixedHeader] = useState(false);
   const [staticHeaderHeight, setStaticHeaderHeight] = useState(0);
-  const [cartItemCount, setCartItemCount] = useState<number>(0); // NEW: State for cart item count
-
+  const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const initialHeaderRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   const SHOW_THRESHOLD = 500;
 
-  // Added useSession to the Header component
+  // Use NextAuth session for authentication status
   const { data: session, status } = useSession();
 
-  // NEW: Function to fetch cart item count
+  // Callback to fetch cart item count, memoized for performance
   const fetchCartItemCount = useCallback(async () => {
-    if (status !== 'authenticated') {
+    if (status !== "authenticated") {
       setCartItemCount(0);
       return;
     }
     try {
       const response = await axios.get<ICart>("/api/cart");
       if (response.data && response.data.items) {
-        // Calculate total quantity of items in cart
-        const totalCount = response.data.items.reduce((sum:any, item:any) => sum + item.quantity, 0);
+        const totalCount = response.data.items.reduce(
+          (sum: any, item: any) => sum + item.quantity,
+          0
+        );
         setCartItemCount(totalCount);
       } else {
         setCartItemCount(0);
@@ -360,12 +380,12 @@ const Header = ({ isHomePage }: HomepageProps) => {
     }
   }, [status]); // Dependency on status to refetch when authentication changes
 
+  // Effect to trigger cart item count fetch
   useEffect(() => {
-    // Fetch cart item count when component mounts or session status changes
     fetchCartItemCount();
   }, [fetchCartItemCount]);
 
-
+  // Effect to handle fixed header visibility based on scroll position
   useMotionValueEvent(scrollY, "change", (latest: number) => {
     if (latest > SHOW_THRESHOLD) {
       setShowFixedHeader(true);
@@ -374,6 +394,7 @@ const Header = ({ isHomePage }: HomepageProps) => {
     }
   });
 
+  // Effect to measure initial header height and handle initial fixed header state
   useEffect(() => {
     const measureInitialHeaderHeight = () => {
       if (initialHeaderRef.current) {
@@ -395,27 +416,26 @@ const Header = ({ isHomePage }: HomepageProps) => {
     };
   }, [SHOW_THRESHOLD]);
 
+  // Toggle functions for different overlays, ensuring only one is open at a time
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
-    // Close other overlays when mobile menu opens/closes
     setIsSearchPopupOpen(false);
     setIsOffCanvasInfoOpen(false);
   };
 
   const toggleSearchPopup = () => {
     setIsSearchPopupOpen(!isSearchPopupOpen);
-    // Close other overlays when search popup opens/closes
     setIsMobileMenuOpen(false);
     setIsOffCanvasInfoOpen(false);
   };
 
   const toggleOffCanvasInfo = () => {
     setIsOffCanvasInfoOpen(!isOffCanvasInfoOpen);
-    // Close other overlays when desktop info sidebar opens/closes
     setIsMobileMenuOpen(false);
     setIsSearchPopupOpen(false);
   };
 
+  // Helper function to determine if a link is active
   const isActiveLink = (path: string, subPaths: string[] = []) => {
     if (typeof window === "undefined") {
       return false;
@@ -436,7 +456,7 @@ const Header = ({ isHomePage }: HomepageProps) => {
     return false;
   };
 
-  // Define variants for the fixed header animation (unchanged)
+  // Variants for the fixed header animation
   const fixedHeaderVariants: Variants = {
     hidden: { y: -staticHeaderHeight, opacity: 0 },
     visible: {
@@ -453,13 +473,14 @@ const Header = ({ isHomePage }: HomepageProps) => {
 
   return (
     <header>
+      {/* Static Header Area */}
       <div
         ref={initialHeaderRef}
         className={`w-full z-40 bg-white
           ${showFixedHeader ? "invisible pointer-events-none" : ""}
         `}
       >
-        {/* Header Top Area */}
+        {/* Header Top Area - Only visible on homepage for large screens */}
         {isHomePage && (
           <div className={`bg-primary py-3 text-sm hidden lg:block`}>
             <div className="container mx-auto px-4 custom-container">
@@ -519,8 +540,7 @@ const Header = ({ isHomePage }: HomepageProps) => {
                           href="#"
                           className="text-white hover:text-primary-200 transition-colors"
                         >
-                          <MessageCircle size={18} />{" "}
-                          {/* Corresponds to the 'g+' or chat icon */}
+                          <MessageCircle size={18} />
                         </a>
                       </li>
                       <li>
@@ -547,29 +567,31 @@ const Header = ({ isHomePage }: HomepageProps) => {
           </div>
         )}
 
-        {/* Main Nav Bar */}
+        {/* Main Nav Bar (Static) - Conditionally renders MainNavContent */}
         <div className="header-main w-full py-4 shadow-lg">
-          <MainNavContent
-            openDropdown={openDropdown}
-            setOpenDropdown={setOpenDropdown}
-            isActiveLink={isActiveLink}
-            toggleSearchPopup={toggleSearchPopup}
-            toggleOffCanvasInfo={toggleOffCanvasInfo}
-            toggleMobileMenu={toggleMobileMenu}
-            session={session} // Pass session
-            status={status}   // Pass status
-            cartItemCount={cartItemCount} // NEW: Pass cartItemCount
-          />
+          {!showFixedHeader && ( // Only render if fixed header is not shown
+            <MainNavContent
+              openDropdown={openDropdown}
+              setOpenDropdown={setOpenDropdown}
+              isActiveLink={isActiveLink}
+              toggleSearchPopup={toggleSearchPopup}
+              toggleOffCanvasInfo={toggleOffCanvasInfo}
+              toggleMobileMenu={toggleMobileMenu}
+              session={session}
+              status={status}
+              cartItemCount={cartItemCount}
+            />
+          )}
         </div>
       </div>
 
-      {/* Spacer div */}
+      {/* Spacer div to prevent content jump when fixed header appears */}
       <div
         style={{ height: showFixedHeader ? `${staticHeaderHeight}px` : "0px" }}
         className="transition-all duration-300 ease-in-out"
       />
 
-      {/* Fixed Header */}
+      {/* Fixed Header Area - Animated with AnimatePresence */}
       <AnimatePresence>
         {showFixedHeader && (
           <motion.div
@@ -587,28 +609,28 @@ const Header = ({ isHomePage }: HomepageProps) => {
               toggleSearchPopup={toggleSearchPopup}
               toggleOffCanvasInfo={toggleOffCanvasInfo}
               toggleMobileMenu={toggleMobileMenu}
-              session={session} // Pass session
-              status={status}   // Pass status
-              cartItemCount={cartItemCount} // NEW: Pass cartItemCount
+              session={session}
+              status={status}
+              cartItemCount={cartItemCount}
             />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Off-canvas desktop info sidebar */}
-      <OffCanvasSidebar
+      {/* Off-canvas desktop info sidebar (Dynamically loaded) */}
+      <DynamicOffCanvasSidebar
         isOpen={isOffCanvasInfoOpen}
         onClose={toggleOffCanvasInfo}
       />
 
-      {/* Mobile sidebar */}
-      <MobileSidebar
+      {/* Mobile sidebar (Dynamically loaded) */}
+      <DynamicMobileSidebar
         isOpen={isMobileMenuOpen}
         onClose={toggleMobileMenu}
         isActiveLink={isActiveLink}
-        session={session} // Pass session to MobileSidebar
-        status={status}   // Pass status to MobileSidebar
-        cartItemCount={cartItemCount} // NEW: Pass cartItemCount
+        session={session}
+        status={status}
+        cartItemCount={cartItemCount}
       />
     </header>
   );

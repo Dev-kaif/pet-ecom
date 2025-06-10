@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Check } from "lucide-react"; // For the checkmark icon
 import { ArrowRight } from "lucide-react"; // For the arrow icon on the button
 

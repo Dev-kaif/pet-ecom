@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from "react"; // Import useRef
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Search, ChevronDown, ChevronUp, MapPin, Heart } from "lucide-react";
 
 // --- Define types for better type checking ---

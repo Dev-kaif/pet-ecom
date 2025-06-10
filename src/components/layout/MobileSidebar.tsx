@@ -19,7 +19,7 @@ import {
   ShoppingBag, // Import ShoppingBag icon
   Heart, // Import Heart icon
 } from "lucide-react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "motion/react";
 import Image from "next/image";
 import { signIn, signOut } from "next-auth/react"; // Import signIn and signOut
 

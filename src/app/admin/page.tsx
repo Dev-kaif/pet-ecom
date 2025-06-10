@@ -9,10 +9,10 @@ import {
   OrderStatus,
   PaymentStatus,
   AuthenticatedUser,
-} from "@/types"; // Adjust path as needed, added AuthenticatedUser
-import { Types } from "mongoose"; // For ObjectId conversion
-import Image from "next/image"; // Import Image component for previews
-import { X, Plus } from "lucide-react"; // Icons for close/add
+} from "@/types"; 
+import { Types } from "mongoose"; 
+import Image from "next/image";
+import { X, Plus } from "lucide-react"; 
 
 // Utility to ensure MongoDB ObjectId strings are valid for display/forms
 const formatObjectId = (id: Types.ObjectId | string | undefined): string => {

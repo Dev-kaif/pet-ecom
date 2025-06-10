@@ -1,6 +1,6 @@
 // src/components/sections/Instagram.tsx
 import React from "react";
-import { motion } from "framer-motion";
+import * as motion from "motion/react-client";
 import Link from "next/link";
 // For Swiper integration:
 // import { Swiper, SwiperSlide } from 'swiper/react';
