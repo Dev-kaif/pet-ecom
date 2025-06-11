@@ -99,7 +99,6 @@ const navItems = [
     href: "#",
     dropdown: [
       { name: "All Pets", href: "/allPets" },
-      { name: "Pet Details", href: "/allPets/petDetails" },
       { name: "Gallery", href: "/gallery" },
       { name: "Faq Page", href: "/faq" },
       { name: "Pricing Page", href: "/pricing" },
