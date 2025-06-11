@@ -207,3 +207,10 @@ export interface ITeamMember {
   createdAt?: string; 
   updatedAt?: string;
 }
+
+export interface IGalleryImage {
+  _id?: string | Types.ObjectId; 
+  imageUrl: string; 
+  createdAt?: string; 
+  updatedAt?: string; 
+}

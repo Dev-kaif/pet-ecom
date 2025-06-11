@@ -2,7 +2,7 @@
 // src/components/admin/PetManagement.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Plus, X } from "lucide-react";
+import { Plus, X, UploadCloud, Loader2 } from "lucide-react"; // Import new icons
 import { motion, AnimatePresence } from "framer-motion";
 import { IPet } from "@/types"; // Ensure IPet is imported from your types file
 import { Types } from "mongoose"; // For formatting ObjectId
@@ -43,6 +43,11 @@ type PetFormData = Omit<
   additionalInfo: string[]; // Explicitly include additionalInfo as a string array
 };
 
+// --- Cloudinary Configuration (Replace with your actual values, ideally from environment variables) ---
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "your_cloudinary_cloud_name"; // e.g., "dtgbnnv5p"
+const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "your_cloudinary_upload_preset"; // e.g., "ml_default"
+
+
 const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
   const [pets, setPets] = useState<IPet[]>([] as IPet[]);
   const [loading, setLoading] = useState(true);
@@ -76,14 +81,81 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
       },
     },
   });
-  const [newImageUrlInput, setNewImageUrlInput] = useState<string>("");
-  const [thumbnailImageUrlInput, setThumbnailImageUrlInput] =
-    useState<string>("");
-  const [newAdditionalInfoInput, setNewAdditionalInfoInput] =
-    useState<string>("");
+
+  // State for Cloudinary upload for thumbnail
+  const [selectedThumbnailFile, setSelectedThumbnailFile] = useState<File | null>(null);
+  const [isThumbnailUploading, setIsThumbnailUploading] = useState(false);
+  const [thumbnailUploadProgress, setThumbnailUploadProgress] = useState(0);
+  const [thumbnailUploadError, setThumbnailUploadError] = useState<string | null>(null);
+
+  // State for Cloudinary upload for additional images (single file input for adding one at a time)
+  const [selectedAdditionalFile, setSelectedAdditionalFile] = useState<File | null>(null);
+  const [isAdditionalUploading, setIsAdditionalUploading] = useState(false);
+  const [additionalUploadProgress, setAdditionalUploadProgress] = useState(0);
+  const [additionalUploadError, setAdditionalUploadError] = useState<string | null>(null);
+
+  const [newAdditionalInfoInput, setNewAdditionalInfoInput] = useState<string>("");
 
   const MAX_IMAGES = 5;
   const MAX_ADDITIONAL_INFO = 10; // Arbitrary limit for additional info strings
+
+  // Helper function to upload a file to Cloudinary
+  const uploadFileToCloudinary = useCallback(async (file: File, type: 'thumbnail' | 'additional') => {
+    if (!file) return null;
+
+    const setUploading = type === 'thumbnail' ? setIsThumbnailUploading : setIsAdditionalUploading;
+    const setProgress = type === 'thumbnail' ? setThumbnailUploadProgress : setAdditionalUploadProgress;
+    const setError = type === 'thumbnail' ? setThumbnailUploadError : setAdditionalUploadError;
+
+    setUploading(true);
+    setProgress(0);
+    setError(null);
+
+    if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME === "your_cloudinary_cloud_name") {
+        setError("Cloudinary cloud name is not configured.");
+        showMessage("error", "Cloudinary cloud name is not configured. Please check environment variables.");
+        setUploading(false);
+        return null;
+    }
+    if (!CLOUDINARY_UPLOAD_PRESET || CLOUDINARY_UPLOAD_PRESET === "your_cloudinary_upload_preset") {
+        setError("Cloudinary upload preset is not configured.");
+        showMessage("error", "Cloudinary upload preset is not configured. Please check environment variables.");
+        setUploading(false);
+        return null;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      // Fetch does not easily support progress events, so progress will be 0 or 100
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error.message || "Cloudinary upload failed.");
+      }
+
+      const data = await response.json();
+      setProgress(100); // Set to 100% on successful completion
+      showMessage("success", `${type === 'thumbnail' ? 'Thumbnail' : 'Additional'} image uploaded successfully!`);
+      return data.secure_url;
+    } catch (err: any) {
+      setError(err.message || "Failed to upload image to Cloudinary.");
+      showMessage("error", err.message || `Failed to upload ${type === 'thumbnail' ? 'thumbnail' : 'additional'} image.`);
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  }, [showMessage]);
+
 
   const fetchPets = useCallback(async () => {
     setLoading(true);
@@ -124,51 +196,86 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
     }));
   };
 
-  const handleNewImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewImageUrlInput(e.target.value);
+  // Handle file selection for thumbnail
+  const handleThumbnailFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedThumbnailFile(e.target.files[0]);
+      setThumbnailUploadError(null);
+    } else {
+      setSelectedThumbnailFile(null);
+    }
   };
 
-  const handleThumbnailImageUrlChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setThumbnailImageUrlInput(e.target.value);
+  // Handle file selection for additional image
+  const handleAdditionalFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedAdditionalFile(e.target.files[0]);
+      setAdditionalUploadError(null);
+    } else {
+      setSelectedAdditionalFile(null);
+    }
   };
 
-  const handleAddImageUrl = () => {
-    const trimmedUrl = newImageUrlInput.trim();
-    if (
-      trimmedUrl &&
-      newPetData.images.length < MAX_IMAGES - (thumbnailImageUrlInput ? 1 : 0)
-    ) {
-      if (
-        newPetData.images.includes(trimmedUrl) ||
-        thumbnailImageUrlInput === trimmedUrl
-      ) {
-        showMessage("error", "This image URL is already added.");
+  // Trigger thumbnail upload
+  const handleThumbnailUploadClick = async () => {
+    if (selectedThumbnailFile) {
+      const url = await uploadFileToCloudinary(selectedThumbnailFile, 'thumbnail');
+      if (url) {
+        setNewPetData((prev) => ({
+          ...prev,
+          images: [url, ...prev.images.slice(currentPet ? 1 : 0)].filter(Boolean), // Ensure thumbnail is first
+        }));
+        setSelectedThumbnailFile(null); // Clear file input
+      }
+    }
+  };
+
+  // Trigger additional image upload and add to array
+  const handleAddAdditionalImageClick = async () => {
+    if (selectedAdditionalFile) {
+      const currentImagesCount = newPetData.images.length;
+      // Simple check if first image is a Cloudinary URL, implying a thumbnail exists
+      const thumbnailExists = newPetData.images.length > 0 && newPetData.images[0].includes('cloudinary');
+
+      // Check if adding this image would exceed the limit
+      if (currentImagesCount >= MAX_IMAGES) {
+        showMessage("error", `You can add a maximum of ${MAX_IMAGES} images (including thumbnail).`);
         return;
       }
-      setNewPetData((prev) => ({
-        ...prev,
-        images: [...prev.images, trimmedUrl],
-      }));
-      setNewImageUrlInput("");
-    } else if (
-      newPetData.images.length >= MAX_IMAGES - (thumbnailImageUrlInput ? 1 : 0)
-    ) {
-      showMessage(
-        "error",
-        `You can add a maximum of ${MAX_IMAGES} images (including thumbnail).`
-      );
-    } else {
-      showMessage("error", "Image URL cannot be empty.");
+
+      const url = await uploadFileToCloudinary(selectedAdditionalFile, 'additional');
+      if (url) {
+        // Prevent adding duplicate URLs
+        if (newPetData.images.includes(url)) {
+            showMessage("error", "This image URL is already added.");
+            return;
+        }
+
+        setNewPetData((prev) => {
+            const existingOtherImages = currentPet
+                ? prev.images.slice(1) // Keep existing additional images
+                : prev.images; // If adding new, prev.images only contains thumbnail if just uploaded
+
+            return {
+                ...prev,
+                images: thumbnailExists && prev.images[0]
+                    ? [prev.images[0], ...existingOtherImages, url].filter(Boolean)
+                    : [...existingOtherImages, url].filter(Boolean) // If no thumbnail or starting fresh
+            };
+        });
+        setSelectedAdditionalFile(null); // Clear file input
+      }
     }
   };
 
   const handleRemoveImageUrl = (urlToRemove: string) => {
-    setNewPetData((prev) => ({
-      ...prev,
-      images: prev.images.filter((url) => url !== urlToRemove),
-    }));
+    setNewPetData((prev) => {
+      const updatedImages = prev.images.filter((url) => url !== urlToRemove);
+      return {
+        ...prev,
+        images: updatedImages,
+      };
+    });
   };
 
   // Additional Info Handlers
@@ -238,11 +345,7 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
     e.preventDefault();
     setLoading(true);
 
-    const finalImages = thumbnailImageUrlInput
-      ? [thumbnailImageUrlInput, ...newPetData.images]
-      : newPetData.images;
-
-    if (!thumbnailImageUrlInput && finalImages.length === 0) {
+    if (newPetData.images.length === 0) {
       showMessage(
         "error",
         "Please add at least one image (thumbnail or additional)."
@@ -257,7 +360,6 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...newPetData,
-          images: finalImages,
           // AvailableDate, breed, dateOfBirth are optional in IPet but string in form data
           // Send mapLocation only if address or coords are provided
           mapLocation:
@@ -274,30 +376,13 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
         showMessage("success", "Pet added successfully!");
         // Reset form
         setNewPetData({
-          name: "",
-          category: "",
-          type: "",
-          age: "",
-          color: "",
-          gender: "N/A",
-          size: "Medium",
-          weight: 0,
-          price: 0,
-          location: "",
-          images: [],
-          description: "",
-          availableDate: "",
-          breed: "",
-          dateOfBirth: "",
-          additionalInfo: [],
-          mapLocation: {
-            address: "",
-            link: "",
-            coords: { lat: 0, lng: 0 },
-          },
+          name: "", category: "", type: "", age: "", color: "",
+          gender: "N/A", size: "Medium", weight: 0, price: 0, location: "",
+          images: [], description: "", availableDate: "", breed: "",
+          dateOfBirth: "", additionalInfo: [],
+          mapLocation: { address: "", link: "", coords: { lat: 0, lng: 0 } },
         });
-        setNewImageUrlInput("");
-        setThumbnailImageUrlInput("");
+        resetUploadStates(); // Reset upload states
         setNewAdditionalInfoInput("");
         setIsModalOpen(false);
         fetchPets();
@@ -317,11 +402,7 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
 
     setLoading(true);
 
-    const finalImages = thumbnailImageUrlInput
-      ? [thumbnailImageUrlInput, ...newPetData.images]
-      : newPetData.images;
-
-    if (!thumbnailImageUrlInput && finalImages.length === 0) {
+    if (newPetData.images.length === 0) {
       showMessage(
         "error",
         "Please add at least one image (thumbnail or additional)."
@@ -338,7 +419,6 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...newPetData,
-            images: finalImages,
             mapLocation:
               newPetData.mapLocation.address ||
               newPetData.mapLocation.coords.lat ||
@@ -354,6 +434,7 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
         showMessage("success", "Pet updated successfully!");
         setIsModalOpen(false);
         setCurrentPet(null);
+        resetUploadStates(); // Reset upload states
         fetchPets();
       } else {
         showMessage("error", data.message || "Failed to update pet.");
@@ -391,40 +472,33 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
     }
   };
 
+  const resetUploadStates = () => {
+    setSelectedThumbnailFile(null);
+    setIsThumbnailUploading(false);
+    setThumbnailUploadProgress(0);
+    setThumbnailUploadError(null);
+    setSelectedAdditionalFile(null);
+    setIsAdditionalUploading(false);
+    setAdditionalUploadProgress(0);
+    setAdditionalUploadError(null);
+  }
+
   const openAddModal = () => {
     setCurrentPet(null);
     setNewPetData({
-      name: "",
-      category: "",
-      type: "",
-      age: "",
-      color: "",
-      gender: "N/A",
-      size: "Medium",
-      weight: 0,
-      price: 0,
-      location: "",
-      images: [],
-      description: "",
-      availableDate: "",
-      breed: "",
-      dateOfBirth: "",
-      additionalInfo: [],
-      mapLocation: {
-        address: "",
-        link: "",
-        coords: { lat: 0, lng: 0 },
-      },
+      name: "", category: "", type: "", age: "", color: "",
+      gender: "N/A", size: "Medium", weight: 0, price: 0, location: "",
+      images: [], description: "", availableDate: "", breed: "",
+      dateOfBirth: "", additionalInfo: [],
+      mapLocation: { address: "", link: "", coords: { lat: 0, lng: 0 } },
     });
-    setNewImageUrlInput("");
-    setThumbnailImageUrlInput("");
+    resetUploadStates(); // Reset all upload states
     setNewAdditionalInfoInput("");
     setIsModalOpen(true);
   };
 
   const openEditModal = (pet: IPet) => {
     setCurrentPet(pet);
-    setThumbnailImageUrlInput(pet.images?.[0] || "");
     setNewPetData({
       name: pet.name,
       category: pet.category,
@@ -436,14 +510,13 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
       weight: pet.weight,
       price: pet.price,
       location: pet.location,
-      images: pet.images?.slice(1) || [], // Exclude thumbnail, ensure array
+      images: pet.images || [], // Use existing images directly for editing
       description: pet.description || "",
       availableDate: pet.availableDate || "",
       breed: pet.breed || "",
       dateOfBirth: pet.dateOfBirth || "",
-      additionalInfo: pet.additionalInfo || [], // Ensure array
+      additionalInfo: pet.additionalInfo || [],
       mapLocation: {
-        // Ensure all mapLocation properties are non-optional strings/numbers for form data
         address: pet.mapLocation?.address || "",
         link: pet.mapLocation?.link || "",
         coords: {
@@ -452,10 +525,14 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
         },
       },
     });
-    setNewImageUrlInput("");
+    resetUploadStates(); // Reset all upload states
     setNewAdditionalInfoInput("");
     setIsModalOpen(true);
   };
+
+  const currentThumbnailUrl = newPetData.images[0] || '';
+  const currentAdditionalImages = newPetData.images.slice(1) || [];
+
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -831,28 +908,47 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
                     <p className="text-lg font-semibold text-primary mb-4">
                       Pet Images
                     </p>
-                    {/* Thumbnail Image Input */}
+                    {/* Thumbnail Image Input with Cloudinary Upload */}
                     <div className="mb-4">
                       <label
-                        htmlFor="thumbnailImageUrl"
+                        htmlFor="thumbnailImageUpload"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Thumbnail Image URL (Required)
+                        Thumbnail Image (Required)
                       </label>
-                      <input
-                        type="url"
-                        id="thumbnailImageUrl"
-                        name="thumbnailImageUrl"
-                        value={thumbnailImageUrlInput}
-                        onChange={handleThumbnailImageUrlChange}
-                        required
-                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
-                        placeholder="e.g., https://example.com/pet_thumbnail.jpg"
-                      />
-                      {thumbnailImageUrlInput && (
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="file"
+                          id="thumbnailImageUpload"
+                          name="thumbnailImageUpload"
+                          accept="image/*"
+                          onChange={handleThumbnailFileChange}
+                          className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleThumbnailUploadClick}
+                          disabled={!selectedThumbnailFile || isThumbnailUploading}
+                          className="p-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                        >
+                          {isThumbnailUploading ? <Loader2 size={20} className="animate-spin" /> : <UploadCloud size={20} />}
+                        </button>
+                      </div>
+                      {isThumbnailUploading && (
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                          <div
+                            className="bg-green-400 h-2.5 rounded-full"
+                            style={{ width: `${thumbnailUploadProgress}%` }}
+                          ></div>
+                        </div>
+                      )}
+                      {thumbnailUploadError && (
+                        <p className="text-red-500 text-sm mt-1">{thumbnailUploadError}</p>
+                      )}
+                      {currentThumbnailUrl && (
                         <div className="mt-3 w-28 h-28 rounded-lg overflow-hidden border border-gray-300 flex items-center justify-center bg-white shadow-sm">
                           <Image
-                            src={thumbnailImageUrlInput}
+                            src={currentThumbnailUrl}
                             alt="Thumbnail Preview"
                             unoptimized
                             height={112}
@@ -868,52 +964,56 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
                       )}
                     </div>
 
-                    {/* Additional Images Input Section */}
+                    {/* Additional Images Input Section with Cloudinary Upload */}
                     <div>
                       <label
-                        htmlFor="newImageUrl"
+                        htmlFor="additionalImageUpload"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Add Additional Image URL (Max{" "}
-                        {MAX_IMAGES - (thumbnailImageUrlInput ? 1 : 0)} more)
+                        Add Additional Image (Max{" "}
+                        {MAX_IMAGES - (currentThumbnailUrl ? 1 : 0) - currentAdditionalImages.length} more)
                       </label>
                       <div className="flex items-center space-x-2">
                         <input
-                          type="url"
-                          id="newImageUrl"
-                          name="newImageUrl"
-                          value={newImageUrlInput}
-                          onChange={handleNewImageUrlChange}
-                          className="flex-grow px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
-                          placeholder="e.g., https://example.com/pet_image2.jpg"
-                          disabled={
-                            newPetData.images.length >=
-                            MAX_IMAGES - (thumbnailImageUrlInput ? 1 : 0)
-                          }
+                          type="file"
+                          id="additionalImageUpload"
+                          name="additionalImageUpload"
+                          accept="image/*"
+                          onChange={handleAdditionalFileChange}
+                          className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                          disabled={currentAdditionalImages.length + (currentThumbnailUrl ? 1 : 0) >= MAX_IMAGES}
                         />
                         <button
                           type="button"
-                          onClick={handleAddImageUrl}
-                          className="p-2 bg-secondary text-white rounded-md hover:bg-secondary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={
-                            !newImageUrlInput.trim() ||
-                            newPetData.images.length >=
-                              MAX_IMAGES - (thumbnailImageUrlInput ? 1 : 0)
-                          }
+                          onClick={handleAddAdditionalImageClick}
+                          disabled={!selectedAdditionalFile || isAdditionalUploading || currentAdditionalImages.length + (currentThumbnailUrl ? 1 : 0) >= MAX_IMAGES}
+                          className="p-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                         >
-                          <Plus size={20} />
+                          {isAdditionalUploading ? <Loader2 size={20} className="animate-spin" /> : <Plus size={20} />}
                         </button>
                       </div>
+                      {isAdditionalUploading && (
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                          <div
+                            className="bg-green-400 h-2.5 rounded-full"
+                            style={{ width: `${additionalUploadProgress}%` }}
+                          ></div>
+                        </div>
+                      )}
+                      {additionalUploadError && (
+                        <p className="text-red-500 text-sm mt-1">{additionalUploadError}</p>
+                      )}
+
                       {/* Display existing additional images */}
-                      {newPetData.images.length > 0 && (
+                      {currentAdditionalImages.length > 0 && (
                         <div className="mt-4 border border-gray-200 p-3 rounded-md bg-white max-h-48 overflow-y-auto">
                           <p className="text-sm font-semibold text-gray-700 mb-2">
                             Currently added:
                           </p>
                           <div className="flex flex-wrap gap-3">
-                            {newPetData.images.map((url, index) => (
+                            {currentAdditionalImages.map((url, index) => (
                               <div
-                                key={index}
+                                key={url} // Using URL as key, assuming unique
                                 className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-300 flex items-center justify-center bg-gray-100 shadow-sm"
                               >
                                 <Image
@@ -1104,9 +1204,9 @@ const PetManagement: React.FC<PetManagementProps> = ({ showMessage }) => {
                     <button
                       type="submit"
                       className="bg-secondary hover:bg-secondary-dark text-white font-bold py-2 px-5 rounded-md shadow-md transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={loading}
+                      disabled={loading || isThumbnailUploading || isAdditionalUploading || newPetData.images.length === 0}
                     >
-                      {loading
+                      {loading || isThumbnailUploading || isAdditionalUploading
                         ? "Saving..."
                         : currentPet
                         ? "Update Pet"

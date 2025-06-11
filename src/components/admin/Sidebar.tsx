@@ -1,11 +1,11 @@
 // src/components/admin/Sidebar.tsx
 import React from "react";
-import { X, Package, ShoppingBag, PawPrint, Users } from "lucide-react"; // Import Users icon
+import { X, Package, ShoppingBag, PawPrint, Users, Image as ImageIcon } from "lucide-react"; // Import ImageIcon for gallery
 import { motion, AnimatePresence } from "framer-motion"; // Correct import for Framer Motion
 
 interface SidebarProps {
-  activeTab: "products" | "orders" | "pets" | "team"; 
-  setActiveTab: (tab: "products" | "orders" | "pets" | "team") => void;
+  activeTab: "products" | "orders" | "pets" | "team" | "gallery"; // Added "gallery" to activeTab types
+  setActiveTab: (tab: "products" | "orders" | "pets" | "team" | "gallery") => void; // Updated setActiveTab type
   isOpen: boolean;
   toggleSidebar: () => void;
 }
@@ -57,7 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     : "text-primary hover:bg-gray-100 hover:text-secondary"
                 }`}
               >
-                <Package size={20} className="mr-3" /> Product Management
+                <Package size={20} className="mr-3" /> Product
               </button>
             </li>
             <li>
@@ -72,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     : "text-primary hover:bg-gray-100 hover:text-secondary"
                 }`}
               >
-                <ShoppingBag size={20} className="mr-3" /> Order Management
+                <ShoppingBag size={20} className="mr-3" /> Order
               </button>
             </li>
             <li>
@@ -87,10 +87,26 @@ const Sidebar: React.FC<SidebarProps> = ({
                     : "text-primary hover:bg-gray-100 hover:text-secondary"
                 }`}
               >
-                <PawPrint size={20} className="mr-3" /> Pet Management
+                <PawPrint size={20} className="mr-3" /> Pet
               </button>
             </li>
-            {/* New Team Management Tab */}
+            {/* New Gallery Tab */}
+            <li>
+              <button
+                onClick={() => {
+                  setActiveTab("gallery"); // Set active tab to 'gallery'
+                  if (window.innerWidth < 1024) toggleSidebar();
+                }}
+                className={`flex items-center w-full px-4 py-3 rounded-lg text-lg font-medium transition-colors duration-200 ${
+                  activeTab === "gallery"
+                    ? "bg-secondary text-white shadow-md"
+                    : "text-primary hover:bg-gray-100 hover:text-secondary"
+                }`}
+              >
+                <ImageIcon size={20} className="mr-3" /> Gallery
+              </button>
+            </li>
+            {/* Existing Team Tab */}
             <li>
               <button
                 onClick={() => {
@@ -103,7 +119,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     : "text-primary hover:bg-gray-100 hover:text-secondary"
                 }`}
               >
-                <Users size={20} className="mr-3" /> Team Management
+                <Users size={20} className="mr-3" /> Team
               </button>
             </li>
           </ul>

@@ -11,13 +11,14 @@ import ProductManagement from "@/components/admin/ProductManagement";
 import OrderManagement from "@/components/admin/OrderManagement";
 import PetManagement from "@/components/admin/PetManagement";
 import TeamManagement from "@/components/admin/TeamManagement"; // Import TeamManagement
+import GalleryManagement from "@/components/admin/GalleryManagement"; // Import GalleryManagement
 
 export default function App() {
   const router = useRouter();
 
   const { data: session, status } = useSession();
-  // --- CHANGE 1: Update activeTab state type to include 'team' ---
-  const [activeTab, setActiveTab] = useState<"products" | "orders" | "pets" | "team">(
+  // --- CHANGE 1: Update activeTab state type to include 'team' and 'gallery' ---
+  const [activeTab, setActiveTab] = useState<"products" | "orders" | "pets" | "team" | "gallery">(
     "products"
   );
   const [message, setMessage] = useState<{
@@ -151,7 +152,9 @@ export default function App() {
             {activeTab === "pets" && (
               <PetManagement showMessage={showMessage} />
             )}
-            {/* --- CHANGE 2: Add conditional rendering for TeamManagement --- */}
+            {activeTab === "gallery" && ( // New conditional rendering for GalleryManagement
+              <GalleryManagement showMessage={showMessage} />
+            )}
             {activeTab === "team" && (
               <TeamManagement showMessage={showMessage} />
             )}

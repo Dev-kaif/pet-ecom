@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/admin/ProductManagement.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Plus, X } from "lucide-react";
+import { Plus, X, UploadCloud, Loader2 } from "lucide-react"; // Import new icons
 import { motion, AnimatePresence } from "framer-motion";
 import { IProduct } from "@/types"; // Ensure IProduct is imported from your types file
 import { Types } from "mongoose"; // For formatting ObjectId
@@ -34,6 +34,13 @@ type ProductFormData = Omit<
   images: string[];
 };
 
+// --- Cloudinary Configuration (Replace with your actual values, ideally from environment variables) ---
+const CLOUDINARY_CLOUD_NAME =
+  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "your_cloudinary_cloud_name"; // e.g., "dtgbnnv5p"
+const CLOUDINARY_UPLOAD_PRESET =
+  process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ||
+  "your_cloudinary_upload_preset"; // e.g., "ml_default"
+
 const ProductManagement: React.FC<ProductManagementProps> = ({
   showMessage,
 }) => {
@@ -48,14 +55,123 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
     price: 0,
     oldPrice: undefined,
     category: "",
-    images: [],
+    images: [], // This will hold all image URLs (thumbnail + additional)
     stock: 0,
   });
-  const [newImageUrlInput, setNewImageUrlInput] = useState<string>("");
-  const [thumbnailImageUrlInput, setThumbnailImageUrlInput] =
-    useState<string>("");
 
-  const MAX_IMAGES = 5;
+  // State for Cloudinary upload for thumbnail
+  const [selectedThumbnailFile, setSelectedThumbnailFile] =
+    useState<File | null>(null);
+  const [isThumbnailUploading, setIsThumbnailUploading] = useState(false);
+  const [thumbnailUploadProgress, setThumbnailUploadProgress] = useState(0);
+  const [thumbnailUploadError, setThumbnailUploadError] = useState<
+    string | null
+  >(null);
+
+  // State for Cloudinary upload for additional images (single file input for adding one at a time)
+  const [selectedAdditionalFile, setSelectedAdditionalFile] =
+    useState<File | null>(null);
+  const [isAdditionalUploading, setIsAdditionalUploading] = useState(false);
+  const [additionalUploadProgress, setAdditionalUploadProgress] = useState(0);
+  const [additionalUploadError, setAdditionalUploadError] = useState<
+    string | null
+  >(null);
+
+  const MAX_IMAGES = 5; // Max images including thumbnail
+
+  // Helper function to upload a file to Cloudinary
+  const uploadFileToCloudinary = useCallback(
+    async (file: File, type: "thumbnail" | "additional") => {
+      if (!file) return null;
+
+      const setUploading =
+        type === "thumbnail"
+          ? setIsThumbnailUploading
+          : setIsAdditionalUploading;
+      const setProgress =
+        type === "thumbnail"
+          ? setThumbnailUploadProgress
+          : setAdditionalUploadProgress;
+      const setError =
+        type === "thumbnail"
+          ? setThumbnailUploadError
+          : setAdditionalUploadError;
+
+      setUploading(true);
+      setProgress(0);
+      setError(null);
+
+      if (
+        !CLOUDINARY_CLOUD_NAME ||
+        CLOUDINARY_CLOUD_NAME === "your_cloudinary_cloud_name"
+      ) {
+        setError("Cloudinary cloud name is not configured.");
+        showMessage(
+          "error",
+          "Cloudinary cloud name is not configured. Please check environment variables."
+        );
+        setUploading(false);
+        return null;
+      }
+      if (
+        !CLOUDINARY_UPLOAD_PRESET ||
+        CLOUDINARY_UPLOAD_PRESET === "your_cloudinary_upload_preset"
+      ) {
+        setError("Cloudinary upload preset is not configured.");
+        showMessage(
+          "error",
+          "Cloudinary upload preset is not configured. Please check environment variables."
+        );
+        setUploading(false);
+        return null;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+      try {
+        // Fetch does not easily support progress events, so progress will be 0 or 100
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error.message || "Cloudinary upload failed."
+          );
+        }
+
+        const data = await response.json();
+        setProgress(100); // Set to 100% on successful completion
+        showMessage(
+          "success",
+          `${
+            type === "thumbnail" ? "Thumbnail" : "Additional"
+          } image uploaded successfully!`
+        );
+        return data.secure_url;
+      } catch (err: any) {
+        setError(err.message || "Failed to upload image to Cloudinary.");
+        showMessage(
+          "error",
+          err.message ||
+            `Failed to upload ${
+              type === "thumbnail" ? "thumbnail" : "additional"
+            } image.`
+        );
+        return null;
+      } finally {
+        setUploading(false);
+      }
+    },
+    [showMessage]
+  );
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -96,45 +212,95 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
     }));
   };
 
-  const handleNewImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewImageUrlInput(e.target.value);
-  };
-
-  const handleThumbnailImageUrlChange = (
+  // Handle file selection for thumbnail
+  const handleThumbnailFileChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setThumbnailImageUrlInput(e.target.value);
+    if (e.target.files && e.target.files[0]) {
+      setSelectedThumbnailFile(e.target.files[0]);
+      setThumbnailUploadError(null);
+    } else {
+      setSelectedThumbnailFile(null);
+    }
   };
 
-  const handleAddImageUrl = () => {
-    const trimmedUrl = newImageUrlInput.trim();
-    if (
-      trimmedUrl &&
-      newProductData.images.length <
-        MAX_IMAGES - (thumbnailImageUrlInput ? 1 : 0)
-    ) {
-      if (
-        newProductData.images.includes(trimmedUrl) ||
-        thumbnailImageUrlInput === trimmedUrl
-      ) {
-        showMessage("error", "This image URL is already added.");
+  // Handle file selection for additional image
+  const handleAdditionalFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedAdditionalFile(e.target.files[0]);
+      setAdditionalUploadError(null);
+    } else {
+      setSelectedAdditionalFile(null);
+    }
+  };
+
+  // Trigger thumbnail upload
+  const handleThumbnailUploadClick = async () => {
+    if (selectedThumbnailFile) {
+      const url = await uploadFileToCloudinary(
+        selectedThumbnailFile,
+        "thumbnail"
+      );
+      if (url) {
+        setNewProductData((prev) => ({
+          ...prev,
+          images: [url, ...prev.images.slice(currentProduct ? 1 : 0)].filter(
+            Boolean
+          ), // Ensure thumbnail is first
+        }));
+        setSelectedThumbnailFile(null); // Clear file input
+      }
+    }
+  };
+
+  // Trigger additional image upload and add to array
+  const handleAddAdditionalImageClick = async () => {
+    if (selectedAdditionalFile) {
+      const currentImagesCount = newProductData.images.length;
+      const thumbnailExists =
+        newProductData.images.length > 0 &&
+        newProductData.images[0].includes("cloudinary"); // Simple check if first image is a Cloudinary URL
+
+      // Check if adding this image would exceed the limit
+      if (currentImagesCount >= MAX_IMAGES) {
+        showMessage(
+          "error",
+          `You can add a maximum of ${MAX_IMAGES} images (including thumbnail).`
+        );
         return;
       }
-      setNewProductData((prev) => ({
-        ...prev,
-        images: [...prev.images, trimmedUrl],
-      }));
-      setNewImageUrlInput("");
-    } else if (
-      newProductData.images.length >=
-      MAX_IMAGES - (thumbnailImageUrlInput ? 1 : 0)
-    ) {
-      showMessage(
-        "error",
-        `You can add a maximum of ${MAX_IMAGES} images (including thumbnail).`
+
+      const url = await uploadFileToCloudinary(
+        selectedAdditionalFile,
+        "additional"
       );
-    } else {
-      showMessage("error", "Image URL cannot be empty.");
+      if (url) {
+        // Prevent adding duplicate URLs
+        if (newProductData.images.includes(url)) {
+          showMessage("error", "This image URL is already added.");
+          return;
+        }
+
+        setNewProductData((prev) => {
+          // If thumbnail exists, put it first, then add the new URL, then the rest of images.
+          // This handles cases where newProductData.images might already contain the thumbnail URL
+          // from an edit operation, and we just need to append.
+          const existingOtherImages = currentProduct
+            ? prev.images.slice(1) // Keep existing additional images
+            : prev.images; // If adding new, prev.images only contains thumbnail if just uploaded
+
+          return {
+            ...prev,
+            images:
+              thumbnailExists && prev.images[0]
+                ? [prev.images[0], ...existingOtherImages, url].filter(Boolean)
+                : [...existingOtherImages, url].filter(Boolean), // If no thumbnail or starting fresh
+          };
+        });
+        setSelectedAdditionalFile(null); // Clear file input
+      }
     }
   };
 
@@ -143,21 +309,21 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
       ...prev,
       images: prev.images.filter((url) => url !== urlToRemove),
     }));
+    // If the removed URL was the thumbnail, clear thumbnail input
+    if (currentProduct?.images?.[0] === urlToRemove) {
+      setNewProductData((prev) => ({
+        ...prev,
+        images: prev.images.filter((url) => url !== urlToRemove), // Remove it from the images array
+      }));
+    }
   };
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const finalImages = thumbnailImageUrlInput
-      ? [thumbnailImageUrlInput, ...newProductData.images]
-      : newProductData.images;
-
-    if (!thumbnailImageUrlInput && finalImages.length === 0) {
-      showMessage(
-        "error",
-        "Please add at least one image (thumbnail or additional)."
-      );
+    if (newProductData.images.length === 0) {
+      showMessage("error", "Please add at least one image.");
       setLoading(false);
       return;
     }
@@ -166,10 +332,7 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
       const response = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...newProductData,
-          images: finalImages,
-        }),
+        body: JSON.stringify(newProductData),
       });
       const data = await response.json();
       if (data.success) {
@@ -183,8 +346,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
           images: [],
           stock: 0,
         });
-        setNewImageUrlInput("");
-        setThumbnailImageUrlInput("");
+        setSelectedThumbnailFile(null);
+        setSelectedAdditionalFile(null);
         setIsModalOpen(false);
         fetchProducts();
       } else {
@@ -203,15 +366,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
 
     setLoading(true);
 
-    const finalImages = thumbnailImageUrlInput
-      ? [thumbnailImageUrlInput, ...newProductData.images]
-      : newProductData.images;
-
-    if (!thumbnailImageUrlInput && finalImages.length === 0) {
-      showMessage(
-        "error",
-        "Please add at least one image (thumbnail or additional)."
-      );
+    if (newProductData.images.length === 0) {
+      showMessage("error", "Please add at least one image.");
       setLoading(false);
       return;
     }
@@ -222,10 +378,7 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...newProductData,
-            images: finalImages,
-          }),
+          body: JSON.stringify(newProductData),
         }
       );
       const data = await response.json();
@@ -233,6 +386,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
         showMessage("success", "Product updated successfully!");
         setIsModalOpen(false);
         setCurrentProduct(null);
+        setSelectedThumbnailFile(null);
+        setSelectedAdditionalFile(null);
         fetchProducts();
       } else {
         showMessage("error", data.message || "Failed to update product.");
@@ -271,6 +426,17 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
     }
   };
 
+  const resetUploadStates = () => {
+    setSelectedThumbnailFile(null);
+    setIsThumbnailUploading(false);
+    setThumbnailUploadProgress(0);
+    setThumbnailUploadError(null);
+    setSelectedAdditionalFile(null);
+    setIsAdditionalUploading(false);
+    setAdditionalUploadProgress(0);
+    setAdditionalUploadError(null);
+  };
+
   const openAddModal = () => {
     setCurrentProduct(null);
     setNewProductData({
@@ -282,26 +448,27 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
       images: [],
       stock: 0,
     });
-    setNewImageUrlInput("");
-    setThumbnailImageUrlInput("");
+    resetUploadStates();
     setIsModalOpen(true);
   };
 
   const openEditModal = (product: IProduct) => {
     setCurrentProduct(product);
-    setThumbnailImageUrlInput(product.images?.[0] || "");
     setNewProductData({
       name: product.name,
       description: product.description,
       price: product.price,
       oldPrice: product.oldPrice,
       category: product.category,
-      images: product.images?.slice(1) || [],
+      images: product.images || [], // Use existing images directly
       stock: product.stock,
     });
-    setNewImageUrlInput("");
+    resetUploadStates();
     setIsModalOpen(true);
   };
+
+  const currentThumbnailUrl = newProductData.images[0] || "";
+  const currentAdditionalImages = newProductData.images.slice(1) || [];
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -537,32 +704,59 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
                     <p className="text-lg font-semibold text-primary mb-4">
                       Product Images
                     </p>
-                    {/* Thumbnail Image Input */}
+                    {/* Thumbnail Image Input with Cloudinary Upload */}
                     <div className="mb-4">
                       <label
-                        htmlFor="thumbnailImageUrl"
+                        htmlFor="thumbnailImageUpload"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Thumbnail Image URL (Required)
+                        Thumbnail Image (Required)
                       </label>
-                      <input
-                        type="url"
-                        id="thumbnailImageUrl"
-                        name="thumbnailImageUrl"
-                        value={thumbnailImageUrlInput}
-                        onChange={handleThumbnailImageUrlChange}
-                        required
-                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
-                        placeholder="e.g., https://example.com/thumbnail.jpg"
-                      />
-                      {thumbnailImageUrlInput && (
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="file"
+                          id="thumbnailImageUpload"
+                          name="thumbnailImageUpload"
+                          accept="image/*"
+                          onChange={handleThumbnailFileChange}
+                          className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleThumbnailUploadClick}
+                          disabled={
+                            !selectedThumbnailFile || isThumbnailUploading
+                          }
+                          className="p-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                        >
+                          {isThumbnailUploading ? (
+                            <Loader2 size={20} className="animate-spin" />
+                          ) : (
+                            <UploadCloud size={20} />
+                          )}
+                        </button>
+                      </div>
+                      {isThumbnailUploading && (
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                          <div
+                            className="bg-green-400 h-2.5 rounded-full"
+                            style={{ width: `${thumbnailUploadProgress}%` }}
+                          ></div>
+                        </div>
+                      )}
+                      {thumbnailUploadError && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {thumbnailUploadError}
+                        </p>
+                      )}
+                      {currentThumbnailUrl && (
                         <div className="mt-3 w-28 h-28 rounded-lg overflow-hidden border border-gray-300 flex items-center justify-center bg-white shadow-sm">
                           <Image
-                            src={thumbnailImageUrlInput}
+                            src={currentThumbnailUrl}
                             alt="Thumbnail Preview"
                             unoptimized
-                            height={112} // Adjusted for w-28
-                            width={112} // Adjusted for w-28
+                            height={112}
+                            width={112}
                             objectFit="cover"
                             className="object-cover w-full h-full"
                             onError={(e) => {
@@ -574,52 +768,68 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
                       )}
                     </div>
 
-                    {/* Additional Images Input Section */}
+                    {/* Additional Images Input Section with Cloudinary Upload */}
                     <div>
                       <label
-                        htmlFor="newImageUrl"
+                        htmlFor="additionalImageUpload"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Add Additional Image URL (Max{" "}
-                        {MAX_IMAGES - (thumbnailImageUrlInput ? 1 : 0)} more)
+                        Add Additional Image (Max{" "}
+                        {MAX_IMAGES -
+                          (newProductData.images.length > 0 ? 1 : 0)}{" "}
+                        more)
                       </label>
                       <div className="flex items-center space-x-2">
                         <input
-                          type="url"
-                          id="newImageUrl"
-                          name="newImageUrl"
-                          value={newImageUrlInput}
-                          onChange={handleNewImageUrlChange}
-                          className="flex-grow px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
-                          placeholder="e.g., https://example.com/image2.jpg"
-                          disabled={
-                            newProductData.images.length >=
-                            MAX_IMAGES - (thumbnailImageUrlInput ? 1 : 0)
-                          }
+                          type="file"
+                          id="additionalImageUpload"
+                          name="additionalImageUpload"
+                          accept="image/*"
+                          onChange={handleAdditionalFileChange}
+                          className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                          disabled={newProductData.images.length >= MAX_IMAGES}
                         />
                         <button
                           type="button"
-                          onClick={handleAddImageUrl}
-                          className="p-2 bg-secondary text-white rounded-md hover:bg-secondary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={handleAddAdditionalImageClick}
                           disabled={
-                            !newImageUrlInput.trim() ||
-                            newProductData.images.length >=
-                              MAX_IMAGES - (thumbnailImageUrlInput ? 1 : 0)
+                            !selectedAdditionalFile ||
+                            isAdditionalUploading ||
+                            newProductData.images.length >= MAX_IMAGES
                           }
+                          className="p-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                         >
-                          <Plus size={20} />
+                          {isAdditionalUploading ? (
+                            <Loader2 size={20} className="animate-spin" />
+                          ) : (
+                            <Plus size={20} />
+                          )}
                         </button>
                       </div>
+                      {isAdditionalUploading && (
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                          <div
+                            className="bg-green-400 h-2.5 rounded-full"
+                            style={{ width: `${additionalUploadProgress}%` }}
+                          ></div>
+                        </div>
+                      )}
+                      {additionalUploadError && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {additionalUploadError}
+                        </p>
+                      )}
+
                       {/* Display existing additional images */}
-                      {newProductData.images.length > 0 && (
+                      {currentAdditionalImages.length > 0 && (
                         <div className="mt-4 border border-gray-200 p-3 rounded-md bg-white max-h-48 overflow-y-auto">
                           <p className="text-sm font-semibold text-gray-700 mb-2">
                             Currently added:
                           </p>
                           <div className="flex flex-wrap gap-3">
-                            {newProductData.images.map((url, index) => (
+                            {currentAdditionalImages.map((url, index) => (
                               <div
-                                key={index}
+                                key={url} // Using URL as key, assuming unique
                                 className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-300 flex items-center justify-center bg-gray-100 shadow-sm"
                               >
                                 <Image
@@ -662,9 +872,14 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
                     <button
                       type="submit"
                       className="bg-secondary hover:bg-secondary-dark text-white font-bold py-2 px-5 rounded-md shadow-md transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={loading}
+                      disabled={
+                        loading ||
+                        isThumbnailUploading ||
+                        isAdditionalUploading ||
+                        newProductData.images.length === 0
+                      }
                     >
-                      {loading
+                      {loading || isThumbnailUploading || isAdditionalUploading
                         ? "Saving..."
                         : currentProduct
                         ? "Update Product"

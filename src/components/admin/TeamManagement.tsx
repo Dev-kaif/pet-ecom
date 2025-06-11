@@ -2,10 +2,10 @@
 // src/components/admin/TeamManagement.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Plus, X } from "lucide-react";
+import { Plus, X, UploadCloud, Loader2 } from "lucide-react"; // Import new icons
 import { motion, AnimatePresence } from "framer-motion";
-import { ITeamMember } from "@/types"; 
-import { Types } from "mongoose"; 
+import { ITeamMember } from "@/types";
+import { Types } from "mongoose";
 
 const formatObjectId = (id: Types.ObjectId | string | undefined): string => {
   if (typeof id === "string") {
@@ -40,6 +40,10 @@ type TeamMemberFormData = Omit<
   };
 };
 
+// --- Cloudinary Configuration (Replace with your actual values, ideally from environment variables) ---
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "your_cloudinary_cloud_name"; // e.g., "dtgbnnv5p"
+const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "your_cloudinary_upload_preset"; // e.g., "ml_default"
+
 const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
   const [teamMembers, setTeamMembers] = useState<ITeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,6 +71,66 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
         },
       },
     });
+
+  // State for Cloudinary upload
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Helper function to upload a file to Cloudinary
+  const uploadFileToCloudinary = useCallback(async (file: File) => {
+    if (!file) return null;
+
+    setIsUploading(true);
+    setUploadProgress(0);
+    setUploadError(null);
+
+    if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME === "your_cloudinary_cloud_name") {
+        setUploadError("Cloudinary cloud name is not configured.");
+        showMessage("error", "Cloudinary cloud name is not configured. Please check environment variables.");
+        setIsUploading(false);
+        return null;
+    }
+    if (!CLOUDINARY_UPLOAD_PRESET || CLOUDINARY_UPLOAD_PRESET === "your_cloudinary_upload_preset") {
+        setUploadError("Cloudinary upload preset is not configured.");
+        showMessage("error", "Cloudinary upload preset is not configured. Please check environment variables.");
+        setIsUploading(false);
+        return null;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error.message || "Cloudinary upload failed.");
+      }
+
+      const data = await response.json();
+      setUploadProgress(100);
+      showMessage("success", "Image uploaded to Cloudinary successfully!");
+      setSelectedFile(null); // Clear selected file after successful upload
+      return data.secure_url;
+    } catch (err: any) {
+      setUploadError(err.message || "Failed to upload image to Cloudinary.");
+      showMessage("error", err.message || "Failed to upload image to Cloudinary.");
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  }, [showMessage]);
+
 
   const fetchTeamMembers = useCallback(async () => {
     setLoading(true);
@@ -139,9 +203,39 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
     }
   };
 
+  // Handle file selection for image upload
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+      setUploadError(null);
+    } else {
+      setSelectedFile(null);
+    }
+  };
+
+  // Trigger image upload
+  const handleUploadClick = async () => {
+    if (selectedFile) {
+      const url = await uploadFileToCloudinary(selectedFile);
+      if (url) {
+        setNewTeamMemberData((prev) => ({
+          ...prev,
+          imageUrl: url, // Set the uploaded URL to imageUrl
+        }));
+      }
+    }
+  };
+
+
   const handleAddTeamMember = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if (!newTeamMemberData.imageUrl.trim()) {
+        showMessage("error", "Please upload an image or provide an Image URL.");
+        setLoading(false);
+        return;
+    }
 
     try {
       // Logic to enforce max 4 members on home before sending
@@ -187,6 +281,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
             },
           },
         });
+        setSelectedFile(null); // Clear selected file
+        setUploadProgress(0); // Reset progress
         setIsModalOpen(false);
         fetchTeamMembers();
       } else {
@@ -204,6 +300,12 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
     if (!currentTeamMember?._id) return;
 
     setLoading(true);
+
+    if (!newTeamMemberData.imageUrl.trim()) {
+        showMessage("error", "Image URL cannot be empty for update.");
+        setLoading(false);
+        return;
+    }
 
     try {
       // Logic to enforce max 4 members on home before sending
@@ -236,6 +338,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
         showMessage("success", "Team member updated successfully!");
         setIsModalOpen(false);
         setCurrentTeamMember(null);
+        setSelectedFile(null); // Clear selected file
+        setUploadProgress(0); // Reset progress
         fetchTeamMembers();
       } else {
         showMessage("error", data.message || "Failed to update team member.");
@@ -280,6 +384,13 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
     }
   };
 
+  const resetUploadStates = () => {
+    setSelectedFile(null);
+    setIsUploading(false);
+    setUploadProgress(0);
+    setUploadError(null);
+  };
+
   const openAddModal = () => {
     setCurrentTeamMember(null);
     setNewTeamMemberData({
@@ -301,6 +412,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
         },
       },
     });
+    resetUploadStates(); // Reset upload states when opening for add
     setIsModalOpen(true);
   };
 
@@ -325,6 +437,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
         },
       },
     });
+    resetUploadStates(); // Reset upload states when opening for edit
     setIsModalOpen(true);
   };
 
@@ -486,39 +599,78 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
                         className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
                       />
                     </div>
-                    <div>
-                      <label
-                        htmlFor="imageUrl"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Image URL
-                      </label>
-                      <input
-                        type="url"
-                        id="imageUrl"
-                        name="imageUrl"
-                        value={newTeamMemberData.imageUrl}
-                        onChange={handleInputChange}
-                        required
-                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
-                        placeholder="https://example.com/image.jpg"
-                      />
-                      {newTeamMemberData.imageUrl && (
-                        <div className="mt-3 w-28 h-28 rounded-lg overflow-hidden border border-gray-300 flex items-center justify-center bg-white shadow-sm">
-                          <Image
-                            src={newTeamMemberData.imageUrl}
-                            alt="Image Preview"
-                            unoptimized
-                            height={112}
-                            width={112}
-                            objectFit="cover"
-                            className="object-cover w-full h-full"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src =
-                                "https://placehold.co/112x112/e0e0e0/555555?text=Bad+URL";
-                            }}
-                          />
+
+                    {/* Cloudinary Upload Section for imageUrl */}
+                    <div className="md:col-span-2 border border-gray-200 p-4 rounded-md bg-gray-50">
+                      <p className="text-lg font-semibold text-primary mb-4">
+                        Team Member Image
+                      </p>
+                      <div className="flex items-center space-x-2 mb-4">
+                        <input
+                          type="file"
+                          id="imageUpload"
+                          name="imageUpload"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleUploadClick}
+                          disabled={!selectedFile || isUploading}
+                          className="p-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                        >
+                          {isUploading ? <Loader2 size={20} className="animate-spin" /> : <UploadCloud size={20} />}
+                        </button>
+                      </div>
+
+                      {isUploading && (
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                          <div
+                            className="bg-green-400 h-2.5 rounded-full"
+                            style={{ width: `${uploadProgress}%` }}
+                          ></div>
                         </div>
+                      )}
+                      {uploadError && (
+                        <p className="text-red-500 text-sm mt-1">{uploadError}</p>
+                      )}
+
+                      {/* Displaying the Image URL (read-only) and Preview */}
+                      {newTeamMemberData.imageUrl && (
+                        <>
+                          <label
+                            htmlFor="imageUrl"
+                            className="block text-sm font-medium text-gray-700 mb-1 mt-3"
+                          >
+                            Image URL (Automatically populated after upload)
+                          </label>
+                          <input
+                            type="url"
+                            id="imageUrl"
+                            name="imageUrl"
+                            value={newTeamMemberData.imageUrl}
+                            readOnly
+                            required
+                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed sm:text-sm"
+                            placeholder="Upload an image above"
+                          />
+                          <div className="mt-3 w-28 h-28 rounded-lg overflow-hidden border border-gray-300 flex items-center justify-center bg-white shadow-sm">
+                            <Image
+                              src={newTeamMemberData.imageUrl}
+                              alt="Image Preview"
+                              unoptimized
+                              height={112}
+                              width={112}
+                              objectFit="cover"
+                              className="object-cover w-full h-full"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  "https://placehold.co/112x112/e0e0e0/555555?text=Bad+URL";
+                              }}
+                            />
+                          </div>
+                        </>
                       )}
                     </div>
                     <div className="flex items-center self-end mb-4">
@@ -719,9 +871,9 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
                     <button
                       type="submit"
                       className="bg-secondary hover:bg-secondary-dark text-white font-bold py-2 px-5 rounded-md shadow-md transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={loading}
+                      disabled={loading || isUploading || !newTeamMemberData.imageUrl.trim()} // Disable if uploading or no image URL
                     >
-                      {loading
+                      {loading || isUploading
                         ? "Saving..."
                         : currentTeamMember
                         ? "Update Member"
