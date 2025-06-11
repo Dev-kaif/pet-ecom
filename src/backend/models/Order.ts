@@ -7,15 +7,13 @@ interface OrderItemDocument extends Omit<IOrderItem, "_id">, Document {
   productId: Types.ObjectId;
 }
 
-// Define the Mongoose Document type for Address within Order (snapshot)
-interface AddressDocument extends IAddress, Document {}
 
 // Define the Mongoose Document type for Order
 interface OrderDocument extends Omit<IOrder, "_id">, Document {
   userId: Types.ObjectId;
   items: Types.DocumentArray<OrderItemDocument>;
-  shippingAddress: AddressDocument;
-  billingAddress?: AddressDocument;
+  shippingAddress: IAddress; // Use IAddress directly
+  billingAddress?: IAddress; // Use IAddress directly
 }
 
 const orderItemSchema = new Schema<OrderItemDocument>(
@@ -29,7 +27,7 @@ const orderItemSchema = new Schema<OrderItemDocument>(
   { _id: true }
 );
 
-const addressSchema = new Schema<AddressDocument>(
+const addressSchema = new Schema<IAddress>( // Use IAddress directly here too
   {
     street: { type: String, required: true },
     city: { type: String, required: true },

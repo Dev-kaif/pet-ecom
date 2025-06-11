@@ -253,7 +253,7 @@ const PetDetailsPage = () => {
     if (pet) {
       fetchSuggestedPets();
     }
-  }, [id, pet?.category]); // Re-fetch suggested pets if main pet's category changes
+  }, [id, pet, pet?.category]); // Re-fetch suggested pets if main pet's category changes
 
   if (loading) {
     return (

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { CheckCircle, FileText, Heart, MoveRight, Plus } from "lucide-react";
+import { CheckCircle, FileText, Heart, Plus } from "lucide-react";
 import { NumberTicker } from "../ui/NumberTicker";
 import Team from "../sections/Team";
 

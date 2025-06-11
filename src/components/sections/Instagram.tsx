@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 // src/components/sections/Instagram.tsx
 import React from "react";
 import * as motion from "motion/react-client";

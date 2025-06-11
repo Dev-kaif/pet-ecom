@@ -8,6 +8,7 @@ import {
   Mail,
   PhoneCall,
 } from "lucide-react";
+import Image from "next/image";
 
 // Define data for Quick Links and Opening Hours to keep JSX clean
 const quickLinksData = [
@@ -41,7 +42,9 @@ const Footer: React.FC = () => {
             <div className="footer-widget space-y-6 text-center md:text-left"> {/* Center text on mobile, left on md+ */}
               <div className="footer-logo flex justify-center md:justify-start"> {/* Center logo on mobile */}
                 <Link href="/">
-                  <img
+                  <Image
+                    height={500}
+                    width={200}
                     src="/images/logo/w_logo.png"
                     alt="PetPal Logo"
                     className="max-h-12"
