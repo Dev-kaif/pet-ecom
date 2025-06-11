@@ -10,16 +10,17 @@ import Sidebar from "@/components/admin/Sidebar";
 import ProductManagement from "@/components/admin/ProductManagement";
 import OrderManagement from "@/components/admin/OrderManagement";
 import PetManagement from "@/components/admin/PetManagement";
-import TeamManagement from "@/components/admin/TeamManagement"; // Import TeamManagement
-import GalleryManagement from "@/components/admin/GalleryManagement"; // Import GalleryManagement
+import TeamManagement from "@/components/admin/TeamManagement";
+import GalleryManagement from "@/components/admin/GalleryManagement";
+import DashboardOverview from "@/components/admin/DashboardOverview"; // Import the new DashboardOverview component
 
 export default function App() {
   const router = useRouter();
 
   const { data: session, status } = useSession();
-  // --- CHANGE 1: Update activeTab state type to include 'team' and 'gallery' ---
-  const [activeTab, setActiveTab] = useState<"products" | "orders" | "pets" | "team" | "gallery">(
-    "products"
+  // Update activeTab state type to include 'dashboard'
+  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "orders" | "pets" | "team" | "gallery">(
+    "dashboard" // Set default active tab to "dashboard"
   );
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -143,6 +144,9 @@ export default function App() {
             )}
 
             {/* Render components based on activeTab */}
+            {activeTab === "dashboard" && ( // Conditional rendering for DashboardOverview
+              <DashboardOverview showMessage={showMessage} />
+            )}
             {activeTab === "products" && (
               <ProductManagement showMessage={showMessage} />
             )}
@@ -152,7 +156,7 @@ export default function App() {
             {activeTab === "pets" && (
               <PetManagement showMessage={showMessage} />
             )}
-            {activeTab === "gallery" && ( // New conditional rendering for GalleryManagement
+            {activeTab === "gallery" && (
               <GalleryManagement showMessage={showMessage} />
             )}
             {activeTab === "team" && (

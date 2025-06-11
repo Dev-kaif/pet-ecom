@@ -13,15 +13,15 @@ import {
   Youtube,
   MessageCircle,
   LogIn, // Import Login icon
-  LogOut, // Import Logout icon
   UserPlus, // Import UserPlus icon for Sign Up
   LayoutDashboard, // Import LayoutDashboard icon for Admin Dashboard
   ShoppingBag, // Import ShoppingBag icon
-  Heart, // Import Heart icon
+  Heart,
+  User, // Import Heart icon
 } from "lucide-react";
 import { motion, AnimatePresence, Variants } from "motion/react";
 import Image from "next/image";
-import { signIn, signOut } from "next-auth/react"; // Import signIn and signOut
+import { signIn } from "next-auth/react"; // Import signIn and signOut
 
 interface MobileSidebarProps {
   isOpen: boolean;
@@ -228,10 +228,12 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
               </ul>
             </nav>
 
-            {/* Cart & Wishlist Icons for Mobile (NEW: Conditionally rendered) */}
-            {status === 'authenticated' && (
+            {/* Cart & Wishlist Icons for Mobile (Conditionally rendered) */}
+            {status === "authenticated" && (
               <div className="p-4 border-t border-gray-200">
-                <h5 className="font-bold text-lg mb-4 text-primary-700">Your Items</h5>
+                <h5 className="font-bold text-lg mb-4 text-primary-700">
+                  Your Items
+                </h5>
                 <div className="flex space-x-6 justify-center">
                   <Link href="/cart" passHref>
                     <motion.div
@@ -262,7 +264,6 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
               </div>
             )}
 
-
             {/* Auth/Admin Buttons for Mobile */}
             <div className="p-4 border-t border-gray-200">
               {status === "loading" ? (
@@ -270,38 +271,47 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
               ) : session ? (
                 <div className="flex flex-col gap-3">
                   {/* Admin Dashboard button */}
-                  {session.user && (session.user as any).role === 'admin' && (
+                  {session.user && (session.user as any).role === "admin" && (
                     <Link href="/admin" passHref>
                       <button
-                        onClick={onClose} // Close sidebar on click
-                        className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md bg-blue-600 text-white font-bold hover:bg-blue-700 transition duration-300"
+                        onClick={onClose}
+                        className="btn-bubble btn-bubble-primary"
                       >
-                        <LayoutDashboard size={18} />
-                        Admin Dashboard
+                        <span>
+                          <LayoutDashboard size={18} />
+                          <span className="text-sm">Admin Dashboard</span>
+                        </span>
                       </button>
                     </Link>
                   )}
-                  {/* Logout button */}
-                  <button
-                    onClick={() => { signOut(); onClose(); }} // Close sidebar on logout
-                    className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md bg-red-500 text-white font-bold hover:bg-red-600 transition duration-300"
-                  >
-                    <LogOut size={18} />
-                    Logout
-                  </button>
+                  {/* Visit Profile Link (Icon/Avatar) */}
+                  <Link href="/profile" passHref>
+                    <button
+                      className="btn-bubble btn-bubble-secondary"
+                      onClick={onClose} // Close sidebar on click
+                    >
+                      <User size={18} /> {/* User icon */}
+                      Visit Profile
+                    </button>
+                  </Link>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
                   {/* Login button */}
                   <button
-                    onClick={() => { signIn(); onClose(); }} // Close sidebar on login click
+                    onClick={() => {
+                      signIn();
+                      onClose();
+                    }} // Close sidebar on login click
                     className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md bg-primary text-white font-bold hover:bg-primary-dark transition duration-300"
                   >
                     <LogIn size={18} />
                     Login
                   </button>
                   {/* Signup button */}
-                  <Link href="/auth/signup" passHref> {/* Assuming a signup page at /auth/signup */}
+                  <Link href="/auth/signup" passHref>
+                    {" "}
+                    {/* Assuming a signup page at /auth/signup */}
                     <button
                       onClick={onClose} // Close sidebar on signup click
                       className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md border border-primary text-primary font-bold hover:bg-primary hover:text-white transition duration-300"
@@ -315,7 +325,9 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
             </div>
 
             {/* Social Icons */}
-            <div className="p-4 border-t border-gray-200 mt-4"> {/* Increased mt-4 for better spacing */}
+            <div className="p-4 border-t border-gray-200 mt-4">
+              {" "}
+              {/* Increased mt-4 for better spacing */}
               <h5 className="font-bold text-lg mb-4 text-primary-700">
                 Follow Us
               </h5>

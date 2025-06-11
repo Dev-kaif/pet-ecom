@@ -28,13 +28,20 @@ export interface IReview {
 }
 
 export interface IUser {
+  _id?: string | Types.ObjectId; 
   email: string;
-  password?: string;
-  name?: string;
-  role: "user" | "admin";
-  addresses?: IAddress[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  password?: string; 
+  name?: string; 
+  firstName?: string; 
+  lastName?: string;  
+  phone?: string; 
+  profilePicture?: string; 
+  role: 'user' | 'admin'; 
+  addresses?: IAddress[]; 
+  passwordResetToken?: string; 
+  passwordResetExpires?: Date; 
+  createdAt?: string; 
+  updatedAt?: string; 
 }
 
 export interface AuthenticatedUser {
@@ -45,11 +52,13 @@ export interface AuthenticatedUser {
 }
 
 export interface IAddress {
+  _id?: string | Types.ObjectId; 
   street: string;
   city: string;
   state: string;
   zipCode: string;
   country: string;
+  label?: 'Home' | 'Work' | 'Other'; 
   isDefault?: boolean;
 }
 
@@ -155,9 +164,9 @@ export interface IWishlistItemFrontend {
 }
 
 
-// src/types/index.ts (Example - adjust to your actual API response)
+
 export interface IPet {
-  _id: string; // This is the ID from MongoDB
+  _id: string; 
   name: string;
   category: string;
   type: string;
@@ -166,19 +175,19 @@ export interface IPet {
   gender: "Male" | "Female" | "N/A";
   size: "Tiny" | "Small" | "Medium" | "Large";
   weight: number;
-  price: number; // Stored as a number
-  location: string; // This will map to your frontend's `location`
-  images: string[]; // Array of image URLs
+  price: number; 
+  location: string; 
+  images: string[]; 
   description?: string;
   isNewlyAdded?: boolean;
-  availableDate?: string; // Add if your backend schema includes this
-  breed?: string; // Add if your backend schema includes this
-  dateOfBirth?: string; // Add if your backend schema includes this
-  additionalInfo?: string[]; // Add if your backend schema includes this
-  mapLocation?: { // Add if your backend schema includes this
+  availableDate?: string; 
+  breed?: string; 
+  dateOfBirth?: string; 
+  additionalInfo?: string[]; 
+  mapLocation?: { 
     address: string;
     coords: { lat: number; lng: number };
-    link: string; // The embed link for the map
+    link: string; 
   };
   createdAt?: string;
   updatedAt?: string;

@@ -26,10 +26,10 @@ import {
   Twitter,
   Youtube,
   LogIn,
-  LogOut,
   UserPlus,
   LayoutDashboard,
   X, // Import X for the close button
+  User, // Import User icon for profile link
 } from "lucide-react";
 
 import {
@@ -42,7 +42,7 @@ import {
 
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import axios from "axios";
 import { ICart } from "@/types";
 
@@ -286,15 +286,12 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
                   </button>
                 </Link>
               )}
-              <button
-                onClick={() => signOut()}
-                className="btn-bubble btn-bubble-secondary"
-              >
-                <span>
-                  <LogOut size={18} />
-                  <span className="text-sm">Logout</span>
-                </span>
-              </button>
+              {/* Profile button */}
+              <Link href="/profile" passHref>
+                <button className="bg-white border-1 rounded-full mt-1">
+                    <User size={35} /> {/* User icon */}
+                </button>
+              </Link>
             </div>
           ) : (
             <div className="flex gap-2">
@@ -307,7 +304,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
                   <span className="text-sm">Login</span>
                 </span>
               </button>
-              <Link href="/auth/signup" passHref>
+              <Link href="/signup" passHref>
                 <button className="btn-bubble btn-bubble-outline-primary">
                   <span>
                     <UserPlus size={18} />
