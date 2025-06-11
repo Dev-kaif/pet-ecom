@@ -13,8 +13,8 @@ const WhyUsSection = dynamic(() => import("@/components/sections/WhyUsSection"))
 const StatsSection = dynamic(() => import("@/components/sections/Counter")); // Your StatsSection is here!
 const Team = dynamic(() => import("@/components/sections/Team"));
 const TestimonialSection = dynamic(() => import("@/components/sections/Testimonial"));
-const Blog = dynamic(() => import("@/components/sections/Blog"));
-const Instagram = dynamic(() => import("@/components/sections/Instagram"));
+// const Blog = dynamic(() => import("@/components/sections/Blog"));
+// const Instagram = dynamic(() => import("@/components/sections/Instagram"));
 const Footer = dynamic(() => import("@/components/layout/footer"));
 
 
@@ -30,8 +30,8 @@ export default function Page() {
       <StatsSection />
       <Team />
       <TestimonialSection />
-      <Blog />
-      <Instagram />
+      {/* <Blog /> */}
+      {/* <Instagram /> */}
       <Footer />
       <ScrollToTopButton />
     </div>

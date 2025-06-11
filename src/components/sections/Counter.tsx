@@ -1,11 +1,10 @@
-// src/components/StatItem.tsx
 "use client";
 import React from "react";
 import Link from "next/link";
 import { MoveRight } from "lucide-react";
 import Image from "next/image";
 import { NumberTicker } from "@/components/ui/NumberTicker";
-import { motion } from "motion/react";
+import { motion } from "motion/react"; // Assuming 'motion/react' is the correct import for 'framer-motion'
 
 interface StatItemProps {
   rawNumber: number;
@@ -51,9 +50,10 @@ const StatsSection = () => {
   const imageHeight = 120;
 
   return (
-    <section className="relative py-20 lg:py-32 bg-primary">
-      <div className="max-w-7xl mx-auto px-4 text-white relative z-10 flex flex-col lg:flex-row items-center lg:items-start gap-12">
-        <div className="lg:w-1/2 text-center lg:text-left">
+    <section className="relative py-20 lg:py-32 bg-primary overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 text-white relative z-10 flex flex-col lg:flex-row items-center lg:items-start lg:justify-between gap-12">
+        {/* Left Section: Text Content */}
+        <div className="lg:w-[45%] text-center lg:text-left lg:pr-12">
           <p className="text-sm font-semibold uppercase mb-2 opacity-70">
             Your Trust Our Priority
           </p>
@@ -75,32 +75,24 @@ const StatsSection = () => {
           </Link>
         </div>
 
-        {/* Right Section: Image and Statistics */}
-        <div className="lg:w-1/2 flex flex-col items-center lg:items-end relative">
+        {/* Right Section: Image and Statistics - Arranged side-by-side */}
+        <div className="lg:w-[55%] flex flex-col md:flex-row items-center justify-center gap-8 relative lg:pl-12">
           {/* Main Image */}
           <div
-            className="relative w-full max-w-md lg:max-w-lg mb-12 lg:mb-0 rounded-full overflow-hidden"
-            style={{
-              backgroundImage: `url('/path/to/your/image.jpg')`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              paddingTop: "66.66%",
-              position: "relative",
-              zIndex: 2,
-              borderRadius: "20px",
-            }}
+            className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg rounded-3xl overflow-hidden shadow-xl" // Adjust max-width to fit beside stats
           >
             <Image
-              width={100}
-              height={100}
-              src="/public/images/about/#"
+              width={550} // Reduced width to accommodate stats next to it
+              height={450} // Reduced height accordingly
+              src="/images/counter/counter.webp" // Assuming this is the correct image path
               alt="Vets examining a dog"
-              className="absolute inset-0 w-full h-full object-cover rounded-full"
+              className="w-full h-full object-cover"
             />
           </div>
 
           {/* Statistics Grid (Stacked vertically) */}
-          <div className="flex flex-col gap-8 text-center lg:text-left lg:absolute lg:top-1/2 lg:right-0 lg:-translate-y-1/2 z-10 w-full lg:w-auto">
+          {/* Removed absolute positioning to place it next to the image */}
+          <div className="flex flex-col gap-8 text-white z-20"> {/* No background needed as it's not overlaying */}
             {stats.map((stat, index) => (
               <StatItem
                 key={index}
@@ -112,19 +104,23 @@ const StatsSection = () => {
             ))}
           </div>
         </div>
+
+        {/* Decorative Shapes */}
         <div>
           <Image
-            className="absolute left-[50%] transform -translate-x-1/2 bottom-10 w-30 h-30"
+            // Adjusted position for counter_shape01.png
+            className="absolute left-[20%] transform -translate-x-1/2 bottom-10 w-30 h-30 opacity-30"
             width={100}
             height={100}
-            alt="idk"
+            alt="Decorative shape 1"
             src={"/images/counter/counter_shape01.png"}
           />
           <Image
-            className="absolute top-18 -right-5 w-50 h-50"
+            // Adjusted position for counter_shape02.png
+            className="absolute top-18 right-0 -mr-16 w-50 h-50 opacity-30"
             width={100}
             height={100}
-            alt="idk"
+            alt="Decorative shape 2"
             src={"/images/counter/counter_shape02.png"}
           />
         </div>

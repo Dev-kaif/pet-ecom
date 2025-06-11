@@ -64,7 +64,7 @@ const TestimonialSection = () => {
                 <div className="flex items-center justify-center space-x-4">
                   {" "}
                   <Image
-                    src="/images/author-avatar.jpg"
+                    src="/public/images"
                     alt="Uraney Jacke"
                     width={40}
                     height={40}
@@ -86,11 +86,11 @@ const TestimonialSection = () => {
 
             <div className="w-full lg:w-6/12 flex justify-center relative">
               <Image
-                src="/images/testimonial/testimonial_mask_img.svg"
+                src="/images/testimonial/testimonial.webp"
                 alt="Happy senior couple with their dog"
-                width={100}
-                height={100}
-                className="rounded-full z-10 w-[34vw] h-[34vw]"
+                width={1000}
+                height={1000}
+                className="rounded-full w-[34vw] h-[34vw] z-10"
               />
               {/* Reviews Badge */}
               <div className="absolute top-1/4 left-0 transform translate-x-1/2 -translate-y-1/2 z-30">

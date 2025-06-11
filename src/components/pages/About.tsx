@@ -88,19 +88,19 @@ const AboutPage: React.FC = () => {
           {/* Left Image Section */}
           <div className="lg:w-1/2 relative flex justify-center items-center">
             {/* Main Image */}
-            <div className="w-[25vw] h-[35vw] lg:max-w-full relative bg-red-400">
+            <div className="w-[25vw] h-[35vw] lg:max-w-full relative overflow-hidden">
               <Image
-                src="/images/about/about-main.jpg" // Placeholder for the main image with the woman and dog
+                src="/pages/about/women_dog.webp" 
                 alt="Woman holding a dog"
                 width={500}
-                height={500} // Adjust height as needed, or use layout="responsive" if dimensions are known
+                height={500} 
                 className="rounded-lg object-cover w-full h-full"
               />
             </div>
             {/* Overlay Image (Dog and Cat) */}
-            <div className="absolute bottom-4 right-4 sm:bottom-50 sm:right-0 w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] bg-yellow-200 rounded-lg shadow-lg overflow-hidden border-4 border-white">
+            <div className="absolute bottom-4 right-4 sm:bottom-50 sm:right-0 w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] rounded-lg shadow-lg overflow-hidden border-4 border-white">
               <Image
-                src="/images/about/about-overlay.jpg" // Placeholder for the overlay image with the cat and dog
+                src="/pages/about/cat_dog.webp"
                 alt="Cat and dog"
                 width={200}
                 height={200}
@@ -161,35 +161,19 @@ const AboutPage: React.FC = () => {
               region&apos;s premier healthcare network providing patient.
             </p>
 
-            <div className="text-center lg:text-left">
+            {/* <div className="text-center lg:text-left">
               <button className="btn-bubble btn-bubble-primary inline-flex items-center">
                 <span>
                   <span className="text-sm">Read More</span>
                   <MoveRight />
                 </span>
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
       {/* why us section */}
       <div className="relative py-20 bg-secondary-50 lg:py-32 overflow-hidden">
-        {" "}
-        <Image
-          src="/images/paw-print-bg.svg" // Create an SVG or PNG for a paw print background
-          alt="Paw print background graphic"
-          width={150}
-          height={150}
-          className="absolute top-10 left-0 opacity-20 -rotate-12 transform scale-125 pointer-events-none"
-        />
-        {/* Another subtle element if needed */}
-        <Image
-          src="/images/cat-outline-bg.svg"
-          alt="Cat outline background graphic"
-          width={100}
-          height={100}
-          className="absolute bottom-10 right-0 opacity-10 rotate-45 transform scale-125 pointer-events-none hidden md:block"
-        />
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="text-center ">
             <p className="text-secondary font-semibold text-base mb-2 flex items-center justify-center gap-2">

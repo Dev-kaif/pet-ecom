@@ -97,9 +97,11 @@ const DynamicShape02 = createDynamicImage(
 );
 
 export default function Hero() {
-
   return (
-    <section className="relative overflow-hidden -pt-10 py-20 lg:py-32 xl:py-40 bg-secondary-50">
+    <section
+      style={{ backgroundImage: "url('/images/banner/banner.webp')"  }}
+      className="relative overflow-hidden -pt-10 py-20 lg:py-32 xl:py-40 bg-secondary-50"
+    >
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center justify-between">
           <div className="lg:w-6/12 mb-10 lg:mb-0 text-center lg:text-left">

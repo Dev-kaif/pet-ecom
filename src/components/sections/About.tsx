@@ -17,9 +17,9 @@ const About = () => {
               transition={{ duration: 0.8 }}
             >
               <img
-                src="/images/about/about_img.png"
+                src="/images/about/about.webp"
                 alt="About Us"
-                className="max-w-full h-auto rounded-lg "
+                className="max-w-full h-auto rounded-full shadow-2xl "
               />
               <motion.div className=" absolute -bottom-15 -left-15 hidden md:block">
                 <img

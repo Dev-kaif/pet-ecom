@@ -47,11 +47,11 @@ const WhyUsSection = () => {
             />
             {/* place holder for dog */}
             <Image
-              src="/images/sections/about/dog.png" // Placeholder path for the dog image
+              src="/images/whyUs/whyus.png" // Placeholder path for the dog image
               alt="A Bernese Mountain Dog wearing a crown"
               width={450} // Adjust these based on the actual image size and desired display
               height={450} // Adjust these based on the actual image size and desired display
-              className="relative z-10 max-w-full h-auto rounded-full object-cover" // Ensure it's responsive and covers
+              className="relative z-10 max-w-full h-auto rounded-[35%] object-cover" // Ensure it's responsive and covers
             />
 
             <Image
@@ -59,8 +59,7 @@ const WhyUsSection = () => {
               alt="Crown"
               width={150}
               height={150}
-              className="absolute z-20 top-0 left-1/2 -translate-x-1/2 -translate-y-1/4 transform" // Adjust for crown position
-              style={{ color: "#904c8c" }} // Apply secondary color (if SVG supports currentColor)
+              className="absolute z-20 top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 transform rotate-10" 
             />
             <Image
              src="/images/whyUs/why_shape02.svg"  // Placeholder path
