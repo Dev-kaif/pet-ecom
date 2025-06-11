@@ -5,7 +5,7 @@ import Order from "@/backend/models/Order";
 import Cart from "@/backend/models/Cart";
 import Product from "@/backend/models/Product";
 import { authenticateAndAuthorize } from "@/backend/lib/auth";
-import { IAddress, IOrderItem, PaymentMethod, IProduct as BackendIProduct } from "@/types"; // Alias IProduct to BackendIProduct
+import { IAddress, IOrderItem, PaymentMethod, IProduct as BackendIProduct } from "@/types"; 
 import mongoose, { Document as MongooseDocument, Types } from "mongoose";
 
 export async function GET(request: NextRequest) {
@@ -123,7 +123,6 @@ export async function POST(request: NextRequest) {
       orderItems.push({
         productId: product._id as Types.ObjectId,
         name: product.name,
-        // *** MODIFICATION HERE: Use product.images[0] ***
         imageUrl: product.images[0] || "/images/placeholder-product.jpg",
         price: product.price,
         quantity: cartItem.quantity,

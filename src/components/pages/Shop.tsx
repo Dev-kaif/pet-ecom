@@ -456,7 +456,7 @@ const Shop: React.FC = () => {
             {!loading && !error && currentProducts.length > 0 && (
               <motion.div
                 ref={productGridRef}
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+                className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-4 "
                 key={currentPage} // Key change forces re-animation on page change
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

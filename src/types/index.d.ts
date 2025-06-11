@@ -183,3 +183,27 @@ export interface IPet {
   createdAt?: string;
   updatedAt?: string;
 }
+
+
+export interface ITeamMember {
+  _id: string;
+  name: string;
+  title: string;
+  description: string;
+  experience: string;
+  contact: {
+    phone: string;
+    email: string;
+    address: string;
+    social: {
+      facebook?: string;
+      twitter?: string;
+      instagram?: string;
+      youtube?: string;
+    };
+  };
+  imageUrl: string;
+  showOnHome?: boolean;
+  createdAt?: string; 
+  updatedAt?: string;
+}

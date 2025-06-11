@@ -29,6 +29,7 @@ import {
   LogOut,
   UserPlus,
   LayoutDashboard,
+  X, // Import X for the close button
 } from "lucide-react";
 
 import {
@@ -350,9 +351,20 @@ const Header = ({ isHomePage }: HeaderProps) => {
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
+  // --- NEW STATE FOR SEARCH ---
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<{
+    products: any[];
+    pets: any[];
+  } | null>(null);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const searchInputRef = useRef<HTMLInputElement>(null); // Ref for search input
+  const searchPopupRef = useRef<HTMLDivElement>(null); // Ref for search popup to detect clicks outside
+
   const initialHeaderRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   const SHOW_THRESHOLD = 500;
+  const DEBOUNCE_DELAY = 500; // milliseconds
 
   // Use NextAuth session for authentication status
   const { data: session, status } = useSession();
@@ -427,6 +439,10 @@ const Header = ({ isHomePage }: HeaderProps) => {
     setIsSearchPopupOpen(!isSearchPopupOpen);
     setIsMobileMenuOpen(false);
     setIsOffCanvasInfoOpen(false);
+    // Focus search input when popup opens
+    if (!isSearchPopupOpen && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current?.focus(), 100); // Small delay to ensure modal is rendered
+    }
   };
 
   const toggleOffCanvasInfo = () => {
@@ -470,6 +486,70 @@ const Header = ({ isHomePage }: HeaderProps) => {
       transition: { duration: 0.2, ease: "easeIn" },
     },
   };
+
+  // --- NEW: Handle search input change with debounce ---
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setIsSearching(true); // Indicate that search is in progress
+  };
+
+  // --- NEW: Debounce effect for search query ---
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (searchQuery.length > 2) {
+        // Only search if query is at least 3 characters long
+        fetchSearchResults();
+      } else if (searchQuery.length === 0) {
+        setSearchResults(null); // Clear results if search query is empty
+        setIsSearching(false);
+      }
+    }, DEBOUNCE_DELAY);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]); // Re-run effect when searchQuery changes
+
+  // --- NEW: Function to fetch search results from backend ---
+  const fetchSearchResults = useCallback(async () => {
+    if (searchQuery.trim() === "") {
+      setSearchResults(null);
+      setIsSearching(false);
+      return;
+    }
+    try {
+      // This API endpoint will be created in the next step
+      const response = await axios.get(
+        `/api/search?q=${encodeURIComponent(searchQuery)}`
+      );
+      setSearchResults(response.data); // Expects { products: [], pets: [] }
+      setIsSearching(false);
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      setSearchResults(null);
+      setIsSearching(false);
+    }
+  }, [searchQuery]); // Re-run when searchQuery changes
+
+  // --- NEW: Effect to handle clicks outside the search popup ---
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchPopupRef.current &&
+        !searchPopupRef.current.contains(event.target as Node) &&
+        isSearchPopupOpen
+      ) {
+        setIsSearchPopupOpen(false);
+        setSearchQuery(""); // Clear search query when closing
+        setSearchResults(null); // Clear results
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSearchPopupOpen]);
 
   return (
     <header>
@@ -632,6 +712,195 @@ const Header = ({ isHomePage }: HeaderProps) => {
         status={status}
         cartItemCount={cartItemCount}
       />
+
+      <AnimatePresence>
+        {isSearchPopupOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 flex items-start justify-center p-4 z-[9999]"
+          >
+            <motion.div
+              ref={searchPopupRef} // Attach ref for click outside detection
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -50, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-lg shadow-xl w-full max-w-2xl mt-20 relative p-6"
+            >
+              <button
+                onClick={() => setIsSearchPopupOpen(false)}
+                className="absolute top-1 right-1 text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X size={24} />
+              </button>
+              <div className="flex items-center border border-gray-300 rounded-lg p-2 focus-within:border-secondary focus-within:ring-1 focus-within:ring-secondary">
+                <Search size={24} className="text-gray-500 mr-2" />
+                <input
+                  ref={searchInputRef} // Attach ref to input
+                  type="text"
+                  placeholder="Search for products or pets..."
+                  className="flex-grow outline-none text-lg py-1 px-2"
+                  value={searchQuery}
+                  onChange={handleSearchInputChange}
+                />
+                {isSearching && searchQuery.length > 2 && (
+                  <div className="w-10 h-10">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 200 200"
+                    >
+                      <circle
+                        fill="#904C8C"
+                        stroke="#904C8C"
+                        strokeWidth="15"
+                        r="15"
+                        cx="40"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.4"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#904C8C"
+                        stroke="#904C8C"
+                        strokeWidth="15"
+                        r="15"
+                        cx="100"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="-.2"
+                        ></animate>
+                      </circle>
+                      <circle
+                        fill="#904C8C"
+                        stroke="#904C8C"
+                        strokeWidth="15"
+                        r="15"
+                        cx="160"
+                        cy="65"
+                      >
+                        <animate
+                          attributeName="cy"
+                          calcMode="spline"
+                          dur="2"
+                          values="65;135;65;"
+                          keySplines=".5 0 .5 1;.5 0 .5 1"
+                          repeatCount="indefinite"
+                          begin="0"
+                        ></animate>
+                      </circle>
+                    </svg>
+                  </div>
+                )}
+              </div>
+
+              {/* Search Results Dropdown */}
+              {searchQuery.length > 2 && !isSearching && searchResults && (
+                <div className="mt-4 max-h-80 overflow-y-auto border border-gray-200 rounded-md shadow-md">
+                  {searchResults.products.length === 0 &&
+                  searchResults.pets.length === 0 ? (
+                    <p className="p-4 text-gray-600 text-center">
+                      No results found for &quot;{searchQuery}&quot;.
+                    </p>
+                  ) : (
+                    <>
+                      {searchResults.products.length > 0 && (
+                        <div className="p-4 border-b border-gray-100">
+                          <h4 className="text-lg font-semibold text-primary mb-2">
+                            Products
+                          </h4>
+                          <ul>
+                            {searchResults.products.map((product: any) => (
+                              <li
+                                key={product._id}
+                                className="py-2 hover:bg-gray-50 rounded-md"
+                              >
+                                <Link
+                                  href={`/shop/products/${product._id}`} // Adjust path to your product detail page
+                                  className="flex items-center gap-3 text-gray-800 hover:text-secondary"
+                                  onClick={() => setIsSearchPopupOpen(false)} // Close popup on click
+                                >
+                                  {product.images && product.images[0] && (
+                                    <Image
+                                      unoptimized
+                                      src={product.images[0]}
+                                      alt={product.name}
+                                      width={40}
+                                      height={40}
+                                      objectFit="cover"
+                                      className="rounded-md"
+                                    />
+                                  )}
+                                  <span>{product.name}</span>
+                                  <span className="ml-auto text-sm text-gray-500">
+                                    ${product.price?.toFixed(2)}
+                                  </span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {searchResults.pets.length > 0 && (
+                        <div className="p-4">
+                          <h4 className="text-lg font-semibold text-primary mb-2">
+                            Pets
+                          </h4>
+                          <ul>
+                            {searchResults.pets.map((pet: any) => (
+                              <li
+                                key={pet._id}
+                                className="py-2 hover:bg-gray-50 rounded-md"
+                              >
+                                <Link
+                                  href={`/allPets/petDetails/${pet._id}`} // Adjust path to your pet detail page
+                                  className="flex items-center gap-3 text-gray-800 hover:text-secondary"
+                                  onClick={() => setIsSearchPopupOpen(false)} // Close popup on click
+                                >
+                                  {pet.images && pet.images[0] && (
+                                    <Image
+                                      src={pet.images[0]}
+                                      alt={pet.name}
+                                      width={40}
+                                      height={40}
+                                      objectFit="cover"
+                                      className="rounded-md"
+                                    />
+                                  )}
+                                  <span>
+                                    {pet.name} ({pet.breed})
+                                  </span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

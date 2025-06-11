@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/app/admin/page.tsx
 "use client";
 import React, { useState, useCallback } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
@@ -12,12 +10,14 @@ import Sidebar from "@/components/admin/Sidebar";
 import ProductManagement from "@/components/admin/ProductManagement";
 import OrderManagement from "@/components/admin/OrderManagement";
 import PetManagement from "@/components/admin/PetManagement";
+import TeamManagement from "@/components/admin/TeamManagement"; // Import TeamManagement
 
 export default function App() {
   const router = useRouter();
 
   const { data: session, status } = useSession();
-  const [activeTab, setActiveTab] = useState<"products" | "orders" | "pets">(
+  // --- CHANGE 1: Update activeTab state type to include 'team' ---
+  const [activeTab, setActiveTab] = useState<"products" | "orders" | "pets" | "team">(
     "products"
   );
   const [message, setMessage] = useState<{
@@ -150,6 +150,10 @@ export default function App() {
             )}
             {activeTab === "pets" && (
               <PetManagement showMessage={showMessage} />
+            )}
+            {/* --- CHANGE 2: Add conditional rendering for TeamManagement --- */}
+            {activeTab === "team" && (
+              <TeamManagement showMessage={showMessage} />
             )}
           </div>
         </main>

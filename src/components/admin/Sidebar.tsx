@@ -1,11 +1,11 @@
 // src/components/admin/Sidebar.tsx
 import React from "react";
-import { X, Package, ShoppingBag, PawPrint } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react"; // Make sure framer-motion is installed
+import { X, Package, ShoppingBag, PawPrint, Users } from "lucide-react"; // Import Users icon
+import { motion, AnimatePresence } from "framer-motion"; // Correct import for Framer Motion
 
 interface SidebarProps {
-  activeTab: "products" | "orders" | "pets";
-  setActiveTab: (tab: "products" | "orders" | "pets") => void;
+  activeTab: "products" | "orders" | "pets" | "team"; 
+  setActiveTab: (tab: "products" | "orders" | "pets" | "team") => void;
   isOpen: boolean;
   toggleSidebar: () => void;
 }
@@ -88,6 +88,22 @@ const Sidebar: React.FC<SidebarProps> = ({
                 }`}
               >
                 <PawPrint size={20} className="mr-3" /> Pet Management
+              </button>
+            </li>
+            {/* New Team Management Tab */}
+            <li>
+              <button
+                onClick={() => {
+                  setActiveTab("team"); // Set active tab to 'team'
+                  if (window.innerWidth < 1024) toggleSidebar();
+                }}
+                className={`flex items-center w-full px-4 py-3 rounded-lg text-lg font-medium transition-colors duration-200 ${
+                  activeTab === "team"
+                    ? "bg-secondary text-white shadow-md"
+                    : "text-primary hover:bg-gray-100 hover:text-secondary"
+                }`}
+              >
+                <Users size={20} className="mr-3" /> Team Management
               </button>
             </li>
           </ul>
