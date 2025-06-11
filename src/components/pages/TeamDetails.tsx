@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion } from "motion/react"; // Corrected import for motion
+import { motion } from "motion/react";
 import {
   Phone,
   Mail,
