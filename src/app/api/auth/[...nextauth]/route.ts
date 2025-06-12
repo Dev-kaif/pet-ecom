@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import dbConnect from '@/backend/lib/mongodb';
 import User, { UserDocument } from "@/backend/models/User";
 import bcrypt from "bcrypt";
+import { JWT_SECRET } from "@/backend/lib/config";
 
 const authOptions: NextAuthOptions = {
   providers: [
@@ -62,7 +63,7 @@ const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
 
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: JWT_SECRET,
   pages: {
     signIn: "/login",
   },

@@ -1,25 +1,31 @@
 "use client";
 
 import React from "react";
-import { motion } from "motion/react";
-import { Check } from "lucide-react"; // For the checkmark icon
-import { ArrowRight } from "lucide-react"; // For the arrow icon on the button
+import { motion } from "framer-motion"; // use correct import for framer-motion
+import { Check, ArrowRight } from "lucide-react";
 
 interface PricingCardProps {
   plan: string;
   price: number;
   features: string[];
-  isHighlighted?: boolean; // If one plan needs to be visually distinct (e.g., "Most Popular")
+  isHighlighted?: boolean;
 }
 
-const PricingCard: React.FC<PricingCardProps> = ({ plan, price, features }) => {
+const PricingCard: React.FC<PricingCardProps> = ({
+  plan,
+  price,
+  features,
+  isHighlighted,
+}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="bg-white p-6 rounded-xl shadow-md flex flex-col items-start text-start h-full"
+      className={`bg-white p-6 rounded-xl shadow-md flex flex-col items-start text-start h-full ${
+        isHighlighted ? "border-2 border-primary scale-105" : ""
+      }`}
       style={{
         width: "370px",
         minHeight: "500px",
@@ -27,15 +33,11 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, price, features }) => {
         margin: "0 auto",
       }}
     >
-      <h3 className="text-3xl font-bold text-primary mb-4 ">{plan}</h3>
-      <div className="text-6xl font-extrabold text-secondary mb-6">
-        ${price}
-        <span className="text-lg font-normal text-gray-500">/mo</span>
+      <h3 className="text-3xl font-bold text-primary mb-4">{plan} Plan</h3>
+      <div className="text-4xl font-extrabold text-secondary mb-6">
+        ₹{price}
+        <span className="text-lg font-normal text-gray-500">/month</span>
       </div>
-
-      <p className="text-gray-600 mb-6 flex-grow">
-        When An Unknown Printer Took A Galley Of Type And Scrambled Make.
-      </p>
 
       <ul className="text-left w-full space-y-3 mb-8">
         {features.map((feature, index) => (
@@ -46,8 +48,8 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, price, features }) => {
         ))}
       </ul>
 
-      <button className="btn-bubble btn-bubble-primary">
-        <span>
+      <button className="btn-bubble btn-bubble-primary mt-auto">
+        <span className="flex items-center">
           Choose Plan <ArrowRight size={18} className="ml-2" />
         </span>
       </button>
@@ -59,35 +61,35 @@ const PricingSection: React.FC = () => {
   const pricingPlans = [
     {
       plan: "Starter",
-      price: 19,
+      price: 299,
       features: [
-        "Pet Grooming",
-        "Physical Exam",
-        "Body Trimming/Styling",
-        "Paw Massage",
-        "3x Vaccination (7 in 1)",
+        "Access to basic pet products & toys",
+        "2 vet consultations per month",
+        "Standard delivery on orders",
+        "Basic customer support",
       ],
     },
     {
       plan: "Basic",
-      price: 29,
+      price: 799,
       features: [
-        "Pet Grooming",
-        "Physical Exam",
-        "Body Trimming/Styling",
-        "Paw Massage",
-        "3x Vaccination (7 in 1)",
+        "Unlimited access to medicines, toys, and accessories",
+        "Unlimited vet consultations (online & in-person)",
+        "Priority delivery and faster service",
+        "Access to grooming and training bookings",
+        "Enhanced customer support",
       ],
+      isHighlighted: true,
     },
     {
       plan: "Professional",
-      price: 99,
+      price: 1999,
       features: [
-        "Pet Grooming",
-        "Physical Exam",
-        "Body Trimming/Styling",
-        "Paw Massage",
-        "3x Vaccination (7 in 1)",
+        "Full access to all pet products and services",
+        "Advanced booking options and management tools",
+        "Marketing and promotional support for businesses",
+        "Dedicated account manager",
+        "24/7 priority support",
       ],
     },
   ];
@@ -102,6 +104,7 @@ const PricingSection: React.FC = () => {
               plan={plan.plan}
               price={plan.price}
               features={plan.features}
+              isHighlighted={plan.isHighlighted}
             />
           ))}
         </div>

@@ -6,6 +6,7 @@ import { Plus, X, UploadCloud, Loader2 } from "lucide-react"; // Import new icon
 import { motion, AnimatePresence } from "framer-motion";
 import { IProduct } from "@/types"; // Ensure IProduct is imported from your types file
 import { Types } from "mongoose"; // For formatting ObjectId
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "@/backend/lib/config";
 
 // Utility to ensure MongoDB ObjectId strings are valid for display/forms
 const formatObjectId = (id: Types.ObjectId | string | undefined): string => {
@@ -33,13 +34,6 @@ type ProductFormData = Omit<
 > & {
   images: string[];
 };
-
-// --- Cloudinary Configuration (Replace with your actual values, ideally from environment variables) ---
-const CLOUDINARY_CLOUD_NAME =
-  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "your_cloudinary_cloud_name"; // e.g., "dtgbnnv5p"
-const CLOUDINARY_UPLOAD_PRESET =
-  process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ||
-  "your_cloudinary_upload_preset"; // e.g., "ml_default"
 
 const ProductManagement: React.FC<ProductManagementProps> = ({
   showMessage,

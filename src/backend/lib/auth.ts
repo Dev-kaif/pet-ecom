@@ -2,8 +2,8 @@
 import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthenticatedUser } from '@/types';
+import { JWT_SECRET } from './config';
 
-const JWT_SECRET= process.env.NEXTAUTH_SECRET as string;
 
 if (!JWT_SECRET) {
   throw new Error('Please define the NEXTAUTH_SECRET environment variable inside .env.local');

@@ -1,9 +1,9 @@
 import mongoose, { Mongoose } from 'mongoose';
+import { MONGODB_URL } from './config';
 
-const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+if (!MONGODB_URL) {
+  throw new Error('Please define the MONGODB_URL environment variable inside .env.local');
 }
 
 // Define global type for caching
@@ -31,7 +31,7 @@ async function dbConnect(): Promise<Mongoose> {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI as string, opts);
+    cached.promise = mongoose.connect(MONGODB_URL as string, opts);
   }
 
   cached.conn = await cached.promise;

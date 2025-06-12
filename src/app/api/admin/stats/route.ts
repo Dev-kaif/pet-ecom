@@ -7,6 +7,7 @@ import Order from "@/backend/models/Order"; // Assuming you have an Order model
 import Pet from "@/backend/models/Pet"; // Assuming you have a Pet model
 import TeamMember from "@/backend/models/TeamMember"; // Assuming you have a TeamMember model
 import GalleryImage from "@/backend/models/Gallery"; // Assuming you have a GalleryImage model
+import Reservation from "@/backend/models/Reservation"; // Import the Reservation model
 
 import { authenticateAndAuthorize } from "@/backend/lib/auth"; // Your authentication middleware
 
@@ -71,6 +72,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // --- NEW: Fetch total appointments count ---
+    let totalAppointments = 0;
+    try {
+      totalAppointments = await Reservation.countDocuments({});
+    } catch (err) {
+      console.warn("Reservation model not found or error counting appointments:", err);
+    }
+    // --- END NEW ---
+
     // You can add more statistics here as needed, e.g.:
     // const totalPendingOrders = await Order.countDocuments({ status: 'pending' });
     // const totalRevenue = await Order.aggregate([ { $group: { _id: null, total: { $sum: '$totalAmount' } } } ]);
@@ -86,7 +96,7 @@ export async function GET(request: NextRequest) {
           totalPets,
           totalTeamMembers,
           totalGalleryImages,
-          // Add other stats here
+          totalAppointments,
         },
       },
       { status: 200 }

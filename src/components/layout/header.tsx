@@ -226,7 +226,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
           <li className="relative">
             <button
               onClick={toggleSearchPopup}
-              className="text-gray-800 hover:text-primary transition-colors focus:outline-none"
+              className="text-gray-800 hover:text-primary transition-colors focus:outline-none mt-1"
             >
               <Search size={25} />
             </button>

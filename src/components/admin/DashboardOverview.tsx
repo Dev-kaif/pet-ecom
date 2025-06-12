@@ -1,7 +1,15 @@
 // src/components/admin/DashboardOverview.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useCallback } from "react";
-import { Users, Package, ShoppingBag, PawPrint, Image as ImageIcon, Briefcase } from "lucide-react"; // Import relevant icons
+import {
+  Users,
+  Package,
+  ShoppingBag,
+  PawPrint,
+  Image as ImageIcon,
+  Briefcase,
+  CalendarCheck, // Import the CalendarCheck icon for appointments
+} from "lucide-react"; // Import relevant icons
 
 interface DashboardOverviewProps {
   showMessage: (type: "success" | "error", text: string) => void;
@@ -14,6 +22,7 @@ interface DashboardStats {
   totalPets: number;
   totalTeamMembers: number;
   totalGalleryImages: number;
+  totalAppointments: number; // Add the new totalAppointments stat
   // Add other stats here as your API expands
 }
 
@@ -78,7 +87,8 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ showMessage }) =>
           <StatCard icon={<PawPrint size={24} />} title="Total Pets" value={stats.totalPets} />
           <StatCard icon={<Briefcase size={24} />} title="Team Members" value={stats.totalTeamMembers} />
           <StatCard icon={<ImageIcon size={24} />} title="Gallery Images" value={stats.totalGalleryImages} />
-          {/* Add more StatCards here for other metrics */}
+          {/* New StatCard for Total Appointments */}
+          <StatCard icon={<CalendarCheck size={24} />} title="Total Appointments" value={stats.totalAppointments} />
         </div>
       )}
       {!loading && !error && !stats && (

@@ -223,3 +223,19 @@ export interface IGalleryImage {
   createdAt?: string; 
   updatedAt?: string; 
 }
+
+export interface IReservation {
+  _id: string | Types.ObjectId; 
+  fullName: string;
+  email: string;
+  phone: string;
+  date: string;
+  species: string;
+  breed: string;
+  reason: string;
+  specialNote?: string; 
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed'; 
+  adminNotes?: string; 
+  createdAt: Date;
+  updatedAt: Date;
+}

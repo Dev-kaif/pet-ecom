@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/reservation.tsx
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { ArrowRight, Calendar } from "lucide-react";
 
 const ReservationPage: React.FC = () => {
@@ -10,12 +10,15 @@ const ReservationPage: React.FC = () => {
     fullName: "",
     email: "",
     phone: "",
-    date: "",
+    date: "", // Consider using a date picker library for better UX
     species: "",
     breed: "",
     reason: "",
     specialNote: "",
   });
+  const [loading, setLoading] = useState(false); // New state for loading feedback
+  const [error, setError] = useState<string | null>(null); // New state for error messages
+  const [success, setSuccess] = useState<string | null>(null); // New state for success messages
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -26,24 +29,59 @@ const ReservationPage: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log("Form data submitted:", formData);
-    alert("Appointment requested!"); // Simple alert for demonstration
+    setLoading(true); // Start loading
+    setError(null);    // Clear previous errors
+    setSuccess(null);  // Clear previous success messages
+
+    try {
+      const response = await fetch("/api/reservation", { 
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Reservation form data submitted successfully:", result);
+      setSuccess("Your appointment request has been sent successfully!"); // Success message
+      setFormData({ // Clear form fields
+        fullName: "",
+        email: "",
+        phone: "",
+        date: "",
+        species: "",
+        breed: "",
+        reason: "",
+        specialNote: "",
+      });
+    } catch (err: any) {
+      console.error("Error submitting reservation form:", err);
+      setError(err.message || "Failed to request appointment. Please try again."); // Error message
+    } finally {
+      setLoading(false); // End loading
+    }
   };
 
   return (
-    <div className="bg-white py-16 lg:py-24 min-h-screen relative overflow-hidden">
-      {" "}
-      {/* Added relative and overflow-hidden */}
-      <div className="container mx-auto px-4 sm:px-16 lg:px-32 flex flex-col lg:flex-row lg:items-start justify-center gap-8 lg:gap-12 relative z-10">
-        {" "}
-        {/* Adjusted gap and alignment */}
-        {/* Left Side: Form - Now wider and standalone */}
+    <div
+      style={{
+        backgroundImage: 'url("/pages/reservtion/dog.webp")',
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+      className="bg-white py-16 lg:py-24 min-h-screen relative overflow-hidden"
+    >
+      <div className="container mx-auto px-4 sm:px-16 lg:px-32 flex flex-col lg:flex-row lg:items-start justify-start gap-8 lg:gap-12 relative z-10">
         <div className="w-full lg:w-[65%] xl:w-[70%] bg-newGray rounded-xl shadow-lg p-6 md:p-16">
-          {" "}
-          {/* Adjusted width to be much larger */}
           <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
             Request a Schedule
           </h2>
@@ -205,24 +243,27 @@ const ReservationPage: React.FC = () => {
             </div>
 
             {/* Book Now Button */}
-            <button className="btn-bubble btn-bubble-primary" type="submit">
+            <button
+              className="btn-bubble btn-bubble-primary"
+              type="submit"
+              disabled={loading} // Disable button when loading
+            >
               <span>
-                Book Now <ArrowRight size={20} className="ml-2" />
+                {loading ? "Booking..." : "Book Now"}{" "}
+                <ArrowRight size={20} className="ml-2" />
               </span>
             </button>
+
+            {/* Displaying feedback messages */}
+            {error && (
+              <p className="text-red-500 text-sm mt-2 font-medium">{error}</p>
+            )}
+            {success && (
+              <p className="text-green-600 text-sm mt-2 font-medium">
+                {success}
+              </p>
+            )}
           </form>
-        </div>
-        {/* Right Side: Image - Now positioned outside the form box and responsive */}
-        <div className="hidden lg:block lg:w-[35%] xl:w-[30%] relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Image
-              src="/images/labrador-cat.png" // Ensure this image path is correct
-              alt="Labrador and Persian Cat"
-              width={700} // Increased base width for a larger image
-              height={700} // Increased base height
-              className="object-contain w-full h-auto max-h-[80vh] drop-shadow-md" // More responsive sizing and shadow
-            />
-          </div>
         </div>
       </div>
     </div>

@@ -12,16 +12,24 @@ import OrderManagement from "@/components/admin/OrderManagement";
 import PetManagement from "@/components/admin/PetManagement";
 import TeamManagement from "@/components/admin/TeamManagement";
 import GalleryManagement from "@/components/admin/GalleryManagement";
-import DashboardOverview from "@/components/admin/DashboardOverview"; // Import the new DashboardOverview component
+import DashboardOverview from "@/components/admin/DashboardOverview";
+import AppointmentManagement from "@/components/admin/AppointmentManagement"; 
 
-export default function App() {
+export default function AdminPage() { 
   const router = useRouter();
 
   const { data: session, status } = useSession();
-  // Update activeTab state type to include 'dashboard'
-  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "orders" | "pets" | "team" | "gallery">(
-    "dashboard" // Set default active tab to "dashboard"
-  );
+  // Update activeTab state type to include 'appointments'
+  const [activeTab, setActiveTab] = useState<
+    | "dashboard"
+    | "products"
+    | "orders"
+    | "pets"
+    | "team"
+    | "gallery"
+    | "appointments" // <--- Added "appointments"
+  >("dashboard"); // Set default active tab to "dashboard"
+
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -144,7 +152,7 @@ export default function App() {
             )}
 
             {/* Render components based on activeTab */}
-            {activeTab === "dashboard" && ( // Conditional rendering for DashboardOverview
+            {activeTab === "dashboard" && (
               <DashboardOverview showMessage={showMessage} />
             )}
             {activeTab === "products" && (
@@ -161,6 +169,9 @@ export default function App() {
             )}
             {activeTab === "team" && (
               <TeamManagement showMessage={showMessage} />
+            )}
+            {activeTab === "appointments" && ( // <--- NEW: Conditional rendering for Appointments
+              <AppointmentManagement showMessage={showMessage} />
             )}
           </div>
         </main>

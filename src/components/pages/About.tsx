@@ -1,7 +1,8 @@
 import Image from "next/image";
-import { CheckCircle, FileText, Heart, Plus } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { NumberTicker } from "../ui/NumberTicker";
 import Team from "../sections/Team";
+import { ShieldCheck, HeartHandshake, ShoppingCart, Users, Sparkles } from "lucide-react";
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -53,22 +54,34 @@ interface CounterData {
 const AboutPage: React.FC = () => {
   const features = [
     {
-      icon: <Plus className="w-12 h-12 text-secondary" strokeWidth={1.5} />,
-      title: "Health Guarantee",
+      icon: <ShieldCheck className="w-12 h-12 text-secondary" strokeWidth={1.5} />,
+      title: "Trust & Transparency",
       description:
-        "Duis aute irure dolor in reprehenderit voluptate velit esse cesserversets are their health best care",
+        "We partner only with certified vets and verified pet businesses to ensure your pet’s safety and well-being.",
     },
     {
-      icon: <Heart className="w-12 h-12 text-secondary" strokeWidth={1.5} />, // Example for Ethical Breeding - heart or animal outline
-      title: "Ethical breeding",
+      icon: <HeartHandshake className="w-12 h-12 text-secondary" strokeWidth={1.5} />,
+      title: "Compassion",
       description:
-        "Duis aute irure dolor in reprehenderit voluptate velit esse cesserversets are their health best care",
+        "We believe every pet deserves love, care, and respect. Our platform reflects this commitment in every interaction.",
     },
     {
-      icon: <FileText className="w-12 h-12 text-secondary" strokeWidth={1.5} />,
-      title: "Transparent Policy",
+      icon: <ShoppingCart className="w-12 h-12 text-secondary" strokeWidth={1.5} />,
+      title: "Convenience",
       description:
-        "Duis aute irure dolor in reprehenderit voluptate velit esse cesserversets are their health best care",
+        "Simplifying pet care by bringing products and services together in one easy-to-use platform.",
+    },
+    {
+      icon: <Users className="w-12 h-12 text-secondary" strokeWidth={1.5} />,
+      title: "Community",
+      description:
+        "Building strong connections between pet owners and service providers to support pets’ health and happiness.",
+    },
+    {
+      icon: <Sparkles className="w-12 h-12 text-secondary" strokeWidth={1.5} />,
+      title: "Innovation",
+      description:
+        "Continuously improving our platform with the latest technology to serve pets and their parents better.",
     },
   ];
 
@@ -90,10 +103,10 @@ const AboutPage: React.FC = () => {
             {/* Main Image */}
             <div className="w-[25vw] h-[35vw] lg:max-w-full relative overflow-hidden">
               <Image
-                src="/pages/about/women_dog.webp" 
+                src="/pages/about/women_dog.webp"
                 alt="Woman holding a dog"
                 width={500}
-                height={500} 
+                height={500}
                 className="rounded-lg object-cover w-full h-full"
               />
             </div>
@@ -118,9 +131,12 @@ const AboutPage: React.FC = () => {
               We&apos;ll Make Your Pets <br /> Really Happy
             </h2>
             <p className="text-gray-700 leading-relaxed mb-6">
-              We work with you to develop individualized care plans, including
-              management of chronic diseases. We are committed to being
-              region&apos;s premier healthcare network providing patient.
+              We are a comprehensive pet care platform dedicated to connecting
+              pet owners with trusted veterinarians, reliable pet shops, and
+              expert service providers. Our mission is to simplify pet parenting
+              by offering a convenient, all-in-one portal where you can find
+              everything your pet needs — from medicines and toys to grooming
+              and health consultations.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -156,9 +172,12 @@ const AboutPage: React.FC = () => {
             </div>
 
             <p className="text-gray-700 leading-relaxed mb-8">
-              We work with you to develop individualized care plans, including
-              management chronic diseases. We are committed to being
-              region&apos;s premier healthcare network providing patient.
+              Our mission is to make pet care accessible, reliable, and
+              enjoyable for every pet owner. We strive to create a trustworthy
+              platform where quality products and professional services come
+              together to support the health and happiness of pets everywhere.
+              By empowering pet businesses with digital tools and a wider
+              audience, we aim to build a vibrant pet care community.
             </p>
 
             {/* <div className="text-center lg:text-left">
@@ -190,8 +209,11 @@ const AboutPage: React.FC = () => {
               See How Petpal Can Help
             </h2>
             <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              amily and deserves ets are the best care
+              We envision a world where every pet receives the best care
+              possible — easily and conveniently. By bridging the gap between
+              pet owners and trusted service providers, we aim to become the
+              leading pet care platform that nurtures happy, healthy pets and
+              strengthens the bond between pets and their families.
             </p>
           </div>
 
@@ -237,7 +259,7 @@ const AboutPage: React.FC = () => {
       </div>
 
       {/* team */}
-      <Team/>
+      <Team />
     </div>
   );
 };

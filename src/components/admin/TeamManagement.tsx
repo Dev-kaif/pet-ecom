@@ -6,6 +6,7 @@ import { Plus, X, UploadCloud, Loader2 } from "lucide-react"; // Import new icon
 import { motion, AnimatePresence } from "framer-motion";
 import { ITeamMember } from "@/types";
 import { Types } from "mongoose";
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "@/backend/lib/config";
 
 const formatObjectId = (id: Types.ObjectId | string | undefined): string => {
   if (typeof id === "string") {
@@ -39,10 +40,6 @@ type TeamMemberFormData = Omit<
     };
   };
 };
-
-// --- Cloudinary Configuration (Replace with your actual values, ideally from environment variables) ---
-const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "your_cloudinary_cloud_name"; // e.g., "dtgbnnv5p"
-const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "your_cloudinary_upload_preset"; // e.g., "ml_default"
 
 const TeamManagement: React.FC<TeamManagementProps> = ({ showMessage }) => {
   const [teamMembers, setTeamMembers] = useState<ITeamMember[]>([]);
