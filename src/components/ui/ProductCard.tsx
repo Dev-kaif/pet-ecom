@@ -237,7 +237,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <motion.div
       onClick={handleCardClick}
-      className="relative bg-white rounded-lg shadow-[0px_0px_0px_1px_rgba(0,0,0,0.06),0px_1px_1px_-0.5px_rgba(0,0,0,0.06),0px_3px_3px_-1.5px_rgba(0,0,0,0.06),_0px_6px_6px_-3px_rgba(0,0,0,0.06),0px_12px_12px_-6px_rgba(0,0,0,0.06),0px_24px_24px_-12px_rgba(0,0,0,0.06)] overflow-hidden group cursor-pointer transition-transform duration-300 w-[16vw]"
+      // REMOVED fixed width 'w-[16vw]' to allow responsiveness via parent grid
+      className="relative bg-white rounded-lg shadow-[0px_0px_0px_1px_rgba(0,0,0,0.06),0px_1px_1px_-0.5px_rgba(0,0,0,0.06),0px_3px_3px_-1.5px_rgba(0,0,0,0.06),_0px_6px_6px_-3px_rgba(0,0,0,0.06),0px_12px_12px_-6px_rgba(0,0,0,0.06),0px_24px_24px_-12px_rgba(0,0,0,0.06)] overflow-hidden group cursor-pointer transition-transform duration-300 w-full"
       variants={cardVariants}
       initial="initial"
       animate="animate"
@@ -305,7 +306,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Add to Cart Button - ONLY show if authenticated */}
         {status === 'authenticated' && (
           <motion.button
-            className="btn-bubble btn-bubble-primary !rounded-lg !absolute bottom-2 px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-bubble btn-bubble-primary !rounded-lg !absolute bottom-2 px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed w-[calc(100%-1rem)] left-1/2 -translate-x-1/2" // Added width and centering for better mobile display
             variants={buttonChildVariants}
             transition={{ duration: 0.1, ease: "easeInOut" }}
             aria-label={isProductInCart ? "Go to Cart" : "Add product to cart"}
