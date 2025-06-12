@@ -8,8 +8,7 @@ import { authenticateAndAuthorize } from "@/backend/lib/auth"; // Assuming you h
 
 export async function GET(request: NextRequest, context: any) {
   await dbConnect();
-  const { params } = context;
-  const { id } = params;
+  const { id } = await context.params; 
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(
@@ -66,8 +65,7 @@ export async function PUT(request: NextRequest, context: any) {
   }
 
   await dbConnect();
-  const { params } = context;
-  const { id } = params;
+  const { id } = await context.params; 
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(
@@ -190,8 +188,7 @@ export async function DELETE(request: NextRequest, context: any) {
   }
 
   await dbConnect();
-  const { params } = context;
-  const { id } = params;
+  const { id } = await context.params; 
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(

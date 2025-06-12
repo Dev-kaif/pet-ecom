@@ -13,8 +13,7 @@ export async function DELETE(request: NextRequest, context: any) {
   const authenticatedUser = authResult.user!;
 
   await dbConnect();
-  const { params } = context;
-  const { id } = params;
+  const { id } = await context.params; 
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(

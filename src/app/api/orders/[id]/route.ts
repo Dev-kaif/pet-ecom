@@ -13,8 +13,7 @@ export async function GET(request: NextRequest, context: any) {
   const authenticatedUser = authResult.user!;
 
   await dbConnect();
-  const { params } = context;
-  const { id } = params;
+  const { id } = await context.params; 
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(
@@ -66,8 +65,7 @@ export async function PUT(request: NextRequest, context: any) {
   if (authResult.response) return authResult.response;
 
   await dbConnect();
-  const { params } = context;
-  const { id } = params;
+  const { id } = await context.params; 
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(
@@ -143,8 +141,7 @@ export async function DELETE(request: NextRequest, context: any) {
   const authenticatedUser = authResult.user!;
 
   await dbConnect();
-  const { params } = context;
-  const { id } = params;
+  const { id } = await context.params; 
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(

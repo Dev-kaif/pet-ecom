@@ -19,14 +19,13 @@ import {
   User as UserIcon,
   Save,
   LogOut,
-} from "lucide-react"; // Added Save and X icons
+  ShoppingBag, // Added ShoppingBag icon for the orders button
+} from "lucide-react";
 import { motion } from "motion/react";
 import { Types } from "mongoose"; // For generating temporary IDs for new addresses
 import Loader from "../ui/Loader";
-import {
-  CLOUDINARY_CLOUD_NAME,
-  CLOUDINARY_UPLOAD_PRESET,
-} from "@/backend/lib/config";
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "@/backend/lib/config";
+import Link from 'next/link';
 
 // Utility to ensure MongoDB ObjectId strings are valid for display/forms
 const formatObjectId = (id: Types.ObjectId | string | undefined): string => {
@@ -637,6 +636,20 @@ export default function UserProfilePage() {
               </button>
             </div>
           </form>
+        </section>
+
+        {/* See All My Orders Button */}
+        <section className="mb-8 p-6 bg-blue-50 rounded-lg shadow-sm border border-blue-100 flex justify-center">
+          <Link href="/orders" passHref>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-primary hover:bg-secondary text-white font-bold py-3 px-8 rounded-lg shadow-md transition duration-300 flex items-center text-lg"
+            >
+              <ShoppingBag size={24} className="mr-3" />
+              See All My Orders
+            </motion.button>
+          </Link>
         </section>
 
         {/* Address Management Section - Inline Editing */}

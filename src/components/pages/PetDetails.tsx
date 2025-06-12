@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -253,7 +254,7 @@ const PetDetailsPage = () => {
     if (pet) {
       fetchSuggestedPets();
     }
-  }, [id, pet, pet?.category]); // Re-fetch suggested pets if main pet's category changes
+  }, [id, pet?.category]); // Re-fetch suggested pets if main pet's category changes
 
   if (loading) {
     return (

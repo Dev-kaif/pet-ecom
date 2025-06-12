@@ -12,9 +12,8 @@ import mongoose from "mongoose";
 export async function GET(request: NextRequest, context: any) {
   
   await dbConnect();
-  const { params } = context;
+  const { id } = await context.params; 
 
-  const { id } = params;
   const productId = id;
 
   if (!mongoose.Types.ObjectId.isValid(productId)) {
@@ -60,8 +59,7 @@ export async function POST(request: NextRequest, context: any) {
   const authenticatedUser = authResult.user!;
 
   await dbConnect();
-  const { params } = context;
-  const { id } = params;
+  const { id } = await context.params; 
   const productId = id;
 
   if (!mongoose.Types.ObjectId.isValid(productId)) {

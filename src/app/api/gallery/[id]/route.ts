@@ -9,8 +9,7 @@ import { authenticateAndAuthorize } from "@/backend/lib/auth"; // Assuming you h
 
 export async function GET(request: NextRequest, context: any) {
   await dbConnect();
-  const { params } = context;
-  const { id } = params; // Get the ID from the URL parameters
+  const { id } = await context.params; 
 
   // Validate if the provided ID is a valid Mongoose ObjectId format
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -65,8 +64,7 @@ export async function PUT(request: NextRequest, context: any) {
   }
 
   await dbConnect();
-  const { params } = context;
-  const { id } = params; // Get the ID from the URL parameters
+  const { id } = await context.params;  // Get the ID from the URL parameters
 
   // Validate if the provided ID is a valid Mongoose ObjectId format
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -161,8 +159,7 @@ export async function DELETE(request: NextRequest, context: any) {
   }
 
   await dbConnect();
-  const { params } = context;
-  const { id } = params; // Get the ID from the URL parameters
+  const { id } = await context.params;  // Get the ID from the URL parameters
 
   // Validate if the provided ID is a valid Mongoose ObjectId format
   if (!mongoose.Types.ObjectId.isValid(id)) {

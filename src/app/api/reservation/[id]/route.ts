@@ -26,8 +26,7 @@ export async function PUT(request: NextRequest, context: any) {
 
   await dbConnect();
 
-  const { params } = context;
-  const { id } = params; // Get the reservation ID from the URL
+  const { id } = await context.params; // Get the reservation ID from the URL
 
   try {
     const body: UpdateReservationRequestBody = await request.json();
@@ -188,8 +187,7 @@ export async function DELETE(request: NextRequest, context: any) {
 
   await dbConnect();
 
-  const { params } = context;
-  const { id } = params;
+  const { id } = await context.params; 
 
   try {
     // 1. Fetch the reservation BEFORE deleting it to get client's details
