@@ -150,7 +150,7 @@ export default function Hero() {
                   transition={{ duration: 0.8, delay: 0.6 }}
                 >
                   <Link
-                    href="/book-vet"
+                    href="/allPets"
                     className="btn-bubble btn-bubble-secondary"
                   >
                     <span>
@@ -167,7 +167,7 @@ export default function Hero() {
                   transition={{ duration: 0.8, delay: 0.7 }}
                 >
                   <Link
-                    href="/join-vendor"
+                    href="/contact"
                     className="btn-bubble btn-bubble-tertiary"
                   >
                     <span>

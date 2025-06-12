@@ -1,24 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/pages/reservation.tsx
 "use client";
 
 import React, { useState } from "react";
 import { ArrowRight, Calendar } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css"; 
+import { format } from "date-fns";
 
 const ReservationPage: React.FC = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     phone: "",
-    date: "", // Consider using a date picker library for better UX
+    date: "",
     species: "",
     breed: "",
     reason: "",
     specialNote: "",
   });
-  const [loading, setLoading] = useState(false); // New state for loading feedback
-  const [error, setError] = useState<string | null>(null); // New state for error messages
-  const [success, setSuccess] = useState<string | null>(null); // New state for success messages
+  // New state to hold the actual Date object selected by the date picker
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -29,44 +34,67 @@ const ReservationPage: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // --- NEW: Handle date picker changes ---
+  const handleDateChange = (date: Date | null) => {
+    setSelectedDate(date);
+    // Format the date to "dd/MM/yyyy" string for your formData, or send as ISO string
+    // Assuming your backend expects "dd/mm/yyyy" as per your current input placeholder
+    setFormData((prev) => ({
+      ...prev,
+      date: date ? format(date, "dd/MM/yyyy") : "",
+    }));
+  };
+  // --- END NEW ---
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true); // Start loading
-    setError(null);    // Clear previous errors
-    setSuccess(null);  // Clear previous success messages
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    // Basic validation for date before sending
+    if (!selectedDate) {
+      setError("Please select a valid date for the appointment.");
+      setLoading(false);
+      return;
+    }
 
     try {
-      const response = await fetch("/api/reservation", { 
+      const response = await fetch("/api/reservation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData), // formData now contains the formatted date string
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
       }
 
       const result = await response.json();
       console.log("Reservation form data submitted successfully:", result);
-      setSuccess("Your appointment request has been sent successfully!"); // Success message
-      setFormData({ // Clear form fields
+      setSuccess("Your appointment request has been sent successfully!");
+      setFormData({
+        // Clear form fields
         fullName: "",
         email: "",
         phone: "",
-        date: "",
+        date: "", // Reset date string
         species: "",
         breed: "",
         reason: "",
         specialNote: "",
       });
+      setSelectedDate(null); 
     } catch (err: any) {
       console.error("Error submitting reservation form:", err);
-      setError(err.message || "Failed to request appointment. Please try again."); // Error message
+      setError(err.message || "Failed to request appointment. Please try again.");
     } finally {
-      setLoading(false); // End loading
+      setLoading(false);
     }
   };
 
@@ -130,14 +158,14 @@ const ReservationPage: React.FC = () => {
                 />
               </div>
               <div className="relative">
-                <input
-                  type="text" // Using text type for dd/mm/yyyy, consider a date picker library for production
-                  name="date"
-                  placeholder="dd/mm/yyyy"
-                  value={formData.date}
-                  onChange={handleChange}
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={handleDateChange}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="dd/mm/yyyy"
                   className="w-full px-8 py-3 border bg-white border-gray-300 rounded-full pr-10 focus:outline-none focus:ring-2 focus:ring-secondary"
                   required
+                  minDate={new Date()}
                 />
                 <Calendar
                   size={20}
