@@ -44,7 +44,6 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useSession, signIn } from "next-auth/react";
 import axios from "axios";
-import { ICart } from "@/types";
 
 // Dynamically import sidebars for performance
 const DynamicOffCanvasSidebar = dynamic(() => import("./OffCanvasSidebar"), {
@@ -289,7 +288,7 @@ const MainNavContent: React.FC<MainNavContentProps> = ({
               {/* Profile button */}
               <Link href="/profile" passHref>
                 <button className="bg-white border-1 rounded-full mt-1">
-                    <User size={35} /> {/* User icon */}
+                  <User size={35} /> {/* User icon */}
                 </button>
               </Link>
             </div>
@@ -368,9 +367,9 @@ const Header = ({ isHomePage }: HeaderProps) => {
       return;
     }
     try {
-      const response = await axios.get<ICart>("/api/cart");
-      if (response.data && response.data.items) {
-        const totalCount = response.data.items.reduce(
+      const response = await axios.get("/api/cart");
+      if (response.data && response.data.data.items) {
+        const totalCount = response.data.data.items.reduce(
           (sum: any, item: any) => sum + item.quantity,
           0
         );
@@ -485,7 +484,6 @@ const Header = ({ isHomePage }: HeaderProps) => {
     setIsSearching(true); // Indicate that search is in progress
   };
 
-  // --- NEW: Debounce effect for search query ---
   useEffect(() => {
     const handler = setTimeout(() => {
       if (searchQuery.length > 2) {

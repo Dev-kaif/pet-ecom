@@ -150,7 +150,7 @@ export default function Hero() {
                   transition={{ duration: 0.8, delay: 0.6 }}
                 >
                   <Link
-                    href="/allPets"
+                    href="/reservation"
                     className="btn-bubble btn-bubble-secondary"
                   >
                     <span>
