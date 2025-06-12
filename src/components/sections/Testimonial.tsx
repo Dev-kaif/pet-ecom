@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React from "react";
 import Image from "next/image";
 import { Star } from "lucide-react";
@@ -56,15 +56,15 @@ const TestimonialSection = () => {
                   Pet Health Important
                 </h3>
                 <p className="text-lg lg:text-xl text-center font-medium text-primary italic leading-relaxed mb-8">
-                  &quot;Duis Aute Irure Dolor In Reprehenderit In Voluptate
-                  Velitesse We Understand That Your Furry Aute Irure Dolor In
-                  Reprehenderit In Voluptate Ute Irure Dolor In Reprehenderit In
-                  Voluptate Understand That You&quot;
+                  &quot;I was genuinely impressed with how they cared for my
+                  pet&apos;s health like their own. From diet consultation to
+                  grooming tips, everything was so well-explained and
+                  personalized. My dog is happier and healthier!&quot;
                 </p>
                 <div className="flex items-center justify-center space-x-4">
                   {" "}
                   <Image
-                    src="/public/images"
+                    src="/images/testimonial/testiminal.png"
                     alt="Uraney Jacke"
                     width={40}
                     height={40}
@@ -74,10 +74,10 @@ const TestimonialSection = () => {
                     {" "}
                     {/* Force text left-align within this div */}
                     <h5 className="text-xl font-semibold text-secondary">
-                      Uraney Jacke
+                      Ritika Gupta
                     </h5>
                     <span className="text-gray-600 text-sm">
-                      Business Study
+                      Pet Parent, Noida
                     </span>
                   </div>
                 </div>
@@ -303,5 +303,3 @@ const TestimonialSection = () => {
 };
 
 export default TestimonialSection;
-
-
