@@ -56,6 +56,7 @@ const orderSchema = new Schema<OrderDocument>(
         "delivered",
         "cancelled",
         "refunded",
+        "completed" 
       ],
       default: "pending",
       required: true,

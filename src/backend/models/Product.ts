@@ -15,7 +15,7 @@ const productSchema = new Schema<ProductDocument>(
     oldPrice: { type: Number, min: 0, required: false },
     category: { type: String, required: true, trim: true, lowercase: true }, // e.g., 'food', 'toys', 'accessories'
     images: [{ type: String }],
-    stock: { type: Number, default: 0, min: 0 },
+    stock: { type: Number, required: true, min: 0 },
   },
   { timestamps: true }
 ); // Mongoose automatically adds createdAt and updatedAt

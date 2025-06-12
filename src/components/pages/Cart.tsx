@@ -1,15 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useMemo, useEffect, useCallback } from "react";
-import Image from "next/image"; // Re-import Next.js Image component if you are using Next.js framework
+import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 import { useSession } from "next-auth/react";
-import axios from "axios"; // Import Axios
+import axios from "axios";
 import { ICartItemFrontend } from "@/types";
 import Loader from "../ui/Loader";
+import Modal from "../ui/Modal"; // Import the new Modal component
+
+// Define a type for the summary data fetched from the backend
+interface CartSummaryResponse {
+  subtotal: number;
+  shippingPrice: number;
+  taxPrice: number;
+  totalPrice: number;
+  itemCount: number;
+  items?: Array<{
+    productId: string;
+    name: string;
+    imageUrl: string;
+    price: number;
+    quantity: number;
+    totalItemPrice: number;
+  }>;
+}
 
 // Variants for page fade-in
 const pageVariants = {
@@ -32,6 +50,78 @@ const CartPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
   const [removingItemId, setRemovingItemId] = useState<string | null>(null);
+
+  // State for the backend-calculated summary
+  const [cartSummary, setCartSummary] = useState<CartSummaryResponse | null>(
+    null
+  );
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+
+  // --- NEW: Modal states ---
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState("");
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [confirmModalItemId, setConfirmModalItemId] = useState<string | null>(
+    null
+  );
+  const [confirmModalMessage, setConfirmModalMessage] = useState("");
+
+  // Function to show error modal
+  const showErrorMessage = useCallback((message: string) => {
+    setErrorModalMessage(message);
+    setIsErrorModalOpen(true);
+  }, []);
+
+  // Function to show confirm modal
+  const showConfirmModal = useCallback((message: string, itemId: string) => {
+    setConfirmModalMessage(message);
+    setConfirmModalItemId(itemId);
+    setIsConfirmModalOpen(true);
+  }, []);
+
+  // --- Functions to close modals ---
+  const closeErrorModal = useCallback(() => setIsErrorModalOpen(false), []);
+  const closeConfirmModal = useCallback(() => {
+    setIsConfirmModalOpen(false);
+    setConfirmModalItemId(null); // Clear the item ID when closing
+  }, []);
+
+  const fetchCartSummary = useCallback(async () => {
+    if (status !== "authenticated" || cartItems.length === 0) {
+      setCartSummary({
+        subtotal: 0,
+        shippingPrice: 0,
+        taxPrice: 0,
+        totalPrice: 0,
+        itemCount: 0,
+      });
+      setSummaryLoading(false);
+      return;
+    }
+
+    setSummaryLoading(true);
+    setSummaryError(null);
+    try {
+      const response = await axios.get<any>("/api/cart/summary");
+      if (response.data.success) {
+        setCartSummary(response.data.data);
+      } else {
+        setSummaryError(
+          response.data.message || "Failed to fetch cart summary."
+        );
+      }
+    } catch (err: any) {
+      console.error("Error fetching cart summary:", err);
+      setSummaryError(
+        err.response?.data?.message ||
+          err.message ||
+          "Network error fetching cart summary."
+      );
+    } finally {
+      setSummaryLoading(false);
+    }
+  }, [status, cartItems.length]);
 
   const fetchCartData = useCallback(async () => {
     if (status !== "authenticated") {
@@ -63,26 +153,13 @@ const CartPage: React.FC = () => {
     }
   }, [status]);
 
-  // Effect to fetch cart data on component mount or session change
   useEffect(() => {
     fetchCartData();
   }, [fetchCartData]);
 
-  // Calculate subtotal, shipping, and total whenever cartItems change
-  const { subtotal, shipping, total } = useMemo(() => {
-    const calculatedSubtotal = cartItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-    // Dummy shipping cost, can be made dynamic
-    const calculatedShipping = calculatedSubtotal > 0 ? 7.5 : 0;
-    const calculatedTotal = calculatedSubtotal + calculatedShipping;
-    return {
-      subtotal: calculatedSubtotal,
-      shipping: calculatedShipping,
-      total: calculatedTotal,
-    };
-  }, [cartItems]);
+  useEffect(() => {
+    fetchCartSummary();
+  }, [cartItems, status, fetchCartSummary]);
 
   // Handle quantity change for a specific item
   const handleQuantityChange = async (
@@ -97,21 +174,20 @@ const CartPage: React.FC = () => {
         ? currentItem.quantity + 1
         : currentItem.quantity - 1;
 
-    // Client-side validation: ensure quantity doesn't go below 1
     newQuantity = Math.max(1, newQuantity);
 
-    // Client-side validation: check against available stock
     if (newQuantity > currentItem.stock) {
-      alert(`Cannot add more. Only ${currentItem.stock} left in stock.`);
+      showErrorMessage(
+        `Cannot add more. Only ${currentItem.stock} left in stock.`
+      );
       return;
     }
 
-    // If quantity hasn't changed, do nothing
     if (newQuantity === currentItem.quantity) {
       return;
     }
 
-    setUpdatingItemId(itemId); // Set loading state for this item
+    setUpdatingItemId(itemId);
 
     try {
       const response = await axios.put(`/api/cart/${itemId}`, {
@@ -119,62 +195,64 @@ const CartPage: React.FC = () => {
       });
 
       if (response.data.success) {
-        // Optimistically update or re-fetch for absolute consistency
         setCartItems((prevItems) =>
           prevItems.map((item) =>
             item._id === itemId ? { ...item, quantity: newQuantity } : item
           )
         );
       } else {
-        alert(response.data.message || "Failed to update quantity.");
-        // Re-fetch cart if update failed to revert optimistic update or sync
+        showErrorMessage(response.data.message || "Failed to update quantity.");
         fetchCartData();
       }
     } catch (err: any) {
       console.error("Error updating quantity:", err);
-      alert(
+      showErrorMessage(
         err.response?.data?.message ||
           err.message ||
           "Network error updating quantity."
       );
-      // Re-fetch cart if update failed
       fetchCartData();
     } finally {
-      setUpdatingItemId(null); // Clear loading state for this item
+      setUpdatingItemId(null);
     }
   };
 
-  // Handle removing an item from the cart
+  // Handle removing an item from the cart - now uses modal
   const handleRemoveItem = async (itemId: string) => {
-    if (!window.confirm("Are you sure you want to remove this item?")) {
-      return;
-    }
-    setRemovingItemId(itemId); // Set loading state for this item
+    showConfirmModal(
+      "Are you sure you want to remove this item from your cart?",
+      itemId
+    );
+  };
+
+  // Confirmed removal action (called from modal)
+  const confirmedRemoveItem = async () => {
+    if (!confirmModalItemId) return; // Should not happen if modal logic is correct
+
+    setRemovingItemId(confirmModalItemId); // Set loading state for this item
+    closeConfirmModal(); // Close the confirmation modal immediately
 
     try {
-      const response = await axios.delete(`/api/cart/${itemId}`);
+      const response = await axios.delete(`/api/cart/${confirmModalItemId}`);
 
       if (response.data.success) {
-        // Remove item from state if successful
         setCartItems((prevItems) =>
-          prevItems.filter((item) => item._id !== itemId)
+          prevItems.filter((item) => item._id !== confirmModalItemId)
         );
       } else {
-        alert(response.data.message || "Failed to remove item.");
-        // Re-fetch cart if removal failed
+        showErrorMessage(response.data.message || "Failed to remove item.");
         fetchCartData();
       }
     } catch (err: any) {
       console.error("Error removing item:", err);
-      alert(
+      showErrorMessage(
         err.response?.data?.message ||
           err.message ||
           "Network error removing item."
       );
-      // Re-fetch cart if removal failed
       fetchCartData();
     } finally {
-      setRemovingItemId(null); // Clear loading state for this item
+      setRemovingItemId(null);
     }
   };
 
@@ -202,9 +280,17 @@ const CartPage: React.FC = () => {
     );
   }
 
+  const displaySummary = cartSummary || {
+    subtotal: 0,
+    shippingPrice: 0,
+    taxPrice: 0,
+    totalPrice: 0,
+    itemCount: 0,
+  };
+
   return (
     <motion.div
-      className="container mx-auto px-4 py-8 max-w-6xl"
+      className="container mx-auto px-4 py-32 max-w-6xl"
       initial="initial"
       animate="animate"
       variants={pageVariants}
@@ -228,8 +314,6 @@ const CartPage: React.FC = () => {
             ahead and explore our products.
           </p>
           <Link href="/shop" passHref>
-            {" "}
-            {/* Link to your products page */}
             <motion.button
               className="btn-bubble btn-bubble-primary inline-flex items-center gap-2"
               whileHover={{ scale: 1.02 }}
@@ -249,7 +333,7 @@ const CartPage: React.FC = () => {
             <AnimatePresence>
               {cartItems.map((item) => (
                 <motion.div
-                  key={item._id} // Use backend _id for key
+                  key={item._id}
                   className="flex flex-col sm:flex-row items-center justify-between border-b border-gray-200 py-4 last:border-b-0"
                   variants={itemVariants}
                   initial="initial"
@@ -262,12 +346,11 @@ const CartPage: React.FC = () => {
                         unoptimized
                         src={item.imageUrl}
                         alt={item.name}
-                        width={96} // Specify width
-                        height={96} // Specify height
-                        objectFit="contain" // Use objectFit
+                        width={96}
+                        height={96}
+                        objectFit="contain"
                         className="rounded-lg"
                         onError={(e) => {
-                          // Fallback to a placeholder image if the original fails
                           (e.target as HTMLImageElement).src =
                             "https://placehold.co/96x96/e0e0e0/555555?text=No+Image";
                         }}
@@ -298,7 +381,7 @@ const CartPage: React.FC = () => {
                       </motion.button>
                       <span className="px-4 text-md font-medium">
                         <motion.span
-                          key={item.quantity} // Key change forces re-render and animation
+                          key={item.quantity}
                           initial={{ opacity: 0, y: -5 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.15 }}
@@ -351,7 +434,7 @@ const CartPage: React.FC = () => {
                     {/* Remove Button */}
                     <motion.button
                       className="ml-4 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => handleRemoveItem(item._id)}
+                      onClick={() => handleRemoveItem(item._id)} // <-- Now calls modal handler
                       whileTap={{ scale: 0.9 }}
                       aria-label="Remove item from cart"
                       disabled={removingItemId === item._id}
@@ -392,38 +475,117 @@ const CartPage: React.FC = () => {
             <h2 className="text-2xl font-semibold text-secondary mb-6 border-b pb-4">
               Order Summary
             </h2>
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-gray-600">Subtotal:</span>
-              <span className="font-medium text-gray-800">
-                ${subtotal.toFixed(2)}
-              </span>
+            <div className="h-46">
+              {summaryLoading ? (
+                <p className="text-gray-600">Calculating summary...</p>
+              ) : summaryError ? (
+                <p className="text-red-600">Error: {summaryError}</p>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-gray-600">Subtotal:</span>
+                    <span className="font-medium text-gray-800">
+                      ${displaySummary.subtotal.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-gray-600">Shipping:</span>
+                    <span className="font-medium text-gray-800">
+                      {displaySummary.shippingPrice === 0
+                        ? "FREE"
+                        : `$${displaySummary.shippingPrice.toFixed(2)}`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-gray-600">Tax:</span>
+                    <span className="font-medium text-gray-800">
+                      ${displaySummary.taxPrice.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="border-t border-gray-200 my-4"></div>
+                  <div className="flex justify-between items-center text-xl font-bold text-gray-800 mb-6">
+                    <span>Total:</span>
+                    <span>${displaySummary.totalPrice.toFixed(2)}</span>
+                  </div>
+                </>
+              )}
             </div>
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-gray-600">Shipping:</span>
-              <span className="font-medium text-gray-800">
-                ${shipping.toFixed(2)}
-              </span>
-            </div>
-            <div className="border-t border-gray-200 my-4"></div>
-            <div className="flex justify-between items-center text-xl font-bold text-gray-800 mb-6">
-              <span>Total:</span>
-              <span>${total.toFixed(2)}</span>
-            </div>
+
             <motion.button
               className="btn-bubble btn-bubble-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => alert("Proceed to Checkout!")} // Replace with actual checkout logic
-              disabled={cartItems.length === 0}
+              onClick={() => {
+                if (cartItems.length > 0) {
+                  window.location.href = "/checkout";
+                } else {
+                  showErrorMessage(
+                    // <-- Uses modal for empty cart
+                    "Your cart is empty. Please add items before proceeding to checkout."
+                  );
+                }
+              }}
+              disabled={
+                cartItems.length === 0 ||
+                summaryLoading ||
+                summaryError !== null
+              }
             >
-              Proceed to Checkout
+              <span>Proceed to Checkout</span>
             </motion.button>
             <p className="text-gray-500 text-sm mt-4 text-center">
-              Shipping calculated at checkout.
+              Final prices confirmed at checkout.
             </p>
           </div>
         </div>
       )}
+
+      {/* --- Modals for alerts and confirmations --- */}
+      {/* Error Modal */}
+      <Modal
+        isOpen={isErrorModalOpen}
+        onClose={closeErrorModal}
+        title="Error"
+        className="max-w-xs" // Make error modal a bit smaller
+        footer={
+          <div className="flex justify-end">
+            <button
+              onClick={closeErrorModal}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              OK
+            </button>
+          </div>
+        }
+      >
+        <p>{errorModalMessage}</p>
+      </Modal>
+
+      {/* Confirmation Modal for Remove Item */}
+      <Modal
+        isOpen={isConfirmModalOpen}
+        onClose={closeConfirmModal}
+        title="Confirm Removal"
+        className="max-w-sm"
+        footer={
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={closeConfirmModal}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmedRemoveItem} // Call the actual removal function
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+              Remove
+            </button>
+          </div>
+        }
+      >
+        <p>{confirmModalMessage}</p>
+      </Modal>
     </motion.div>
   );
 };

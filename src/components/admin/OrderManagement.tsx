@@ -42,6 +42,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ showMessage }) => {
     "delivered",
     "cancelled",
     "refunded",
+    "completed" 
   ];
   const paymentStatusOptions: PaymentStatus[] = [
     "pending",
@@ -171,8 +172,9 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ showMessage }) => {
                   key={formatObjectId(order._id!)}
                   className="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-150"
                 >
+                  {/* FULL Order ID */}
                   <td className="py-3 px-4 text-gray-800 text-sm font-medium">
-                    {formatObjectId(order._id!).substring(0, 8)}...
+                    {formatObjectId(order._id!)}
                   </td>
                   <td className="py-3 px-4 text-gray-700 text-sm">
                     {order.userId
@@ -183,7 +185,14 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ showMessage }) => {
                   <td className="py-3 px-4 text-gray-700 text-sm">
                     ${order.totalPrice.toFixed(2)}
                   </td>
-                  <td className="py-3 px-4 text-gray-700 text-sm capitalize">
+                  {/* Conditional coloring for Order Status */}
+                  <td
+                    className={`py-3 px-4 text-sm capitalize font-medium ${
+                      order.orderStatus === "cancelled"
+                        ? "text-red-600"
+                        : "text-gray-700"
+                    }`}
+                  >
                     {order.orderStatus}
                   </td>
                   <td className="py-3 px-4 text-gray-700 text-sm capitalize">
@@ -193,12 +202,17 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ showMessage }) => {
                     {order.isPaid ? "Yes" : "No"}
                   </td>
                   <td className="py-3 px-4 text-sm">
-                    <button
-                      onClick={() => openEditModal(order)}
-                      className="bg-secondary hover:bg-secondary-dark text-white font-semibold py-1 px-3 rounded-md transition duration-300 shadow-sm"
-                    >
-                      Edit Status
-                    </button>
+                    {/* No action button if status is cancelled */}
+                    {order.orderStatus !== "cancelled" ? (
+                      <button
+                        onClick={() => openEditModal(order)}
+                        className="bg-secondary hover:bg-secondary-dark text-white font-semibold py-1 px-3 rounded-md transition duration-300 shadow-sm"
+                      >
+                        Edit Status
+                      </button>
+                    ) : (
+                      <span className="text-gray-500 italic">No actions</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -215,7 +229,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ showMessage }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}

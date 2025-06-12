@@ -8,7 +8,7 @@ export interface IProduct {
   oldPrice?: number;
   category: string;
   images?: string[];
-  stock?: number;
+  stock: number;
   createdAt?: Date;
   updatedAt?: Date;
   reviewsCount?: number;
@@ -52,13 +52,14 @@ export interface AuthenticatedUser {
 }
 
 export interface IAddress {
-  _id?: string | Types.ObjectId; 
+  _id?: Types.ObjectId | string;
   street: string;
+  apartment?: string; // Add this
   city: string;
   state: string;
   zipCode: string;
   country: string;
-  label?: 'Home' | 'Work' | 'Other'; 
+  label?: 'Home' | 'Work' | 'Other'; // Make it optional since it has a default
   isDefault?: boolean;
 }
 
@@ -105,13 +106,14 @@ export type OrderStatus =
   | "shipped"
   | "delivered"
   | "cancelled"
-  | "refunded";
+  | "refunded"
+  | "completed";
 
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
 export type PaymentMethod = "card" | "cash_on_delivery" | "paypal";
 
 export interface IOrder {
-  _id:Types.ObjectId;
+  _id?: Types.ObjectId | string; 
   userId: Types.ObjectId;
   items: IOrderItem[];
   shippingAddress: IAddress;
@@ -238,4 +240,37 @@ export interface IReservation {
   adminNotes?: string; 
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IPopulatedCartItem {
+  _id: Types.ObjectId; // The Mongoose _id for the cart item subdocument
+  productId: IProduct; // This is the populated IProduct document
+  quantity: number;
+}
+
+// The output structure of the pricing service, including all calculated components
+export interface CalculatedCartSummary {
+  subtotal: number;
+  shippingPrice: number;
+  taxRate: number; // Useful to know what rate was applied
+  taxPrice: number;
+  totalPrice: number;
+  itemCount: number;
+  // Details of items used for calculation, including authoritative price and stock
+  itemsDetails: Array<{
+    productId: string; // Product ID as string
+    name: string;
+    price: number; // Authoritative price from DB
+    quantity: number;
+    stock: number; // Authoritative stock from DB
+    imageUrl: string; // Include image URL for order items
+    totalItemPrice: number; // Price for this specific item (price * quantity)
+  }>;
+  errors: string[]; // To capture any non-fatal issues (e.g., product not found)
+}
+
+// Type for the input to stock validation/deduction functions
+export interface IStockOperationItem {
+  productId: string; // Product ID as string
+  quantity: number;
 }

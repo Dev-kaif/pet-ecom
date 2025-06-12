@@ -23,7 +23,10 @@ import {
 import { motion } from "motion/react";
 import { Types } from "mongoose"; // For generating temporary IDs for new addresses
 import Loader from "../ui/Loader";
-import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "@/backend/lib/config";
+import {
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_UPLOAD_PRESET,
+} from "@/backend/lib/config";
 
 // Utility to ensure MongoDB ObjectId strings are valid for display/forms
 const formatObjectId = (id: Types.ObjectId | string | undefined): string => {
@@ -686,6 +689,22 @@ export default function UserProfilePage() {
                           value={addressFormData.street}
                           onChange={handleAddressFormFieldChange}
                           required
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor={`apartment-${formatObjectId(address._id)}`}
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Apartment, Suite, etc. (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          name="apartment"
+                          id={`apartment-${formatObjectId(address._id)}`}
+                          value={addressFormData.apartment || ""} // Use || '' to handle undefined
+                          onChange={handleAddressFormFieldChange}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-secondary focus:border-secondary sm:text-sm"
                         />
                       </div>

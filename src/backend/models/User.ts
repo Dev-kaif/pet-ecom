@@ -6,15 +6,28 @@ import { IAddress, IUser } from '@/types'; // Ensure correct path to your types
 interface AddressDocument extends Omit<IAddress, '_id'>, Document {}
 
 const addressSchema = new Schema<AddressDocument>({
-    street: { type: String, required: [true, 'Street is required.'] },
-    city: { type: String, required: [true, 'City is required.'] },
-    state: { type: String, required: [true, 'State is required.'] },
-    zipCode: { type: String, required: [true, 'Zip code is required.'] },
-    country: { type: String, required: [true, 'Country is required.'] },
-    label: { type: String, enum: ['Home', 'Work', 'Other'], default: 'Home' },
-    isDefault: { type: Boolean, default: false }, // Flag for default address
-  }, { _id: true }); // Ensure subdocuments get their own _id
+  street: { type: String, required: [true, 'Street address is required.'], trim: true },
+  apartment: { type: String, trim: true }, // Added for apt/suite/unit (often optional)
+  city: { type: String, required: [true, 'City is required.'], trim: true },
+  state: { type: String, required: [true, 'State/Province is required.'], trim: true }, // Clarified as State/Province
+  zipCode: { type: String, required: [true, 'Zip/Postal code is required.'], trim: true }, // Clarified as Zip/Postal Code
+  country: { type: String, required: [true, 'Country is required.'], trim: true },
+  
+  // Optional: Add a 'name' field for the address, e.g., "John Doe's Home"
+  // fullName: { type: String, trim: true, required: false },
 
+  label: {
+    type: String,
+    enum: ['Home', 'Work', 'Other'],
+    default: 'Home',
+    trim: true,
+    required: false // It can default, so not strictly required on creation
+  },
+  isDefault: { type: Boolean, default: false }, // Flag for default address
+}, {
+  _id: true, // Ensure subdocuments get their own _id
+  timestamps: false // Subdocuments usually don't need their own timestamps, the parent User document has them
+});
 
 export interface UserDocument extends Omit<IUser, '_id' | 'password'>, Document {
   _id: Types.ObjectId; 

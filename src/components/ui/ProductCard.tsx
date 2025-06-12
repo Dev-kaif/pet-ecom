@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/layout/ProductCard.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react"; // Import AnimatePresence
+import { motion, AnimatePresence } from "motion/react";
 import { IProduct, ICart, IWishlistItemFrontend } from "@/types"; // Import necessary types
 import { Heart, ShoppingCart, Star, RotateCw } from "lucide-react"; // Import RotateCw for spinner
 import { useSession } from "next-auth/react";
@@ -42,6 +41,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     type: "success" | "error";
     text: string;
   } | null>(null); // NEW: State for wishlist messages
+
+  // Determine if the product is out of stock
+  const isOutOfStock = product.stock !== undefined && product.stock <= 0;
 
   // Use the first image from the 'images' array, or fallback
   const imageUrl = product.images?.[0] || "/images/placeholder-product.jpg";
@@ -156,7 +158,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       return;
     }
 
-    if (product.stock !== undefined && product.stock <= 0) {
+    if (isOutOfStock) { // Use the derived state here
       showCartMessage("error", "This product is out of stock.");
       return;
     }
@@ -258,6 +260,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
       )}
 
+      {/* Out of Stock Overlay */}
+      {isOutOfStock && (
+        <div className="absolute inset-0 bg-white/50 bg-opacity-70 flex items-center justify-center z-20">
+          <span className="text-lg font-bold text-red-600 animate-pulse">OUT OF STOCK</span>
+        </div>
+      )}
+
+
       {/* Product Image */}
       <div className="relative w-full h-56 overflow-hidden bg-gray-100 flex items-center justify-center">
         <Image
@@ -266,7 +276,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           alt={product.name}
           layout="fill"
           objectFit="contain"
-          className="transition-transform duration-300 group-hover:brightness-75"
+          className={`transition-transform duration-300 group-hover:brightness-75 ${isOutOfStock ? 'grayscale opacity-75' : ''}`} // Apply grayscale and opacity
         />
 
         {/* Wishlist and Quick View - ONLY show if authenticated */}
@@ -281,7 +291,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 isProductInWishlist ? 'text-secondary hover:text-red-500' : 'text-primary hover:text-secondary'
               }`}
               aria-label={isProductInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
-              disabled={addingToWishlist} // Disable during loading
+              disabled={addingToWishlist || isOutOfStock} // Disable if out of stock
             >
               {addingToWishlist ? (
                 <RotateCw size={20} className="animate-spin" />
@@ -300,9 +310,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             transition={{ duration: 0.1, ease: "easeInOut" }}
             aria-label={isProductInCart ? "Go to Cart" : "Add product to cart"}
             onClick={handleAddToCart}
-            disabled={
-              addingToCart || (product.stock !== undefined && product.stock <= 0)
-            }
+            disabled={addingToCart || isOutOfStock} // Use isOutOfStock here
           >
             <span className="flex items-center justify-center gap-2">
               {addingToCart ? (
@@ -318,7 +326,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               ) : (
                 <>
                   <ShoppingCart size={20} />
-                  {product.stock !== undefined && product.stock <= 0
+                  {isOutOfStock // Use isOutOfStock here
                     ? "Out of Stock"
                     : "Add to Cart"}
                 </>
@@ -369,7 +377,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               key={i}
               size={16}
               fill={
-                i < Math.round(product.reviewsCount || 0) // Use averageRating
+                i < Math.round(product.reviewsCount || 0)
                   ? "currentColor"
                   : "none"
               }
@@ -378,7 +386,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             />
           ))}
           <span className="text-gray-500 text-xs ml-2">
-            ({product.reviewsCount || 0} Reviews) {/* Display actual numReviews */}
+            ({product.reviewsCount || 0} Reviews)
           </span>
         </div>
 

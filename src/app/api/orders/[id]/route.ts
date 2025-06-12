@@ -135,3 +135,88 @@ export async function PUT(request: NextRequest, context: any) {
     );
   }
 }
+
+// ORDER CANCLEING 
+export async function DELETE(request: NextRequest, context: any) {
+  const authResult = await authenticateAndAuthorize(request); // Authenticate any logged-in user
+  if (authResult.response) return authResult.response;
+  const authenticatedUser = authResult.user!;
+
+  await dbConnect();
+  const { params } = context;
+  const { id } = params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json(
+      { success: false, message: "Invalid Order ID format." },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return NextResponse.json(
+        { success: false, message: "Order not found." },
+        { status: 404 }
+      );
+    }
+
+    // Authorization: User can "delete" (cancel) their own order, or admin can cancel any order
+    if (
+      authenticatedUser.role !== "admin" &&
+      !order.userId.equals(authenticatedUser.id)
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Forbidden. You do not have permission to delete this order.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Business Logic: Define statuses where "deletion" (cancellation) is allowed
+    // 'pending' and 'processing' are common cancellable states
+    const cancellableStatuses: OrderStatus[] = ['pending', 'processing'];
+
+    if (!cancellableStatuses.includes(order.orderStatus)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Order cannot be deleted as it is currently '${order.orderStatus}'. Only 'pending' or 'processing' orders can be deleted.`,
+        },
+        { status: 400 } // Bad Request
+      );
+    }
+
+    // Update order status to 'cancelled' (logical deletion)
+    order.orderStatus = 'cancelled';
+    order.updatedAt = new Date(); // Update the updatedAt timestamp
+
+    await order.save(); // Save the updated order document
+
+    return NextResponse.json(
+      { success: true, message: "Order deleted (cancelled) successfully.", data: order },
+      { status: 200 }
+    );
+
+  } catch (error: any) {
+    console.error("Error deleting (cancelling) order:", error);
+    if (error.name === "ValidationError") {
+      return NextResponse.json(
+        { success: false, message: error.message, errors: error.errors },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to delete (cancel) order.",
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MoveRight } from "lucide-react";
 import Image from "next/image";
 import { NumberTicker } from "@/components/ui/NumberTicker";
-import { motion } from "motion/react"; // Assuming 'motion/react' is the correct import for 'framer-motion'
+import { motion } from "motion/react"; // Assuming 'motion/react' is the correct import for "motion/react"
 
 interface StatItemProps {
   rawNumber: number;
